@@ -1,5 +1,6 @@
 package com.batch.Database.Entities;
 
+import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,5 +32,23 @@ public class Material {
 
     public Material(String name) {
         this.name = name;
+    }
+
+    public Material(String name, String comment) {
+        this.name = name;
+        Comment = comment;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Material material = (Material) o;
+        return Objects.equal(id, material.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

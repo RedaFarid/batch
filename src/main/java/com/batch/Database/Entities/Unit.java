@@ -17,5 +17,9 @@ public class Unit{
     @Id
     @Column(name = "Unit")
     private String name;
-    
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

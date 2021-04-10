@@ -93,7 +93,7 @@ public class BatchService {
                                         if (idle) {
                                             data.setCurrentParallelStepsNo(1);
                                             data.setRunningBatchID(currentBatchId);
-                                            batchControllerDataService.update(data);//TODO - check Update method instead of save
+                                            batchControllerDataService.update(data);
                                         }
                                         return;
                                     }
