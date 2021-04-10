@@ -1,0 +1,29 @@
+.root {
+    -fx-background-color: white;
+    -fx-border-color: orange;
+    -fx-border-width:0;
+/*    -fx-padding: 10 10 10 10;*/
+
+}
+.label {
+    -fx-background-color: transparent;
+    -fx-text-fill:black;
+    -fx-font-weight: bold;
+    -fx-font-size: 20pt ;
+}
+.list-view{
+    -fx-background-color: transparent;
+    -fx-border-width:0;
+}
+
+.list-view .list-cell:even {
+-fx-background-color: transparent;
+-fx-text-fill: white;
+-fx-font-weight: bold;
+
+}
+.list-view .list-cell:odd {
+-fx-background-color: transparent;
+-fx-text-fill: white;
+-fx-font-weight: bold;
+}
