@@ -81,7 +81,7 @@ public class InitialWindowController {
         allDataDefinitions = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel();
     }
 
-    @EventListener
+//    @EventListener
     private void init(ContextStartedEvent event){
         checkESDAlarms();
         checkPLCConnection();

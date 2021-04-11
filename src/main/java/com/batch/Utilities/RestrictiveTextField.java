@@ -10,15 +10,15 @@ import javafx.scene.control.TextField;
 
 public class RestrictiveTextField extends TextField {
 
-    private IntegerProperty maxLength = new SimpleIntegerProperty(this, "maxLength", -1);
-    private StringProperty restrict = new SimpleStringProperty(this, "restrict");
+    private final IntegerProperty maxLength = new SimpleIntegerProperty(this, "maxLength", -1);
+    private final StringProperty restrict = new SimpleStringProperty(this, "restrict");
 
     public RestrictiveTextField() {
         textProperty().addListener(new ChangeListener<String>() {
             private boolean ignore;
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String s1) {
-                setText(s1.toUpperCase());
+//                setText(s1.toUpperCase());
                 if (ignore || s1 == null) {
                     return;
                 }

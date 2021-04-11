@@ -51,7 +51,7 @@ public class MixerFacePlate extends ControlFacePlate {
         Start.setPrefWidth(200);
         Stop.setPrefWidth(200);
 
-        //CmboBox
+        //ComboBox
         mode = new ComboBox<>();
         source = new ComboBox<>();
         mode.getItems().addAll(FXCollections.observableArrayList(Arrays.stream(Mode.values()).map(Enum::name).collect(Collectors.toList())));

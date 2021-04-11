@@ -1,6 +1,8 @@
 package com.batch.GUI.InitialWindow;
 
 import com.batch.ApplicationContext;
+import com.batch.GUI.Alarms.AllAlarmsWindow;
+import com.batch.GUI.Alarms.Utilities;
 import com.batch.GUI.FacePlates.MixerFacePlate;
 import com.batch.GUI.FacePlates.PumpFacePlate;
 import com.batch.GUI.FacePlates.ValveFacePlate;
@@ -47,23 +49,20 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Component
 @Log4j2
-public class FXApplication implements ApplicationListener<ApplicationContext.ApplicationListener> {
+@Component
+public class InitialWindow implements ApplicationListener<ApplicationContext.ApplicationListener> {
+
+    //Stages
+    private Stage initialStage;
 
     //Scene
     private final BorderPane root = new BorderPane();
     private final Scene scene = new Scene(root);
 
-    //Stages
-    private Stage initialStage;
-
-
-    private ExecutorService service;
     private final TabPane containerPane = new TabPane();
 
     private final Tab SCADATab = new Tab("    OverView    ");
@@ -96,7 +95,6 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
     private final MenuItem batchCreatorItem = new MenuItem("Batch Creator");
     private final MenuItem reportingSystem = new MenuItem("Reporting System");
     private final MenuItem configurations = new MenuItem("Configurations");
-    private final MenuItem autoUpdateAlarmsItem = new MenuItem("Auto update Alarms");
     private final MenuItem journalAlarms = new MenuItem("Journal Alarms");
     private final MenuItem airPressureSettings = new MenuItem("Air-Pressure Alarms");
 
@@ -128,7 +126,7 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
 //    private BatchCreator batchCreator;
 //    private List<BatchObserver> batchObservers = Collections.synchronizedList(new LinkedList<>());
 //    private AutoUpdateAlarmsWindow logWindow;
-//    private AllAlarmsWindow allAlarmsWindow;
+    private AllAlarmsWindow allAlarmsWindow;
 
     private String returnData;
 
@@ -137,26 +135,24 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
     private final Background FAULTY_BACKGROUND = new Background(new BackgroundFill(Color.RED.brighter(), CornerRadii.EMPTY, Insets.EMPTY));
 
 
-    @Autowired
-    private LoggingService logger;
+    private InitialWindowModel model;
 
-    @Autowired
+    //Injected Beans
+    @Autowired(required = false)
+    private LoggingService logger;
+    @Autowired(required = false)
     private InitialWindowController controller;
 
-    private InitialWindowModel model;
+
 
 
     @Override
     public void onApplicationEvent(ApplicationContext.ApplicationListener listener) {
         initialStage = listener.getStage();
         model = controller.getModel();
-        try {
-            graphicsBuilder();
-        } catch (Exception e) {
-            log.fatal(e, e);
-        }
+        allAlarmsWindow = AllAlarmsWindow.getWindow(initialStage);
+        graphicsBuilder();
     }
-
 
     private void graphicsBuilder() {
 //        recipeEditor.initOwner(mainWindow);
@@ -206,7 +202,7 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
         view.getItems().addAll(enterFullScreenItem, exitFullScreenItem, new SeparatorMenuItem(), closeAppItem);
         Users.getItems().addAll(LoginItem, LogOutItem, new SeparatorMenuItem(), UserAdministrationMenuItem);
         RecipesSettings.getItems().addAll(Units, Phases);
-        alarms.getItems().addAll(autoUpdateAlarmsItem, journalAlarms, airPressureSettings);
+        alarms.getItems().addAll(journalAlarms, airPressureSettings);
         SystemMenu.getItems().addAll(configurations, new SeparatorMenuItem());
         operations.getItems().addAll(materialItem, new SeparatorMenuItem(), recipeEditorItem, batchCreatorItem, new SeparatorMenuItem(), reportingSystem);
 
@@ -226,7 +222,7 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
             scada.setScaleY(0.92);
 
         } catch (IOException ex) {
-            Logger.getLogger(FXApplication.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(InitialWindow.class.getName()).log(Level.SEVERE, null, ex);
             log.fatal(ex, ex);
         }
 
@@ -275,16 +271,16 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
         try {
             Units.setOnAction(action -> UnitsWindow.getWindow(initialStage).show());
             Phases.setOnAction(action -> PhasesWindow.getWindow(initialStage).show());
-            materialItem.setOnAction(this::onMaterialManagerRequest);
+            materialItem.setOnAction(action -> MaterialsWindow.getMaterialsWindow(initialStage).show());
+
 //            batchCreatorItem.setOnAction(this::onBatchCreatorRequest);
 //            recipeEditorItem.setOnAction(this::onRecipeEditorRequest);
 //            reportaItem.setOnAction(this::onReportRequest);
             configurations.setOnAction(action -> {
 //                ConfigurationsWindow.getConfigurationWindow(mainWindow, logger, service).show();
             });
-//            autoUpdateAlarmsItem.setOnAction(this::onAutoUpdateAlarmsPressed);
-//            journalAlarms.setOnAction(this::onJouralAlarmsPressed);
-//            airPressureSettings.setOnAction(this::onAirPressureAlarmsSettings);
+            journalAlarms.setOnAction(this::onJournalAlarmsPressed);
+            airPressureSettings.setOnAction(action -> Utilities.getUtilitiesWindow(initialStage).show());
 
             enterFullScreenItem.setOnAction(action -> {
                 initialStage.hide();
@@ -310,8 +306,7 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
             changeAllDevicesToAutomatic.setOnMousePressed(action -> controller.onSetAllInAutoPressed(mixers, pumps, valves));
             changeAllDevicesToAutomatic.setOnMouseReleased(action -> controller.onSetAllInAutoReleased());
 
-            UserAdministrationMenuItem.setOnAction(action -> {
-            });
+            UserAdministrationMenuItem.setOnAction(action -> {});
             logIn.setOnMouseClicked(action -> controller.onLogIn());
             logOut.setOnMouseClicked(action -> controller.onLogOut());
             LoginItem.setOnAction(action -> controller.onLogIn());
@@ -413,7 +408,6 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
             e.printStackTrace();
         }
     }
-
     private void handleMixerBlockIcon(String name, ImageView mixer) {
         Pane pane = new Pane();
         SCADAPane.getChildren().add(pane);
@@ -442,7 +436,6 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
         });
         mixer.setOnMouseClicked(action -> {
             try {
-                System.err.println("Weight " + name + " " + data);
                 MixerFacePlate facePlate = new MixerFacePlate(initialStage, data);
                 facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
                 facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
@@ -452,7 +445,6 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
             }
         });
     }
-
     private void handlePumpBlockIcon(String name, ImageView pump) {
         Pane pane = new Pane();
         SCADAPane.getChildren().add(pane);
@@ -481,13 +473,16 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
             pane.setBackground(back);
         });
         pump.setOnMouseClicked(action -> {
-            PumpFacePlate facePlate = new PumpFacePlate(initialStage, data);
-            facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
-            facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
-            facePlate.show();
+            try {
+                PumpFacePlate facePlate = new PumpFacePlate(initialStage, data);
+                facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
+                facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
+                facePlate.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
-
     private void handleValveBlockIcon(String name, ImageView valve) {
         Pane pane = new Pane();
         SCADAPane.getChildren().add(pane);
@@ -521,61 +516,64 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
             pane.setBackground(back);
         });
         valve.setOnMouseClicked(action -> {
-            ValveFacePlate facePlate = new ValveFacePlate(initialStage, data);
-            facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
-            facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
-            facePlate.show();
+            try {
+                ValveFacePlate facePlate = new ValveFacePlate(initialStage, data);
+                facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
+                facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
+                facePlate.show();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         });
     }
 
     private void setWaterTankLevel() {
-        Platform.runLater(() -> {
-            try {
-                Pane bar = waterLevel;
+        try {
+            Pane bar = waterLevel;
 
-                Pane pane = new Pane();
-                SCADAPane.getChildren().add(pane);
-                pane.setLayoutX(bar.getLayoutX());
-                pane.setLayoutY(bar.getLayoutY());
-                pane.setPrefWidth(bar.getWidth());
-                pane.setPrefHeight(bar.getHeight());
-                bar.toFront();
+            Pane pane = new Pane();
+            SCADAPane.getChildren().add(pane);
+            pane.setLayoutX(bar.getLayoutX());
+            pane.setLayoutY(bar.getLayoutY());
+            pane.setPrefWidth(bar.getWidth());
+            pane.setPrefHeight(bar.getHeight());
+            bar.toFront();
 
-                bar.setOpacity(0.6);
+            bar.setOpacity(0.6);
 
-                double Height = bar.getHeight();
-                Weight data = controller.getWeightByName("L01");
+            double Height = bar.getHeight();
+            Weight data = controller.getWeightByName("L01");
 
-                bindStatusToLevel(data, pane, bar, Height);
-                ((FloatProperty) data.getAllValues().get(WeightInput.Weight)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-                ((FloatProperty) data.getAllValues().get(WeightOutput.Zero)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-                ((FloatProperty) data.getAllValues().get(WeightOutput.Span)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-                ((FloatProperty) data.getAllValues().get(WeightOutput.Low_Warning_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-                ((FloatProperty) data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-                ((FloatProperty) data.getAllValues().get(WeightOutput.High_Warning_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-                ((FloatProperty) data.getAllValues().get(WeightOutput.High_Alarm_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
+            bindStatusToLevel(data, pane, bar, Height);
+            ((FloatProperty) data.getAllValues().get(WeightInput.Weight)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty) data.getAllValues().get(WeightOutput.Zero)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty) data.getAllValues().get(WeightOutput.Span)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty) data.getAllValues().get(WeightOutput.Low_Warning_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty) data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty) data.getAllValues().get(WeightOutput.High_Warning_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty) data.getAllValues().get(WeightOutput.High_Alarm_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
 
-                Border back = pane.getBorder();
-                bar.setOnMouseEntered(action -> {
-                    bar.setCursor(Cursor.HAND);
-                    bar.setBorder(new Border(new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
-                });
-                bar.setOnMouseExited(action -> {
-                    bar.setCursor(Cursor.DEFAULT);
-                    bar.setBorder(back);
-                });
-                bar.setOnMouseClicked(action -> {
-                    if (action.getButton().equals(MouseButton.PRIMARY)) {
-                        try {
-                            WeightFacePlate facePlate = new WeightFacePlate(initialStage, data, "M");
-                            facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
-                            facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
-                            facePlate.show();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+            Border back = pane.getBorder();
+            bar.setOnMouseEntered(action -> {
+                bar.setCursor(Cursor.HAND);
+                bar.setBorder(new Border(new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
+            });
+            bar.setOnMouseExited(action -> {
+                bar.setCursor(Cursor.DEFAULT);
+                bar.setBorder(back);
+            });
+            bar.setOnMouseClicked(action -> {
+                if (action.getButton().equals(MouseButton.PRIMARY)) {
+                    try {
+                        WeightFacePlate facePlate = new WeightFacePlate(initialStage, data, "M");
+                        facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
+                        facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
+                        facePlate.show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                });
+                }
+            });
 //                bar.setOnContextMenuRequested(action -> {
 //                    MenuItem trend = new MenuItem("Show realtime trend");
 //                    MenuItem log = new MenuItem("Show Logged data");
@@ -600,13 +598,10 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
 //                        });
 //                    });
 //                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-
 
     private void bindStatusToValve(RowDataDefinition data, ImageView item) {
         Platform.runLater(() -> {
@@ -628,7 +623,6 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
         });
 
     }
-
     private void bindStatusToPump(RowDataDefinition data, ImageView item) {
         Platform.runLater(() -> {
             try {
@@ -648,7 +642,6 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
         });
 
     }
-
     private void bindStatusToMixer(Mixer data, ImageView item) {
         Platform.runLater(() -> {
             try {
@@ -667,8 +660,7 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
             }
         });
     }
-
-    private synchronized void bindStatusToMWeight(Weight data, Pane pane, Pane backGroundBar, Label label, Label weightLabel, double Height) {
+    private void bindStatusToMWeight(Weight data, Pane pane, Pane backGroundBar, Label label, Label weightLabel, double Height) {
         Platform.runLater(() -> {
             try {
                 float qtyValue = ((RealDataType) data.getAllValues().get(WeightInput.Weight)).getValue();
@@ -724,8 +716,7 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
         });
 
     }
-
-    private synchronized void bindStatusToLevel(Weight data, Pane pane, Pane backGroundBar, double Height) {
+    private void bindStatusToLevel(Weight data, Pane pane, Pane backGroundBar, double Height) {
         Platform.runLater(() -> {
             try {
                 float qtyValue = ((RealDataType) data.getAllValues().get(WeightInput.Weight)).getValue();
@@ -777,116 +768,16 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
         });
 
     }
+    protected void changeColorOfImageView(Color color, ImageView imView){
+        Glow glow = new Glow(0.2);
+        DropShadow shadow = new DropShadow(BlurType.GAUSSIAN, Color.GRAY, 1, 1, 1, 1);
+        Light.Distant light = new Light.Distant(100, 100, color.brighter().brighter().brighter());
+        Lighting lighting = new Lighting(light);
+        Blend blend = new Blend(BlendMode.MULTIPLY, glow, shadow);
+        Blend blend2 = new Blend(BlendMode.MULTIPLY, blend, lighting);
 
-    protected synchronized void changeColorOfImageView(Color color, ImageView imView) {
-        try {
-            Glow glow = new Glow(0.2);
-            DropShadow shadow = new DropShadow(BlurType.GAUSSIAN, Color.GRAY, 1, 1, 1, 1);
-            Light.Distant light = new Light.Distant(100, 100, color.brighter().brighter().brighter());
-            Lighting lighting = new Lighting(light);
-            Blend blend = new Blend(BlendMode.MULTIPLY, glow, shadow);
-            Blend blend2 = new Blend(BlendMode.MULTIPLY, blend, lighting);
-
-            imView.setEffect(blend2);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.fatal(e, e);
-        }
+        imView.setEffect(blend2);
     }
-
-
-    //    private synchronized void onReportRequest(ActionEvent event) {
-//        try {
-//            scene.setCursor(Cursor.WAIT);
-//            CompletableFuture.supplyAsync(() -> {
-//                Platform.runLater(() -> {
-//                    BatchArchieveWindow.getWindow(mainWindow).showAndUpdate();
-//                    scene.setCursor(Cursor.DEFAULT);
-//                });
-//                return null;
-//            }, service);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-    private void onMaterialManagerRequest(ActionEvent event) {
-        try {
-            MaterialsWindow.getMaterialsWindow(initialStage).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-//    private synchronized void onBatchCreatorRequest(ActionEvent event) {
-//        try {
-//            scene.setCursor(Cursor.WAIT);
-//            CompletableFuture.supplyAsync(() -> {
-//                Platform.runLater(() -> {
-//                    handleEvents(mainWindow, batchCreator, batchObservers, containerPane);
-//                    scene.setCursor(Cursor.DEFAULT);
-//                });
-//                return null;
-//            }, service);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-//    private synchronized void onRecipeEditorRequest(ActionEvent event) {
-//        try {
-//            CompletableFuture.supplyAsync(() -> {
-//                Platform.runLater(() -> {
-//                    String retVal = selectUnitWindow();
-//                    if (!retVal.equals("Cancel")) {
-//                        scene.setCursor(Cursor.WAIT);
-//                        recipeEditor.hide();
-//                        recipeEditor.refreshAndUpdateAndShow(retVal);
-//                    }
-//                    scene.setCursor(Cursor.DEFAULT);
-//                });
-//                return null;
-//            }, service);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-//    private synchronized void onAutoUpdateAlarmsPressed(ActionEvent event) {
-//        Platform.runLater(() -> {
-//            try {
-//                if (!containerPane.getTabs().contains(logWindow)) {
-//                    containerPane.getTabs().add(logWindow);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
-//
-//    }
-//    private synchronized void onJouralAlarmsPressed(ActionEvent event) {
-//        Platform.runLater(() -> {
-//            try {
-//                if (!containerPane.getTabs().contains(allAlarmsWindow)) {
-//                    containerPane.getTabs().add(allAlarmsWindow);
-//                    allAlarmsWindow.update();
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
-//
-//    }
-//    private synchronized void onAirPressureAlarmsSettings(ActionEvent event) {
-//        Platform.runLater(() -> {
-//            try {
-//                Stage window = Utilities.getUtilitiesWindow(allDataDefinitions, mainWindow);
-//                if (!window.isShowing()) {
-//                    window.show();
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
-//
-//    }
-
 
     private void adjustGauges() {
         Gauge gauge1 = getGauge("Water level", "Meter");
@@ -898,10 +789,8 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
         waterPress.getChildren().add(gauge1);
         airPress.getChildren().add(gauge2);
     }
-
     private Gauge getGauge(String label, String unit) {
-        Gauge gauge
-                = GaugeBuilder.create()
+        Gauge gauge = GaugeBuilder.create()
                 .prefSize(160, 180) // Preferred size of control
                 .foregroundBaseColor(Color.BLACK) // Color for title, subtitle, unit, value, tick label, zeroColor, tick mark, major tick mark, medium tick mark and minor tick mark
                 .title(label) // Text for title
@@ -961,7 +850,6 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
 
         return gauge;
     }
-
     private Clock getClock() {
         return ClockBuilder.create()
                 .skinType(Clock.ClockSkinType.TEXT)
@@ -970,7 +858,61 @@ public class FXApplication implements ApplicationListener<ApplicationContext.App
                 .build();
     }
 
-
+    //    private synchronized void onReportRequest(ActionEvent event) {
+//        try {
+//            scene.setCursor(Cursor.WAIT);
+//            CompletableFuture.supplyAsync(() -> {
+//                Platform.runLater(() -> {
+//                    BatchArchieveWindow.getWindow(mainWindow).showAndUpdate();
+//                    scene.setCursor(Cursor.DEFAULT);
+//                });
+//                return null;
+//            }, service);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+//    private synchronized void onBatchCreatorRequest(ActionEvent event) {
+//        try {
+//            scene.setCursor(Cursor.WAIT);
+//            CompletableFuture.supplyAsync(() -> {
+//                Platform.runLater(() -> {
+//                    handleEvents(mainWindow, batchCreator, batchObservers, containerPane);
+//                    scene.setCursor(Cursor.DEFAULT);
+//                });
+//                return null;
+//            }, service);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+//    private synchronized void onRecipeEditorRequest(ActionEvent event) {
+//        try {
+//            CompletableFuture.supplyAsync(() -> {
+//                Platform.runLater(() -> {
+//                    String retVal = selectUnitWindow();
+//                    if (!retVal.equals("Cancel")) {
+//                        scene.setCursor(Cursor.WAIT);
+//                        recipeEditor.hide();
+//                        recipeEditor.refreshAndUpdateAndShow(retVal);
+//                    }
+//                    scene.setCursor(Cursor.DEFAULT);
+//                });
+//                return null;
+//            }, service);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+    private synchronized void onJournalAlarmsPressed(ActionEvent event) {
+            try {
+                if (!containerPane.getTabs().contains(allAlarmsWindow)) {
+                    containerPane.getTabs().add(allAlarmsWindow);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+    }
 //    private String selectUnitWindow() {
 //
 //        Label label = new Label("Please select unit to create recipe");
