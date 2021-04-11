@@ -9,6 +9,7 @@ import com.batch.GUI.FacePlates.ValveFacePlate;
 import com.batch.GUI.FacePlates.WeightFacePlate;
 import com.batch.GUI.MaterialsWindow.MaterialsWindow;
 import com.batch.GUI.PhasesWindow.PhasesWindow;
+import com.batch.GUI.RecipeEditor.WindowComponents.RecipeEditor;
 import com.batch.GUI.UnitsWindow.UnitsWindow;
 import com.batch.PLCDataSource.PLC.ComplexDataType.*;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
@@ -24,6 +25,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -33,11 +35,16 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Stop;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -122,7 +129,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
 
     private final Label lastAlarmField = new Label();
 
-    //    private RecipeEditor recipeEditor;
+//    private RecipeEditor recipeEditor;
 //    private BatchCreator batchCreator;
 //    private List<BatchObserver> batchObservers = Collections.synchronizedList(new LinkedList<>());
 //    private AutoUpdateAlarmsWindow logWindow;
@@ -151,11 +158,11 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
         initialStage = listener.getStage();
         model = controller.getModel();
         allAlarmsWindow = AllAlarmsWindow.getWindow(initialStage);
+//        recipeEditor = RecipeEditor.getWindow(initialStage);
         graphicsBuilder();
     }
 
     private void graphicsBuilder() {
-//        recipeEditor.initOwner(mainWindow);
 //        recipeEditor.setHeight(900);
 //        recipeEditor.setWidth(1500);
 //        batchCreator.setHeight(600);
@@ -243,15 +250,19 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
         //Binding data
         connectionStatus.textProperty().bind(model.getConnectionInfo());
         connectionStatus.backgroundProperty().bind(Bindings.when(model.getConnectionStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
+        connectionStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
 
         airPressureStatus.textProperty().bind(model.getAirPressureInfo());
         airPressureStatus.backgroundProperty().bind(Bindings.when(model.getAirPressureStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
+        airPressureStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
 
         overUnderVoltageStatus.textProperty().bind(model.getOverUnderVoltageInfo());
         overUnderVoltageStatus.backgroundProperty().bind(Bindings.when(model.getOverUnderVoltageStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
+        overUnderVoltageStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
 
         ESDStatus.textProperty().bind(model.getEsdInfo());
         ESDStatus.backgroundProperty().bind(Bindings.when(model.getEsdStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
+        ESDStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
 
         //----------------------------------------------------------------------------------------------------------------------------------
 
@@ -886,25 +897,18 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
 //            e.printStackTrace();
 //        }
 //    }
-//    private synchronized void onRecipeEditorRequest(ActionEvent event) {
-//        try {
-//            CompletableFuture.supplyAsync(() -> {
-//                Platform.runLater(() -> {
-//                    String retVal = selectUnitWindow();
-//                    if (!retVal.equals("Cancel")) {
-//                        scene.setCursor(Cursor.WAIT);
-//                        recipeEditor.hide();
-//                        recipeEditor.refreshAndUpdateAndShow(retVal);
-//                    }
-//                    scene.setCursor(Cursor.DEFAULT);
-//                });
-//                return null;
-//            }, service);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-    private synchronized void onJournalAlarmsPressed(ActionEvent event) {
+    private void onRecipeEditorRequest(ActionEvent event) {
+        try {
+            String retVal = selectUnitWindow();
+            if (!retVal.equals("Cancel")) {
+//                recipeEditor.hide();
+//                recipeEditor.refreshAndUpdateAndShow(retVal);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private void onJournalAlarmsPressed(ActionEvent event) {
             try {
                 if (!containerPane.getTabs().contains(allAlarmsWindow)) {
                     containerPane.getTabs().add(allAlarmsWindow);
@@ -913,95 +917,83 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
                 e.printStackTrace();
             }
     }
-//    private String selectUnitWindow() {
-//
-//        Label label = new Label("Please select unit to create recipe");
-//        ComboBox<String> field = new ComboBox();
-//        field.setPromptText("Please enter the unit ");
-//        field.setPrefWidth(350);
-//        field.getItems().addAll(UnitDAOImpl.getInstance().GetAll().stream().map(unit -> unit.getName()).collect(Collectors.toList()));
-//
-//        Button Cancel = new Button("Cancel");
-//        Button Ok = new Button("Ok");
-//
-//        Cancel.setPrefWidth(150);
-//        Ok.setPrefWidth(150);
-//
-//        HBox buttonsContainer = new HBox();
-//        buttonsContainer.getChildren().addAll(Ok, Cancel);
-//        buttonsContainer.setSpacing(10);
-//        buttonsContainer.setPadding(new Insets(5));
-//
-//        GridPane container = new GridPane();
-//        container.add(field, 0, 0);
-//        container.setPadding(new Insets(5));
-//        container.setVgap(5);
-//        container.setHgap(5);
-//
-//        BorderPane root = new BorderPane();
-//        root.setBottom(buttonsContainer);
-//        root.setCenter(container);
-//        root.setTop(label);
-//        root.setPadding(new Insets(15));
-//
-//        Scene scene = new Scene(root);
-//
-//        Stage stage = new Stage();
-//        stage.setTitle("Please enter name ");
-//        stage.initStyle(StageStyle.UTILITY);
-//        stage.initOwner(mainWindow);
-//        stage.initModality(Modality.NONE);
-//        stage.setScene(scene);
-//
-//        Cancel.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                returnData = "Cancel";
-//                stage.close();
-//            }
-//        });
-//        Ok.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                if (!field.getValue().isEmpty()) {
-//                    returnData = field.getValue();
-//                } else {
-//                    returnData = "Cancel";
-//                }
-//
-//                stage.close();
-//            }
-//        });
-//        field.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-//            @Override
-//            public void handle(KeyEvent event) {
-//                if (event.getCode().equals(KeyCode.ENTER)) {
-//                    if (!field.getValue().isEmpty()) {
-//                        returnData = field.getValue();
-//                    } else {
-//                        returnData = "Cancel";
-//                    }
-//
-//                    stage.close();
-//                }
-//            }
-//        });
-//        stage.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-//            @Override
-//            public void handle(KeyEvent event) {
-//                if (event.getCode().equals(KeyCode.ESCAPE)) {
-//                    returnData = "Cancel";
-//                    stage.close();
-//                }
-//            }
-//        });
-//        stage.setOnCloseRequest(action -> returnData = "Cancel");
-//
-//        field.requestFocus();
-//        stage.showAndWait();
-//
-//        return returnData;
-//    }
+    private String selectUnitWindow() {
+
+        Label label = new Label("Please select unit to create recipe");
+        ComboBox<String> field = new ComboBox<>();
+        field.setPromptText("Please enter the unit ");
+        field.setPrefWidth(350);
+        field.getItems().addAll(controller.getAllUnitsNames());
+
+        Button Cancel = new Button("Cancel");
+        Button Ok = new Button("Ok");
+
+        Cancel.setPrefWidth(150);
+        Ok.setPrefWidth(150);
+
+        HBox buttonsContainer = new HBox();
+        buttonsContainer.getChildren().addAll(Ok, Cancel);
+        buttonsContainer.setSpacing(10);
+        buttonsContainer.setPadding(new Insets(5));
+
+        GridPane container = new GridPane();
+        container.add(field, 0, 0);
+        container.setPadding(new Insets(5));
+        container.setVgap(5);
+        container.setHgap(5);
+
+        BorderPane root = new BorderPane();
+        root.setBottom(buttonsContainer);
+        root.setCenter(container);
+        root.setTop(label);
+        root.setPadding(new Insets(15));
+
+        Scene scene = new Scene(root);
+
+        Stage stage = new Stage();
+        stage.setTitle("Please enter name ");
+        stage.initStyle(StageStyle.UTILITY);
+        stage.initOwner(initialStage);
+        stage.initModality(Modality.NONE);
+        stage.setScene(scene);
+
+        Cancel.setOnMouseClicked(event -> {
+            returnData = "Cancel";
+            stage.close();
+        });
+        Ok.setOnMouseClicked(event -> {
+            if (!field.getValue().isEmpty()) {
+                returnData = field.getValue();
+            } else {
+                returnData = "Cancel";
+            }
+
+            stage.close();
+        });
+        field.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode().equals(KeyCode.ENTER)) {
+                if (!field.getValue().isEmpty()) {
+                    returnData = field.getValue();
+                } else {
+                    returnData = "Cancel";
+                }
+
+                stage.close();
+            }
+        });
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode().equals(KeyCode.ESCAPE)) {
+                returnData = "Cancel";
+                stage.close();
+            }
+        });
+        stage.setOnCloseRequest(action -> returnData = "Cancel");
+
+        field.requestFocus();
+        stage.showAndWait();
+
+        return returnData;
+    }
 //
 
 //    private void updateLastAlarmField() {

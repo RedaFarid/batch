@@ -1,20 +1,23 @@
 package com.batch.GUI.InitialWindow;
 
 import com.batch.ApplicationContext;
+import com.batch.Database.Entities.Unit;
+import com.batch.Database.Repositories.UnitsRepository;
 import com.batch.PLCDataSource.ModBus.ModBusService;
 import com.batch.PLCDataSource.PLC.ComplexDataType.*;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.image.ImageView;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class InitialWindowController {
     private Map<String, RowDataDefinition> allDataDefinitions;
 
     private final ModBusService modBusService;
+    private UnitsRepository unitsRepository;
 
 
 
@@ -81,7 +85,7 @@ public class InitialWindowController {
         allDataDefinitions = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel();
     }
 
-//    @EventListener
+    @EventListener
     private void init(ContextStartedEvent event){
         checkESDAlarms();
         checkPLCConnection();
@@ -151,5 +155,9 @@ public class InitialWindowController {
                 model.getEsdInfo().setValue("ESD not activated");
             }
         });
+    }
+
+    public List<String> getAllUnitsNames() {
+        return unitsRepository.findAll().stream().map(Unit::getName).collect(Collectors.toList());
     }
 }
