@@ -14,18 +14,18 @@ import javafx.stage.StageStyle;
 public class Utilities extends Stage {
 
     private static volatile Utilities singleton = null;
-    private Stage mainWindow;
+    private final Stage mainWindow;
 
-    private BorderPane layout = new BorderPane();
-    private GridPane gridPane = new GridPane();
+    private final BorderPane layout = new BorderPane();
+    private final GridPane gridPane = new GridPane();
 
-    private Label label = new Label("Utilities");
+    private final Label label = new Label("Air pressure settings");
 
-    private Label hiPressLimit = new Label("HI pressure limit (Bar)");
-    private Label loPressLimit = new Label("Lo pressure limit (Bar)");
+    private final Label hiPressLimit = new Label("HI pressure limit (Bar)");
+    private final Label loPressLimit = new Label("Lo pressure limit (Bar)");
 
-    private FaceplateTextField hiPressureField = new FaceplateTextField();
-    private FaceplateTextField loPressureField = new FaceplateTextField();
+    private final FaceplateTextField hiPressureField = new FaceplateTextField();
+    private final FaceplateTextField loPressureField = new FaceplateTextField();
 
     private final AlarmsController controller;
     private final AlarmsModel model;
@@ -51,7 +51,7 @@ public class Utilities extends Stage {
 
         label.prefWidthProperty().bind(layout.widthProperty());
         label.setAlignment(Pos.CENTER);
-        label.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:48;");
+        label.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:36;");
         label.setPrefHeight(100);
 
         hiPressLimit.setStyle("-fx-text-fill:white;");

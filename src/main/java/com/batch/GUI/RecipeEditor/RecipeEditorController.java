@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 
 import java.util.Comparator;
@@ -29,10 +30,7 @@ public class RecipeEditorController {
     private final TreeViewItemsDataRepository treeViewItemsDataRepository;
     private final RecipeConfRepository recipeConfRepository;
     private final MaterialsRepository materialsRepository;
-
-    @Autowired
-    @Qualifier("GPExecutor")
-    private Executor executor;
+    private final TaskExecutor executor;
 
 
 

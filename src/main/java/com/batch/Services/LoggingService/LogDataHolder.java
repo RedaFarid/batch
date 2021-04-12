@@ -5,50 +5,18 @@ package com.batch.Services.LoggingService;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowAttripute;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.ValueObject;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LogDataHolder {
-    String name;
-    RowAttripute attribute;
-    ValueObject value;
-    EDT type;
-
-    public LogDataHolder(String name, RowAttripute attribute, ValueObject value, EDT type) {
-        this.name = name;
-        this.attribute = attribute;
-        this.value = value;
-        this.type = type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public RowAttripute getAttribute() {
-        return attribute;
-    }
-
-    public void setAttribute(RowAttripute attribute) {
-        this.attribute = attribute;
-    }
-
-    public ValueObject getValue() {
-        return value;
-    }
-
-    public void setValue(ValueObject value) {
-        this.value = value;
-    }
-
-    public EDT getType() {
-        return type;
-    }
-
-    public void setType(EDT type) {
-        this.type = type;
-    }
+    private String name;
+    private RowAttripute attribute;
+    private ValueObject value;
+    private EDT type;
     
 }

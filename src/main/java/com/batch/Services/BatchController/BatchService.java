@@ -19,6 +19,7 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -28,24 +29,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BatchService {
 
-    private int counter, i, j = 0;
+    private int counter;
+    private int i;
+    private final int j = 0;
 
-    @Autowired
-    private ModBusService modBusService;
-
-    @Autowired
-    private BatchesRepository batchesRepository;
-
-    @Autowired
-    private BatchControllerDataService batchControllerDataService;
-
-    @Autowired
-    private RecipeConfRepository recipeConfRepository;
-
-    @Autowired
-    private PhaseRepository phaseRepository;
+    
+    private final ModBusService modBusService;
+    private final BatchesRepository batchesRepository;
+    private final BatchControllerDataService batchControllerDataService;
+    private final RecipeConfRepository recipeConfRepository;
+    private final PhaseRepository phaseRepository;
 
 
     @Scheduled(fixedDelay = 100)
@@ -122,24 +118,12 @@ public class BatchService {
                                             }
                                         } else {
                                             switch (onLineBatch.getOrder()) {
-                                                case ("Start"):
-                                                    startSteps(currentBatchSteps);
-                                                    break;
-                                                case ("Hold"):
-                                                    holdSteps(currentBatchSteps);
-                                                    break;
-                                                case ("Abort"):
-                                                    AbortSteps(currentBatchSteps);
-                                                    break;
-                                                case ("Create"):
-                                                    createSteps(currentBatchSteps);
-                                                    break;
-                                                case ("Resume"):
-                                                    resumeSteps(currentBatchSteps);
-                                                    break;
-                                                case ("Close"):
-                                                    onCloseBatch(onLineBatch, currentBatchId, currentParallelStep);
-                                                    break;
+                                                case ("Start") -> startSteps(currentBatchSteps);
+                                                case ("Hold") -> holdSteps(currentBatchSteps);
+                                                case ("Abort") -> AbortSteps(currentBatchSteps);
+                                                case ("Create") -> createSteps(currentBatchSteps);
+                                                case ("Resume") -> resumeSteps(currentBatchSteps);
+                                                case ("Close") -> onCloseBatch(onLineBatch, currentBatchId, currentParallelStep);
                                             }
                                         }
                                     } else {
@@ -280,7 +264,7 @@ public class BatchService {
 
         if (allFinished) {
             Batch.setState(BatchStates.Finished.name());
-        } else if (!allFinished && finished) {
+        } else if (finished) {
             Batch.setState(BatchStates.Created.name());
         } else if (held) {
             Batch.setState(BatchStates.Held.name());
@@ -299,17 +283,17 @@ public class BatchService {
             counter = 1;
             batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().forEach(step -> {
                 if (counter <= maxNumberOfParallelSteps) {
-                    RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(String.valueOf(unitName + " [" + counter + "]"));
+                    RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unitName + " [" + counter + "]");
                     String batchPhaseName = step.getPhaseName();
                     step.getParametersType().forEach(batchParameter -> {
                         try {
                             String batchParameterName = batchParameter.getName();
-                            RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unitName + " [" + counter + "]"), batchPhaseName, batchParameterName + "IN");
+                            RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unitName + " [" + counter + "]", batchPhaseName, batchParameterName + "IN");
                             if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                                boolean value = ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).getValue();
+                                boolean value = ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).getValue();
                                 step.getActualCheckParametersData().replace(batchParameterName, value);
                             } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                                double value = ((RealDataType) dataDefinition.getAllValues().get(attripute)).getValue();
+                                double value = ((RealDataType) dataDefinition.getAllValues().get(attribute)).getValue();
                                 step.getActualvalueParametersData().replace(batchParameterName, value);
                             } else {
                                 System.err.println("DataType error   ");
@@ -333,17 +317,17 @@ public class BatchService {
             counter = 1;
             batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().forEach(step -> {
                 if (counter <= maxNumberOfParallelSteps) {
-                    RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(String.valueOf(unitName + " [" + counter + "]"));
+                    RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unitName + " [" + counter + "]");
                     String batchPhaseName = step.getPhaseName();
                     step.getParametersType().forEach(batchParameter -> {
                         String batchParameterName = batchParameter.getName();
-                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unitName + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
+                        RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unitName + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
                         if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
                             boolean value = step.getCheckParametersData().get(batchParameterName);
-                            ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).setValue(value);
+                            ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(value);
                         } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
                             double value = step.getValueParametersData().get(batchParameterName);
-                            ((RealDataType) dataDefinition.getAllValues().get(attripute)).setValue(value);
+                            ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(value);
                         } else {
                             System.err.println("DataType error   ");
                         }
@@ -360,7 +344,7 @@ public class BatchService {
         int maxNumberOfParallelSteps = recipeConfRepository.findAll().stream().findAny().get().getMaxParallelSteps();
         if (maxNumberOfParallelSteps > 0) {
             for (counter = 1; counter <= maxNumberOfParallelSteps; counter++) {
-                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(String.valueOf(unit + " [" + counter + "]"));
+                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unit + " [" + counter + "]");
                 if (dataDefinition != null) {
                     ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
                     ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
@@ -368,11 +352,11 @@ public class BatchService {
                         String batchPhaseName = phase.getName();
                         phase.getParameters().forEach(batchParameter -> {
                             String batchParameterName = batchParameter.getName();
-                            RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
+                            RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
                             if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                                ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).setValue(false);
+                                ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
                             } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                                ((RealDataType) dataDefinition.getAllValues().get(attripute)).setValue(0.0f);
+                                ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0f);
                             } else {
                                 System.err.println("DataType error   ");
                             }
@@ -386,16 +370,16 @@ public class BatchService {
         int maxNumberOfParallelSteps = recipeConfRepository.findAll().stream().findAny().get().getMaxParallelSteps();
         if (maxNumberOfParallelSteps > 0) {
             for (counter = 1; counter <= batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().size(); counter++) {
-                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(String.valueOf(unit + " [" + counter + "]"));
+                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unit + " [" + counter + "]");
                 phaseRepository.findAll().stream().filter(Phase -> Phase.getUnit().equals(unit)).filter(Phase -> !batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().stream().map(step -> step.getPhaseName()).collect(Collectors.toList()).contains(Phase.getName())).forEachOrdered(phase -> {
                     String batchPhaseName = phase.getName();
                     phase.getParameters().forEach(batchParameter -> {
                         String batchParameterName = batchParameter.getName();
-                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
+                        RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
                         if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                            ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).setValue(false);
+                            ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
                         } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                            ((RealDataType) dataDefinition.getAllValues().get(attripute)).setValue(0.0f);
+                            ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0f);
                         } else {
                             System.err.println("DataType error   ");
                         }
@@ -403,18 +387,18 @@ public class BatchService {
                 });
             }
             for (counter = batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().size() + 1; counter <= maxNumberOfParallelSteps; counter++) {
-                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(String.valueOf(unit + " [" + counter + "]"));
+                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unit + " [" + counter + "]");
                 ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
                 ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
                 phaseRepository.findAll().stream().filter(Phase -> Phase.getUnit().equals(unit)).forEachOrdered(phase -> {
                     String batchPhaseName = phase.getName();
                     phase.getParameters().forEach(batchParameter -> {
                         String batchParameterName = batchParameter.getName();
-                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
+                        RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
                         if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                            ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).setValue(false);
+                            ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
                         } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                            ((RealDataType) dataDefinition.getAllValues().get(attripute)).setValue(0.0f);
+                            ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0f);
                         } else {
                             System.err.println("DataType error   ");
                         }
@@ -444,28 +428,14 @@ public class BatchService {
         return ret;
     }
     private String getStatusToStep(int status) {
-        String ret = "";
-        switch (status) {
-            case 1:
-                ret = BatchStates.Idle.name();
-                break;
-            case 2:
-                ret = BatchStates.Running.name();
-                break;
-            case 3:
-                ret = BatchStates.Held.name();
-                break;
-            case 4:
-                ret = BatchStates.Aborted.name();
-                break;
-            case 5:
-                ret = BatchStates.Finished.name();
-                break;
-            default:
-                ret = BatchStates.Created.name();
-                break;
-        }
-        return ret;
+        return switch (status) {
+            case 1 -> BatchStates.Idle.name();
+            case 2 -> BatchStates.Running.name();
+            case 3 -> BatchStates.Held.name();
+            case 4 -> BatchStates.Aborted.name();
+            case 5 -> BatchStates.Finished.name();
+            default -> BatchStates.Created.name();
+        };
     }
 
 }

@@ -4,55 +4,54 @@ import com.batch.ApplicationContext;
 import com.batch.Database.Entities.TagLog;
 import com.batch.Database.Repositories.TagLogRepository;
 import com.batch.PLCDataSource.PLC.ComplexDataType.Logging;
+import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.ValueObject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ProcessTagLoggingService implements Runnable {
+@Service
+@RequiredArgsConstructor
+public class ProcessTagLoggingService {
 
-    private static ProcessTagLoggingService singelton = null;
-    Map<String, RowDataDefinition> allDevices;
-
+    private Map<String, RowDataDefinition> allDevices;
     private final TagLogRepository tagLogRepository;
 
-    public ProcessTagLoggingService(Map<String, RowDataDefinition> allDevices) {
-        this.allDevices = allDevices;
-        this.tagLogRepository = ApplicationContext.applicationContext.getBean(TagLogRepository.class);
+    @EventListener
+    public void atStart(ApplicationContext.ApplicationListener event){
+        allDevices = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel();
     }
 
-    public static ProcessTagLoggingService getSystem(Map<String, RowDataDefinition> allDevices) {
-        synchronized (PrrocessAlarmLoggingService.class) {
-            if (singelton == null) {
-                singelton = new ProcessTagLoggingService(allDevices);
-            }
-        }
-        return singelton;
-    }
-
-    @Override
+    @Scheduled(fixedDelay = 1000)
     public void run() {
         try {
-            allDevices.values().stream().flatMap(item -> {
-                List<LogDataHolder> list = new ArrayList();
-                item.getEnableTagLogging().forEach((att, val) -> {
-                    if (val.equals(Logging.Enable)) {
-                        ValueObject value = item.getAllValues().get(att);
-                        String name = item.getName();
-                        EDT type = item.getTypes().get(att);
-                        list.add(new LogDataHolder(name, att, value, type));
-                    }
+            if (allDevices != null) {
+                allDevices.values().stream().flatMap(item -> {
+                    List<LogDataHolder> list = new ArrayList<>();
+                    item.getEnableTagLogging().forEach((att, val) -> {
+                        if (val.equals(Logging.Enable)) {
+                            ValueObject value = item.getAllValues().get(att);
+                            String name = item.getName();
+                            EDT type = item.getTypes().get(att);
+                            list.add(new LogDataHolder(name, att, value, type));
+                        }
+                    });
+                    return list.stream();
+                }).forEach(item -> {
+                    tagLogRepository.save(new TagLog(item.getName(), item.getAttribute().toString(), getValue(item.getValue(), item.getType())));
                 });
-                return list.stream();
-            }).forEach(item -> {
-                tagLogRepository.save(new TagLog(item.getName(), item.getAttribute().toString(), getValue(item.getValue(), item.getType())));
-            });
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

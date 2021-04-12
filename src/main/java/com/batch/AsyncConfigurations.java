@@ -3,6 +3,7 @@ package com.batch;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -19,6 +20,7 @@ import java.util.concurrent.Executor;
 public class AsyncConfigurations {
 
     @Bean
+    @Primary
     public TaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(10);
@@ -30,7 +32,8 @@ public class AsyncConfigurations {
         return scheduler;
     }
 
-    @Bean(name = "ServiceExecutor")
+    @Bean
+    @Primary
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(10);
@@ -38,19 +41,6 @@ public class AsyncConfigurations {
         executor.setQueueCapacity(Integer.MAX_VALUE);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix("Service-layer-executor");
-        executor.setDaemon(true);
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean(name = "GPExecutor")
-    public Executor taskExecutorGP() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(Integer.MAX_VALUE);
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadNamePrefix("General-purpose-executor");
         executor.setDaemon(true);
         executor.initialize();
         return executor;
