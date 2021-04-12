@@ -1,18 +1,13 @@
 package com.batch.Database.Entities;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchModel;
+import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -82,39 +77,17 @@ public class Batch {
 
 
 
-    public BatchModel getModel() {
-        BatchModel batchModel = null;
-        try {
-            batchModel = startUnMarshalling(rowModel);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
-        this.model = batchModel;
-        return batchModel;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Batch batch = (Batch) o;
+        return Objects.equal(id, batch.id);
     }
 
-    public void setModel(BatchModel model) {
-        String s = null;
-        try {
-             s = startMarshalling(model);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
-        this.model = model;
-        this.rowModel = s;
-    }
-
-    private String startMarshalling(BatchModel model) throws JAXBException {
-        StringWriter sw = new StringWriter();
-        JAXBContext jaxbcontext = JAXBContext.newInstance(BatchModel.class);
-        Marshaller marshaller = jaxbcontext.createMarshaller();
-        marshaller.marshal(model, sw);
-        return sw.toString();
-    }
-    private BatchModel startUnMarshalling(String model) throws JAXBException {
-        JAXBContext jaxbcontext = JAXBContext.newInstance(BatchModel.class);
-        Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
-        return ((BatchModel) unMarshaller.unmarshal(new StringReader(model)));
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.batch.GUI.FacePlates.WeightFacePlate;
 import com.batch.GUI.MaterialsWindow.MaterialsWindow;
 import com.batch.GUI.PhasesWindow.PhasesWindow;
 import com.batch.GUI.RecipeEditor.WindowComponents.RecipeEditor;
+import com.batch.GUI.Reporting.BatchArchiveWindow;
 import com.batch.GUI.UnitsWindow.UnitsWindow;
 import com.batch.PLCDataSource.PLC.ComplexDataType.*;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
@@ -138,8 +139,8 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
     private String returnData;
 
 
-    private final Background HEALTHY_BACKGROUND = new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY));
-    private final Background FAULTY_BACKGROUND = new Background(new BackgroundFill(Color.RED.brighter(), CornerRadii.EMPTY, Insets.EMPTY));
+    private final Background HEALTHY_BACKGROUND = new Background(new BackgroundFill(Color.LIGHTGREEN,  new CornerRadii(5), Insets.EMPTY));
+    private final Background FAULTY_BACKGROUND = new Background(new BackgroundFill(Color.RED.brighter(),  new CornerRadii(5), Insets.EMPTY));
 
 
     private InitialWindowModel model;
@@ -167,8 +168,8 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
     }
 
     private void graphicsBuilder() {
-//        recipeEditor.setHeight(900);
-//        recipeEditor.setWidth(1500);
+        recipeEditor.setHeight(900);
+        recipeEditor.setWidth(1500);
 //        batchCreator.setHeight(600);
 //        batchCreator.setWidth(800);
 
@@ -178,22 +179,19 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
         lastAlarmField.setPrefHeight(30);
         lastAlarmField.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
 
-        connectionStatus.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
+
         connectionStatus.setPadding(new Insets(5, 10, 5, 10));
         connectionStatus.setPrefSize(400, 30);
         connectionStatus.setAlignment(Pos.CENTER);
 
-        airPressureStatus.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
         airPressureStatus.setPadding(new Insets(5, 10, 5, 10));
         airPressureStatus.setPrefSize(180, 30);
         airPressureStatus.setAlignment(Pos.CENTER);
 
-        overUnderVoltageStatus.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
         overUnderVoltageStatus.setPadding(new Insets(5, 10, 5, 10));
         overUnderVoltageStatus.setPrefSize(180, 30);
         overUnderVoltageStatus.setAlignment(Pos.CENTER);
 
-        ESDStatus.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
         ESDStatus.setPadding(new Insets(5, 10, 5, 10));
         ESDStatus.setPrefSize(180, 30);
         ESDStatus.setAlignment(Pos.CENTER);
@@ -290,7 +288,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
 
 //            batchCreatorItem.setOnAction(this::onBatchCreatorRequest);
             recipeEditorItem.setOnAction(this::onRecipeEditorRequest);
-//            reportaItem.setOnAction(this::onReportRequest);
+            reportingSystem.setOnAction(action -> BatchArchiveWindow.getWindow(initialStage).show());
             configurations.setOnAction(action -> {
 //                ConfigurationsWindow.getConfigurationWindow(mainWindow, logger, service).show();
             });
@@ -873,20 +871,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
                 .build();
     }
 
-    //    private synchronized void onReportRequest(ActionEvent event) {
-//        try {
-//            scene.setCursor(Cursor.WAIT);
-//            CompletableFuture.supplyAsync(() -> {
-//                Platform.runLater(() -> {
-//                    BatchArchieveWindow.getWindow(mainWindow).showAndUpdate();
-//                    scene.setCursor(Cursor.DEFAULT);
-//                });
-//                return null;
-//            }, service);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 //    private synchronized void onBatchCreatorRequest(ActionEvent event) {
 //        try {
 //            scene.setCursor(Cursor.WAIT);

@@ -11,13 +11,16 @@ import com.batch.Database.Entities.RecipeConf;
 import com.batch.Database.Entities.TreeViewItemsData;
 import com.batch.GUI.RecipeEditor.RecipeEditorController;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
@@ -26,8 +29,12 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.controlsfx.dialog.ExceptionDialog;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RecipeEditor extends Stage {
@@ -49,6 +56,7 @@ public class RecipeEditor extends Stage {
     private final Button validate = new Button("Validate");
     private final Button save = new Button("Save");
     private final Button cancel = new Button("Cancel editing");
+    private final Button maximize = new Button("maximize");
 
     
     private final FlowPane flowPane = new FlowPane();
@@ -71,6 +79,9 @@ public class RecipeEditor extends Stage {
 
     private final RecipeEditorController controller;
 
+    private final ObjectProperty<Cursor> CURSOR_DEFAULT = new SimpleObjectProperty<>(Cursor.DEFAULT);
+    private final ObjectProperty<Cursor> CURSOR_WAIT = new SimpleObjectProperty<>(Cursor.WAIT);
+
     private RecipeEditor(Stage ownerWindow) {
         this.mainWindow = this;
         this.ownerWindow = ownerWindow;
@@ -90,7 +101,8 @@ public class RecipeEditor extends Stage {
 
     private void graphicsBuilder() {
         editorMode.setValue("Default");
-        
+
+        maximize.setPrefWidth(150);
         save.setPrefWidth(200);
         edit.setPrefWidth(200);
         discard.setPrefWidth(200);
@@ -109,18 +121,20 @@ public class RecipeEditor extends Stage {
         flowPane.prefHeightProperty().bind(heightProperty());
         flowPane.prefWidthProperty().bind(stepsScrollPane.widthProperty());
         
-        stepsScrollPane.setMaxWidth(500);
+        stepsScrollPane.setMaxWidth(800);
+        scrollPane.setPannable(true);
         
-        flowPane.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+        flowPane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         flowPane.setVgap(5);
-        flowPane.setHgap(5);
+        flowPane.setHgap(15);
         flowPane.setPadding(new Insets(5));
+        flowPane.setAlignment(Pos.TOP_CENTER);
 
         pane.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         pane.setAlignment(Pos.CENTER);
         pane.setSpacing(5);
         pane.setPadding(new Insets(20));
-        pane.prefHeightProperty().bind(heightProperty());
+        pane.minHeightProperty().bind(scrollPane.heightProperty());
         pane.prefWidthProperty().bind(scrollPane.widthProperty());
 
         treeView.setPrefWidth(300);
@@ -128,15 +142,15 @@ public class RecipeEditor extends Stage {
         treeView.setRoot(root);
         treeView.setPadding(new Insets(0,0,20,0));
 
-        toolBar.getItems().addAll(edit, discard, validate, save, launch, cancel);
+        toolBar.getItems().addAll(maximize, new Separator(), new Separator(), edit, discard, validate, save, /*launch, */cancel);
 
-        statusBar.getItems().addAll(new Label("Batch interfece status"));
+        statusBar.getItems().addAll(new Label("Batch interface status"));
 
         rootPane.setCenter(splitPane);
         rootPane.setTop(toolBar);
         rootPane.setBottom(statusBar);
         
-        splitPane.setDividerPositions(0.1,0.8,0.1);
+        splitPane.setDividerPositions(0.1,0.6,0.3);
         
         setTitle("Recipe editor");
         setScene(new Scene(rootPane));
@@ -146,6 +160,7 @@ public class RecipeEditor extends Stage {
         
     }
     private void actionHandler() {
+        maximize.setOnMouseClicked(this::onMaximize);
         save.setOnMouseClicked(this::onSaveClicked);
         validate.setOnMouseClicked(this::onValidateClicked);
         edit.setOnMouseClicked(this::onEditClicked);
@@ -181,33 +196,51 @@ public class RecipeEditor extends Stage {
         });
         treeView.setOnMouseClicked(this::onLoadRecipeAtClick);
         editorMode.addListener(this::onModeChange);
- 
+
+        pane.heightProperty().addListener((observable, oldValue, newValue) -> scrollPane.setHvalue((Double)newValue ));
     }
 
     public void refreshAndUpdateAndShow(String unit) {
         try {
-            this.unit = unit;
-            pane.getChildren().clear();
-            FillTreeFromDB();
-            flowPane.getChildren().clear();
-            controller.getAllPhasesSortedForAUnit(unit).forEach((Phase) -> {
-                Platform.runLater(() -> {
-                    Step step = new Step(Phase.getName(), false, mainWindow);
-                    flowPane.getChildren().add(step);
-
-                    step.setOnDragDetected(action -> {
-                        Dragboard board = step.startDragAndDrop(TransferMode.ANY);
-                        ClipboardContent content = new ClipboardContent();
-                        content.putString(Phase.getName());
-                        board.setContent(content);
-                        draggedStepPhaseName = step.getModel().getPhaseName();
-                    });
-                });
-            });
-            show();
+            final Task<Boolean> task = loadingTask(unit);
+            final ReadOnlyBooleanProperty readOnlyBooleanProperty = task.runningProperty();
+            ownerWindow.getScene().cursorProperty().bind(Bindings.when(readOnlyBooleanProperty).then(CURSOR_WAIT).otherwise(CURSOR_DEFAULT));
+            controller.execute(task);
         } catch (Exception e) {
+            showErrorWindowForException("Error updating", e);
             e.printStackTrace();
         }
+    }
+    private Task<Boolean> loadingTask(String unit){
+        return new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+
+                final List<Phase> allPhasesSortedForAUnit = controller.getAllPhasesSortedForAUnit(unit);
+                setUnit(unit);
+                Platform.runLater(() -> {
+                    pane.getChildren().clear();
+                    FillTreeFromDB();
+                    flowPane.getChildren().clear();
+                    allPhasesSortedForAUnit.forEach((Phase) -> {
+
+                        Step step = new Step(Phase.getName(), false, mainWindow);
+                        flowPane.getChildren().add(step);
+
+                        step.setOnDragDetected(action -> {
+                            Dragboard board = step.startDragAndDrop(TransferMode.ANY);
+                            ClipboardContent content = new ClipboardContent();
+                            content.putString(Phase.getName());
+                            board.setContent(content);
+                            draggedStepPhaseName = step.getModel().getPhaseName();
+                        });
+
+                    });
+                    show();
+                });
+                return null;
+            }
+        };
     }
 
     private ParallelSteps adjustDragDropActionsForReceivingContainer(ParallelSteps parallelSteps) {
@@ -241,12 +274,7 @@ public class RecipeEditor extends Stage {
 
                 action.setDropCompleted(true);
             } else {
-                Alert Error = new Alert(Alert.AlertType.ERROR);
-                Error.setTitle("Error ");
-                Error.setHeaderText("Error adding new step");
-                Error.setContentText("You can't exceed the maximum number of steps \nAs defined in the recipe configurations.");
-                Error.initOwner(mainWindow);
-                Error.show();
+                showErrorWindow("Error adding new step", "You can't exceed the maximum number of steps \nAs defined in the recipe configurations.");
             }
         });
         return newParallelSteps;
@@ -285,6 +313,9 @@ public class RecipeEditor extends Stage {
         }
     }
 
+    private void onMaximize(MouseEvent mouseEvent) {
+        mainWindow.setMaximized(true);
+    }
     private void onCreateFolder(ActionEvent action) {
         RecipeTreeItem parent = (RecipeTreeItem) treeView.getSelectionModel().getSelectedItem();
         if (parent != null){
@@ -340,12 +371,7 @@ public class RecipeEditor extends Stage {
                 LoadRecipeToGraphicsWithoutEdit();
                 editorMode.setValue("Monitor");
             } else {
-                Alert Error = new Alert(Alert.AlertType.ERROR);
-                Error.setTitle("Error ");
-                Error.setHeaderText("Error you selected wrong recipe");
-                Error.setContentText("Please select recipe related to " + unit + " ,\nOr close recipe editor and start it again for " + recipe.getUnitName());
-                Error.initOwner(mainWindow);
-                Error.showAndWait();
+                showErrorWindow("Error you selected wrong recipe", "Please select recipe related to " + unit + " ,\nOr close recipe editor and start it again for " + recipe.getUnitName());
             }
         }
     }
@@ -380,8 +406,6 @@ public class RecipeEditor extends Stage {
     }
     private void onSaveClicked(MouseEvent action) {
         controller.getRecipeById(selectedRecipe.getId()).ifPresentOrElse(recipe -> {
-            System.err.println(recipeModel);
-            System.err.println(selectedRecipe);
             controller.saveRecipe(selectedRecipe);
             LoadRecipeToGraphicsWithoutEdit();
             FillTreeFromDB();
@@ -394,7 +418,7 @@ public class RecipeEditor extends Stage {
         //Checking if there are many end
         //checking if there are any empty parallel steps
         //checking if there are end at the end
-        System.err.println(selectedRecipe);
+
         double total = recipeModel.getParallelSteps()
                 .stream()
                 .flatMap(item -> item.getSteps().stream())
@@ -411,8 +435,8 @@ public class RecipeEditor extends Stage {
                     .map(psm -> {
                         ParallelStepsModel psmt = new ParallelStepsModel();
                         psm.getSteps().forEach(a -> {
-                            if (!a.getPhaseName().equals("End")) {
-                                if (phasesNames.contains(a.getPhaseName()) || a.getPhaseName().equals("Start")) {
+                            if (!a.getPhaseName().equals("End") || !a.getPhaseName().equals("Start")) {
+                                if (phasesNames.contains(a.getPhaseName())) {
                                     psmt.getSteps().add(a);
                                 }
                             }
@@ -423,20 +447,19 @@ public class RecipeEditor extends Stage {
                     .collect(LinkedList::new, LinkedList::add, LinkedList::addAll));
 
             ParallelSteps ps = new ParallelSteps();
+            ParallelSteps startPs = new ParallelSteps();
             Step endStep = new Step("End", true, mainWindow);
+            Step startStep = new Step("Start", true, mainWindow);
             recipeModel.getParallelSteps().add(ps.getModel());
+            recipeModel.getParallelSteps().add(0, startPs.getModel());
             ps.getModel().getSteps().add(endStep.getModel());
+            startPs.getModel().getSteps().add(startStep.getModel());
 
             LoadRecipeToGraphicsWithoutEdit();
 
             editorMode.setValue("validate");
         } else {
-            Alert Error = new Alert(Alert.AlertType.ERROR);
-            Error.setTitle("Error ");
-            Error.setHeaderText("Error validating recipe");
-            Error.setContentText("Total percentages are not equal to 100% \nThe total equals to " + total);
-            Error.initOwner(mainWindow);
-            Error.showAndWait();
+            showErrorWindow("Error adding new step", "You can't exceed the maximum number of steps \nAs defined in the recipe configurations.");
         }
     }
     private void onEditClicked(MouseEvent action){
@@ -451,12 +474,7 @@ public class RecipeEditor extends Stage {
                 LoadRecipeToGraphicsWithEdit();
             }, () -> {});
         } else {
-            Alert Error = new Alert(Alert.AlertType.ERROR);
-            Error.setTitle("Error ");
-            Error.setHeaderText("Error changing data");
-            Error.setContentText("Discarding changes happens only if in Edit mode ...");
-            Error.initOwner(mainWindow);
-            Error.showAndWait();
+            showErrorWindow("Error changing data", "Discarding changes happens only if in Edit mode ...");
         }
     }
     private void onLaunchClicked(MouseEvent action) {
@@ -469,22 +487,17 @@ public class RecipeEditor extends Stage {
                 if (parent != null && parent.isLeaf() && parent.getItemType().equals(TreeItemType.Recipe)) {
                     Recipe recipe = parent.getRecipe();
                     if (recipe.getUnitName().equals(unit)) {
-                        System.err.println("getting selected recipe " + recipe);
                         recipeModel = recipe.getModel();
                         selectedRecipe = recipe;
                         LoadRecipeToGraphicsWithoutEdit();
                         editorMode.setValue("Monitor");
                     } else {
-                        Alert Error = new Alert(Alert.AlertType.ERROR);
-                        Error.setTitle("Error ");
-                        Error.setHeaderText("Error you selected wrong recipe");
-                        Error.setContentText("Please select recipe related to " + unit + " ,\nOr close recipe editor and start it again for " + recipe.getUnitName());
-                        Error.initOwner(mainWindow);
-                        Error.showAndWait();
+                        showErrorWindow("Error you selected wrong recipe", "Please select recipe related to " + unit + " ,\nOr close recipe editor and start it again for " + recipe.getUnitName());
                     }
                 }
             }
         }catch (Exception e){
+            showErrorWindowForException("Error loading recipe", e);
             e.printStackTrace();
         }
     }
@@ -617,7 +630,6 @@ public class RecipeEditor extends Stage {
                         item.setExpanded(true);
                         item.setItemID(element.getId());
                         item.setRecipe(recipe);
-                        System.err.println("At fill " + recipe + " " + item);
                         parent.getChildren().add(item);
                         //Recursive fill
                         FillTreeItemRecursiveAction(element.getId(), item, groupedItemsByParentID);
@@ -666,7 +678,6 @@ public class RecipeEditor extends Stage {
         Map<Long, List<TreeViewItemsData>> groupedItemsByParentID =  controller.getAllTreeItems()
                 .stream()
                 .collect(Collectors.groupingBy(TreeViewItemsData::getParentID, LinkedHashMap::new , Collectors.toCollection(LinkedList::new )));
-        
         return ! notOneOfItsChildRecursiveCheck(destination, SelectedItem, groupedItemsByParentID);
         
     }
@@ -796,6 +807,35 @@ public class RecipeEditor extends Stage {
         
         
         return returnData;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    private void showErrorWindow(String header, String content){
+        Platform.runLater(() -> {
+            Alert Error = new Alert(Alert.AlertType.ERROR);
+            Error.setTitle("Error ");
+            Error.setHeaderText(header);
+            Error.setContentText(content);
+            Error.initOwner(mainWindow);
+            Error.show();
+        });
+    }
+    private void showErrorWindowForException(String header, Throwable e) {
+        Platform.runLater(() -> {
+            ExceptionDialog exceptionDialog = new ExceptionDialog(e);
+            exceptionDialog.setHeaderText(header);
+            exceptionDialog.getDialogPane().setMaxWidth(500);
+            exceptionDialog.initOwner(mainWindow);
+            exceptionDialog.initModality(Modality.WINDOW_MODAL);
+            exceptionDialog.initStyle(StageStyle.UTILITY);
+            exceptionDialog.show();
+        });
     }
 
     @Override

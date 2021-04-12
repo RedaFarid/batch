@@ -60,7 +60,6 @@ public class RecipeService {
         try {
             s = startMarshalling(model);
         } catch (Exception ignored) {
-
         }
         return s;
     }

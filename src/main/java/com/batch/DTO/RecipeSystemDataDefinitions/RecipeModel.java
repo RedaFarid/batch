@@ -1,40 +1,23 @@
 package com.batch.DTO.RecipeSystemDataDefinitions;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
+@Data
 @ToString
 @XmlRootElement
+@AllArgsConstructor
+@NoArgsConstructor
 public class RecipeModel {
-
-    private List<ParallelStepsModel> parallelSteps = new LinkedList();
-
-    public RecipeModel(List<ParallelStepsModel> parallelSteps) {
-        this.parallelSteps = parallelSteps;
+    private List<ParallelStepsModel> parallelSteps = new LinkedList<>();
+    public RecipeModel(ParallelStepsModel... firstParallelStepsModel) {
+        Collections.addAll(parallelSteps, firstParallelStepsModel);
     }
-
-    public RecipeModel(ParallelStepsModel ... firstParallelStepsModel ) {
-        
-        for (ParallelStepsModel step : firstParallelStepsModel) {
-            parallelSteps.add(step);
-        }
-        
-    }
-
-    public RecipeModel() {
-    }
-
-    public List<ParallelStepsModel> getParallelSteps() {
-        return parallelSteps;
-    }
-
-    public void setParallelSteps(List<ParallelStepsModel> parallelSteps) {
-        this.parallelSteps = parallelSteps;
-    }
-
-
-    
 }
