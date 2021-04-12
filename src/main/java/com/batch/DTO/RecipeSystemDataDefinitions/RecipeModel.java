@@ -1,9 +1,12 @@
 package com.batch.DTO.RecipeSystemDataDefinitions;
 
+import lombok.ToString;
+
 import java.util.LinkedList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
+@ToString
 @XmlRootElement
 public class RecipeModel {
 
@@ -31,5 +34,7 @@ public class RecipeModel {
     public void setParallelSteps(List<ParallelStepsModel> parallelSteps) {
         this.parallelSteps = parallelSteps;
     }
+
+
     
 }

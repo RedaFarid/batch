@@ -129,7 +129,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
 
     private final Label lastAlarmField = new Label();
 
-//    private RecipeEditor recipeEditor;
+    private RecipeEditor recipeEditor;
 //    private BatchCreator batchCreator;
 //    private List<BatchObserver> batchObservers = Collections.synchronizedList(new LinkedList<>());
 //    private AutoUpdateAlarmsWindow logWindow;
@@ -155,11 +155,15 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
 
     @Override
     public void onApplicationEvent(ApplicationContext.ApplicationListener listener) {
-        initialStage = listener.getStage();
-        model = controller.getModel();
-        allAlarmsWindow = AllAlarmsWindow.getWindow(initialStage);
-//        recipeEditor = RecipeEditor.getWindow(initialStage);
-        graphicsBuilder();
+        try {
+            initialStage = listener.getStage();
+            model = controller.getModel();
+            allAlarmsWindow = AllAlarmsWindow.getWindow(initialStage);
+            recipeEditor = RecipeEditor.getWindow(initialStage);
+            graphicsBuilder();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void graphicsBuilder() {
@@ -285,7 +289,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
             materialItem.setOnAction(action -> MaterialsWindow.getMaterialsWindow(initialStage).show());
 
 //            batchCreatorItem.setOnAction(this::onBatchCreatorRequest);
-//            recipeEditorItem.setOnAction(this::onRecipeEditorRequest);
+            recipeEditorItem.setOnAction(this::onRecipeEditorRequest);
 //            reportaItem.setOnAction(this::onReportRequest);
             configurations.setOnAction(action -> {
 //                ConfigurationsWindow.getConfigurationWindow(mainWindow, logger, service).show();
@@ -901,8 +905,8 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
         try {
             String retVal = selectUnitWindow();
             if (!retVal.equals("Cancel")) {
-//                recipeEditor.hide();
-//                recipeEditor.refreshAndUpdateAndShow(retVal);
+                recipeEditor.hide();
+                recipeEditor.refreshAndUpdateAndShow(retVal);
             }
         } catch (Exception e) {
             e.printStackTrace();

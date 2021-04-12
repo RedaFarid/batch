@@ -34,30 +34,30 @@ public class RecipeEditor extends Stage {
 
     private static volatile RecipeEditor singleton = null;
     
-    private Stage mainWindow;
-    private Stage ownerWindow;
+    private final Stage mainWindow;
+    private final Stage ownerWindow;
 
-    private BorderPane rootPane = new BorderPane();
-    private TreeView<String> treeView = new TreeView<>();
-    private RecipeTreeItem root = new RecipeTreeItem("System", TreeItemType.Folder);
-    private ToolBar toolBar = new ToolBar();
-    private ToolBar statusBar = new ToolBar();
+    private final BorderPane rootPane = new BorderPane();
+    private final TreeView<String> treeView = new TreeView<>();
+    private final RecipeTreeItem root = new RecipeTreeItem("System", TreeItemType.Folder);
+    private final ToolBar toolBar = new ToolBar();
+    private final ToolBar statusBar = new ToolBar();
     
-    private Button edit = new Button("Edit");
-    private Button discard = new Button("Discard changes");
-    private Button launch = new Button("Release for production");
-    private Button validate = new Button("Validate");
-    private Button save = new Button("Save");
-    private Button cancel = new Button("Cancel editing");
+    private final Button edit = new Button("Edit");
+    private final Button discard = new Button("Discard changes");
+    private final Button launch = new Button("Release for production");
+    private final Button validate = new Button("Validate");
+    private final Button save = new Button("Save");
+    private final Button cancel = new Button("Cancel editing");
 
     
-    private FlowPane flowPane = new FlowPane();
-    private ScrollPane stepsScrollPane = new ScrollPane(flowPane);
-    private VBox pane = new VBox();
-    private ScrollPane scrollPane = new ScrollPane(pane);
-    private SplitPane splitPane = new SplitPane(treeView, scrollPane, stepsScrollPane);
+    private final FlowPane flowPane = new FlowPane();
+    private final ScrollPane stepsScrollPane = new ScrollPane(flowPane);
+    private final VBox pane = new VBox();
+    private final ScrollPane scrollPane = new ScrollPane(pane);
+    private final SplitPane splitPane = new SplitPane(treeView, scrollPane, stepsScrollPane);
     
-    private StringProperty editorMode = new SimpleStringProperty();
+    private final StringProperty editorMode = new SimpleStringProperty();
     
     private long SelectedItemID = -1;
     
@@ -70,6 +70,7 @@ public class RecipeEditor extends Stage {
     private String unit;
 
     private final RecipeEditorController controller;
+
     private RecipeEditor(Stage ownerWindow) {
         this.mainWindow = this;
         this.ownerWindow = ownerWindow;
@@ -188,23 +189,21 @@ public class RecipeEditor extends Stage {
             this.unit = unit;
             pane.getChildren().clear();
             FillTreeFromDB();
-
             flowPane.getChildren().clear();
+            controller.getAllPhasesSortedForAUnit(unit).forEach((Phase) -> {
+                Platform.runLater(() -> {
+                    Step step = new Step(Phase.getName(), false, mainWindow);
+                    flowPane.getChildren().add(step);
 
-                    controller.getAllPhases().stream().filter(item -> item.getUnit().equals(unit)).sorted(Comparator.comparing(Phase::getPhaseType)).forEach((Phase) -> {
-                        Platform.runLater(() -> {
-                            Step step = new Step(Phase.getName(), false, mainWindow);
-                            flowPane.getChildren().add(step);
-                            
-                            step.setOnDragDetected(action -> {
-                                Dragboard board = step.startDragAndDrop(TransferMode.ANY);
-                                ClipboardContent content = new ClipboardContent();
-                                content.putString(Phase.getName());
-                                board.setContent(content);
-                                draggedStepPhaseName = step.getModel().getPhaseName();
-                            });
-                        });
+                    step.setOnDragDetected(action -> {
+                        Dragboard board = step.startDragAndDrop(TransferMode.ANY);
+                        ClipboardContent content = new ClipboardContent();
+                        content.putString(Phase.getName());
+                        board.setContent(content);
+                        draggedStepPhaseName = step.getModel().getPhaseName();
                     });
+                });
+            });
             show();
         } catch (Exception e) {
             e.printStackTrace();
@@ -245,7 +244,7 @@ public class RecipeEditor extends Stage {
                 Alert Error = new Alert(Alert.AlertType.ERROR);
                 Error.setTitle("Error ");
                 Error.setHeaderText("Error adding new step");
-                Error.setContentText("You cann't exceed the maximum number of steps \nAs defined in the recipe confiigurations.");
+                Error.setContentText("You can't exceed the maximum number of steps \nAs defined in the recipe configurations.");
                 Error.initOwner(mainWindow);
                 Error.show();
             }
@@ -348,7 +347,6 @@ public class RecipeEditor extends Stage {
                 Error.initOwner(mainWindow);
                 Error.showAndWait();
             }
-
         }
     }
     private void onDelete(ActionEvent action) {
@@ -382,17 +380,21 @@ public class RecipeEditor extends Stage {
     }
     private void onSaveClicked(MouseEvent action) {
         controller.getRecipeById(selectedRecipe.getId()).ifPresentOrElse(recipe -> {
+            System.err.println(recipeModel);
+            System.err.println(selectedRecipe);
             controller.saveRecipe(selectedRecipe);
             LoadRecipeToGraphicsWithoutEdit();
             FillTreeFromDB();
             editorMode.setValue("save");
-        }, () -> {});
+        }, () -> {
+
+        });
     }
     private void onValidateClicked(MouseEvent action) {
         //Checking if there are many end
         //checking if there are any empty parallel steps
         //checking if there are end at the end
-
+        System.err.println(selectedRecipe);
         double total = recipeModel.getParallelSteps()
                 .stream()
                 .flatMap(item -> item.getSteps().stream())
@@ -448,7 +450,6 @@ public class RecipeEditor extends Stage {
                 selectedRecipe = recipe;
                 LoadRecipeToGraphicsWithEdit();
             }, () -> {});
-
         } else {
             Alert Error = new Alert(Alert.AlertType.ERROR);
             Error.setTitle("Error ");
@@ -457,30 +458,34 @@ public class RecipeEditor extends Stage {
             Error.initOwner(mainWindow);
             Error.showAndWait();
         }
-        
     }
     private void onLaunchClicked(MouseEvent action) {
         editorMode.setValue("launch");
     }
     private void onLoadRecipeAtClick(MouseEvent action) {
-        if (action.getButton().equals(MouseButton.PRIMARY) && action.getClickCount() == 2) {
-            RecipeTreeItem parent = (RecipeTreeItem) treeView.getSelectionModel().getSelectedItem();
-            if (parent != null && parent.isLeaf() && parent.getItemType().equals(TreeItemType.Recipe)) {
-                Recipe recipe = parent.getRecipe();
-                if (recipe.getUnitName().equals(unit)) {
-                    recipeModel = recipe.getModel();
-                    selectedRecipe = recipe;
-                    LoadRecipeToGraphicsWithoutEdit();
-                    editorMode.setValue("Monitor");
-                } else {
-                    Alert Error = new Alert(Alert.AlertType.ERROR);
-                    Error.setTitle("Error ");
-                    Error.setHeaderText("Error you selected wrong recipe");
-                    Error.setContentText("Please select recipe related to " + unit + " ,\nOr close recipe editor and start it again for " + recipe.getUnitName());
-                    Error.initOwner(mainWindow);
-                    Error.showAndWait();
+        try {
+            if (action.getButton().equals(MouseButton.PRIMARY) && action.getClickCount() == 2) {
+                RecipeTreeItem parent = (RecipeTreeItem) treeView.getSelectionModel().getSelectedItem();
+                if (parent != null && parent.isLeaf() && parent.getItemType().equals(TreeItemType.Recipe)) {
+                    Recipe recipe = parent.getRecipe();
+                    if (recipe.getUnitName().equals(unit)) {
+                        System.err.println("getting selected recipe " + recipe);
+                        recipeModel = recipe.getModel();
+                        selectedRecipe = recipe;
+                        LoadRecipeToGraphicsWithoutEdit();
+                        editorMode.setValue("Monitor");
+                    } else {
+                        Alert Error = new Alert(Alert.AlertType.ERROR);
+                        Error.setTitle("Error ");
+                        Error.setHeaderText("Error you selected wrong recipe");
+                        Error.setContentText("Please select recipe related to " + unit + " ,\nOr close recipe editor and start it again for " + recipe.getUnitName());
+                        Error.initOwner(mainWindow);
+                        Error.showAndWait();
+                    }
                 }
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
     private void onModeChange(ObservableValue<? extends String> observable, String oldValue, String newValue){
@@ -548,7 +553,7 @@ public class RecipeEditor extends Stage {
                 break;
         }
     }
-    private void onCancelClicked(MouseEvent actiob) {
+    private void onCancelClicked(MouseEvent action) {
         controller.getRecipeById(selectedRecipe.getId()).ifPresentOrElse(recipe -> {
             recipeModel = recipe.getModel();
             selectedRecipe = recipe;
@@ -595,9 +600,9 @@ public class RecipeEditor extends Stage {
         root.getChildren().clear();
         FillTreeItemRecursiveAction(0, root, groupedItemsByParentID);
     }
-    private void FillTreeItemRecursiveAction(long parentID, RecipeTreeItem parent, Map<Long, List<TreeViewItemsData>> groupdItemsByParentID) {
-        if (groupdItemsByParentID.get(parentID) != null) {
-            groupdItemsByParentID.get(parentID).forEach(element -> {
+    private void FillTreeItemRecursiveAction(long parentID, RecipeTreeItem parent, Map<Long, List<TreeViewItemsData>> groupedItemsByParentID) {
+        if (groupedItemsByParentID.get(parentID) != null) {
+            groupedItemsByParentID.get(parentID).forEach(element -> {
                 if (element.getItemType().equals(TreeItemType.Folder.name())) {
                     RecipeTreeItem item = new RecipeTreeItem(element.getName(), TreeItemType.Folder);
                     item.setExpanded(true);
@@ -605,18 +610,19 @@ public class RecipeEditor extends Stage {
 
                     parent.getChildren().add(item);
                     //Recursive fill
-                    FillTreeItemRecursiveAction(element.getId(), item, groupdItemsByParentID);
+                    FillTreeItemRecursiveAction(element.getId(), item, groupedItemsByParentID);
                 } else if (element.getItemType().equals(TreeItemType.Recipe.name())) {
                     controller.getRecipeById(element.getRecipeID()).ifPresentOrElse(recipe -> {
                         RecipeTreeItem item = new RecipeTreeItem(element.getName(), TreeItemType.Recipe);
                         item.setExpanded(true);
                         item.setItemID(element.getId());
                         item.setRecipe(recipe);
-
+                        System.err.println("At fill " + recipe + " " + item);
                         parent.getChildren().add(item);
                         //Recursive fill
-                        FillTreeItemRecursiveAction(element.getId(), item, groupdItemsByParentID);
-                    }, () -> {});
+                        FillTreeItemRecursiveAction(element.getId(), item, groupedItemsByParentID);
+                    }, () -> {
+                    });
                 }
             });
         }
@@ -636,17 +642,17 @@ public class RecipeEditor extends Stage {
     }
     private void LoadRecipeToGraphicsWithEdit() {
         pane.getChildren().clear();
-        ParallelSteps parallStepTemp = new ParallelSteps();
+        ParallelSteps parallelStepTemp = new ParallelSteps();
         for (ParallelStepsModel pSM : recipeModel.getParallelSteps()) {
-            if (pSM.getSteps().stream().filter(a -> a.getPhaseName().equals("End")).count() == 0) {
-                parallStepTemp = adjustDragDropActionsForReceivingContainer(parallStepTemp);
-                parallStepTemp.setModel(pSM);
-                pane.getChildren().add(parallStepTemp);
+            if (pSM.getSteps().stream().noneMatch(a -> a.getPhaseName().equals("End"))) {
+                parallelStepTemp = adjustDragDropActionsForReceivingContainer(parallelStepTemp);
+                parallelStepTemp.setModel(pSM);
+                pane.getChildren().add(parallelStepTemp);
                 for (StepModel sm : pSM.getSteps()) {
                     Step step = new Step(sm.getPhaseName(), true, mainWindow);
                     step.setModel(sm);
-                    parallStepTemp.getChildren().add(step);
-                    adjustDragDropActionsForStep(step, parallStepTemp);
+                    parallelStepTemp.getChildren().add(step);
+                    adjustDragDropActionsForStep(step, parallelStepTemp);
                 }
             }
         }
@@ -658,18 +664,19 @@ public class RecipeEditor extends Stage {
     
     private boolean notOneOfItsChild(long SelectedItem, long destination) {
         Map<Long, List<TreeViewItemsData>> groupedItemsByParentID =  controller.getAllTreeItems()
-                .stream().collect(Collectors.groupingBy(TreeViewItemsData::getParentID, LinkedHashMap::new , Collectors.toCollection(LinkedList::new )));    
+                .stream()
+                .collect(Collectors.groupingBy(TreeViewItemsData::getParentID, LinkedHashMap::new , Collectors.toCollection(LinkedList::new )));
         
         return ! notOneOfItsChildRecursiveCheck(destination, SelectedItem, groupedItemsByParentID);
         
     }
-    private boolean notOneOfItsChildRecursiveCheck(long destination, long SelectedItem, Map<Long, List<TreeViewItemsData>> groupdItemsByParentID) {
-        if (groupdItemsByParentID.get(SelectedItem) != null) {
-            for (TreeViewItemsData item : groupdItemsByParentID.get(SelectedItem)) {
+    private boolean notOneOfItsChildRecursiveCheck(long destination, long SelectedItem, Map<Long, List<TreeViewItemsData>> groupedItemsByParentID) {
+        if (groupedItemsByParentID.get(SelectedItem) != null) {
+            for (TreeViewItemsData item : groupedItemsByParentID.get(SelectedItem)) {
                 if (item.getId() == destination) {
                     return true;
                 } else {
-                    if (notOneOfItsChildRecursiveCheck(destination, item.getId(), groupdItemsByParentID)) {
+                    if (notOneOfItsChildRecursiveCheck(destination, item.getId(), groupedItemsByParentID)) {
                         return true;
                     }
                 }

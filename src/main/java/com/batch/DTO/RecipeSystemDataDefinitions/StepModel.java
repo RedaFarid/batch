@@ -4,13 +4,14 @@ package com.batch.DTO.RecipeSystemDataDefinitions;
 import com.batch.ApplicationContext;
 import com.batch.Database.Entities.Parameter;
 import com.batch.Database.Repositories.PhaseRepository;
+import lombok.ToString;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
+@ToString
 public class StepModel {
     
     private Long PhaseID;

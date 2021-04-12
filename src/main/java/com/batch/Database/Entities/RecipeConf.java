@@ -15,10 +15,11 @@ import javax.persistence.*;
 public class RecipeConf {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "MaxNumberOfParallelSteps")
     private int maxParallelSteps;
+    @Column(name = "AcceptedError")
     private int acceptedErrorInDosePhases;
+    @Column(name = "MaxBatchSize")
     private double maxBatchSize;
     
 }

@@ -278,16 +278,6 @@ public class BatchService {
                 .map(BatchStepModel::getState)
                 .allMatch(item -> item.equals(BatchStates.Finished.name()));
 
-//        Batch
-//                .getModel()
-//                .getParallelSteps()
-//                .stream()
-//                .flatMap(item -> item.getSteps().stream())
-//                .filter(item -> !item.getPhaseName().equals("Start"))
-//                .filter(item -> !item.getPhaseName().equals("End"))
-//                .forEach(System.err::println);
-//        System.err.println("");
-
         if (allFinished) {
             Batch.setState(BatchStates.Finished.name());
         } else if (!allFinished && finished) {
@@ -314,7 +304,7 @@ public class BatchService {
                     step.getParametersType().forEach(batchParameter -> {
                         try {
                             String batchParameterName = batchParameter.getName();
-                            RowAttripute attripute = PhasesAttriputes.getAttributes().getAttriputeForPhaseAndParameter(String.valueOf(unitName + " [" + counter + "]"), batchPhaseName, batchParameterName + "IN");
+                            RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unitName + " [" + counter + "]"), batchPhaseName, batchParameterName + "IN");
                             if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
                                 boolean value = ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).getValue();
                                 step.getActualCheckParametersData().replace(batchParameterName, value);
@@ -347,7 +337,7 @@ public class BatchService {
                     String batchPhaseName = step.getPhaseName();
                     step.getParametersType().forEach(batchParameter -> {
                         String batchParameterName = batchParameter.getName();
-                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttriputeForPhaseAndParameter(String.valueOf(unitName + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
+                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unitName + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
                         if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
                             boolean value = step.getCheckParametersData().get(batchParameterName);
                             ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).setValue(value);
@@ -378,7 +368,7 @@ public class BatchService {
                         String batchPhaseName = phase.getName();
                         phase.getParameters().forEach(batchParameter -> {
                             String batchParameterName = batchParameter.getName();
-                            RowAttripute attripute = PhasesAttriputes.getAttributes().getAttriputeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
+                            RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
                             if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
                                 ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).setValue(false);
                             } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
@@ -401,7 +391,7 @@ public class BatchService {
                     String batchPhaseName = phase.getName();
                     phase.getParameters().forEach(batchParameter -> {
                         String batchParameterName = batchParameter.getName();
-                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttriputeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
+                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
                         if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
                             ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).setValue(false);
                         } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
@@ -420,7 +410,7 @@ public class BatchService {
                     String batchPhaseName = phase.getName();
                     phase.getParameters().forEach(batchParameter -> {
                         String batchParameterName = batchParameter.getName();
-                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttriputeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
+                        RowAttripute attripute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(String.valueOf(unit + " [" + counter + "]"), batchPhaseName, batchParameterName + "OUT");
                         if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
                             ((BooleanDataType) dataDefinition.getAllValues().get(attripute)).setValue(false);
                         } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {

@@ -98,7 +98,6 @@ public class Step extends VBox {
         setPadding(new Insets(10));
         setPadding(new Insets(10));
         setOnMouseClicked(action -> {
-            System.err.println("Step " + this.hashCode());
             if (model != null) {
                 fillParametersInConfigurationWindow();
 

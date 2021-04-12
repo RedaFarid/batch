@@ -1,4 +1,3 @@
-
 package com.batch.Database.Entities;
 
 import com.batch.DTO.RecipeSystemDataDefinitions.RecipeModel;
@@ -7,12 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
+import javax.xml.transform.Result;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.LocalDate;
@@ -20,9 +19,9 @@ import java.time.LocalTime;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "RecipesDesign")
+@EntityListeners(AuditingEntityListener.class)
 public class Recipe {
 
     @Id
@@ -41,11 +40,25 @@ public class Recipe {
     @LastModifiedDate
     private LocalTime lastUpdateTime;
     private String version = "1";
-    private String state;
-    @Column(name = "Design", columnDefinition = "varchar(max)")
+    private String state = "1";
+    @Column(name = "Design", columnDefinition = "XML")
     private String rowModel;
     @Transient
     private RecipeModel model;
+
+    public Recipe(Long id, String recipeName, String unitName, LocalDate creationDate, LocalDate lastUpdateDate, LocalTime creationTime, LocalTime lastUpdateTime, String version, String state, String rowModel, RecipeModel model) {
+        this.id = id;
+        this.recipeName = recipeName;
+        this.unitName = unitName;
+        this.creationDate = creationDate;
+        this.lastUpdateDate = lastUpdateDate;
+        this.creationTime = creationTime;
+        this.lastUpdateTime = lastUpdateTime;
+        this.version = version;
+        this.state = state;
+        this.rowModel = rowModel;
+        this.model = model;
+    }
 
     public Recipe(String recipeName, String version, String state, RecipeModel model) {
         this.recipeName = recipeName;
@@ -60,44 +73,8 @@ public class Recipe {
         this.unitName = unitName;
     }
 
-    public RecipeModel getModel() {
-        RecipeModel recipeModel = null;
-        try {
-            recipeModel = startUnMarshalling(rowModel);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
-        this.model = recipeModel;
-        return recipeModel;
-    }
-
-    public void setModel(RecipeModel model) {
-        String s = null;
-        try {
-            s = startMarshalling(model);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
-        this.model = model;
-        this.rowModel = s;
-    }
-
-    private String startMarshalling(RecipeModel model) throws JAXBException {
-        StringWriter sw = new StringWriter();
-        JAXBContext jaxbcontext = JAXBContext.newInstance(RecipeModel.class);
-        Marshaller marshaller = jaxbcontext.createMarshaller();
-        marshaller.marshal(model, sw);
-        return sw.toString();
-    }
-    private RecipeModel startUnMarshalling(String model) throws JAXBException {
-        JAXBContext jaxbcontext = JAXBContext.newInstance(RecipeModel.class);
-        Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
-        return ((RecipeModel) unMarshaller.unmarshal(new StringReader(model)));
-    }
-
     @Override
     public String toString() {
-        getModel();
         return String.format("Recipe{id=%-10d, recipeName='%-10s', unitName='%-10s', creationDate=%-10s, lastUpdateDate=%-10s, creationTime=%-10s, lastUpdateTime=%-10s, version='%-10s', state='%-10s', model=%s}", id, recipeName, unitName, creationDate, lastUpdateDate, creationTime, lastUpdateTime, version, state, model);
     }
 }

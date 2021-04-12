@@ -71,7 +71,6 @@ class RecieveDataMapper implements Runnable {
                     if (device.getInOutIndecation().get(k)) {
                         ValueObject value = getValueFromBuffer(device.getTypes().get(k), v);
                         if (value == null) {
-                            System.err.println("Recieve data mapper : Value = null ");
                             Log log = new Log(LogIdentefires.System.name(), "Recieve data mapper : Value = null ");
                             log.setSource("Recieve data mapper");
                             loggingService.LogRecord(log);

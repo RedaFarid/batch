@@ -10,7 +10,6 @@ import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import javafx.application.Platform;
 import javafx.scene.image.ImageView;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
@@ -27,7 +26,7 @@ public class InitialWindowController {
     private Map<String, RowDataDefinition> allDataDefinitions;
 
     private final ModBusService modBusService;
-    private UnitsRepository unitsRepository;
+    private final UnitsRepository unitsRepository;
 
 
 

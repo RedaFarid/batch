@@ -38,7 +38,7 @@ public class Batch {
     @Column(name = "[Order]")
     private String order;
     private String comment;
-    @Column(name = "Content", columnDefinition = "varchar(max)")
+    @Column(name = "Content", columnDefinition = "XML")
     private String rowModel;
     @Transient
     private BatchModel model;

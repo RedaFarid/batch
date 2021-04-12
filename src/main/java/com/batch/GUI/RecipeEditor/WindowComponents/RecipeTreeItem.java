@@ -2,6 +2,7 @@
 package com.batch.GUI.RecipeEditor.WindowComponents;
 
 import com.batch.Database.Entities.Recipe;
+import com.google.common.io.Resources;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -18,11 +19,11 @@ public class RecipeTreeItem extends TreeItemIdentity{
         Image image;
         switch (type) {
             case Folder:
-                image = new Image("/GUI/Icons/Folder.png");
+                image = new Image(Resources.getResource("Icons/Folder.png").toString());
                 view = new ImageView(image);
                 break;
             case Recipe:
-                image = new Image("/GUI/Icons/Recipe.png");
+                image = new Image(Resources.getResource("Icons/Recipe.png").toString());
                 view = new ImageView(image);
                 view.setFitHeight(20);
                 view.setFitWidth(20);

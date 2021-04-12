@@ -24,21 +24,20 @@ public class PhasesAttriputes {
         return singelton;
     }
     public void addNewStep(String step){
-        Map<String, Map<String, RowAttripute>> newStepCollection = Collections.synchronizedMap(new LinkedHashMap());
+        Map<String, Map<String, RowAttripute>> newStepCollection = Collections.synchronizedMap(new LinkedHashMap<>());
         phasesAttriputes.put(step, newStepCollection);
     }
 
     public void addNewPhase(String step, String phase) {
-        Map<String, RowAttripute> newParametersCollection = Collections.synchronizedMap(new LinkedHashMap());
+        Map<String, RowAttripute> newParametersCollection = Collections.synchronizedMap(new LinkedHashMap<>());
         phasesAttriputes.get(step).put(phase, newParametersCollection);
     }
 
-    public void addAttriputeForPhaseAndParameter(String step, String phase, String parameter, RowAttripute attripute) {
-        phasesAttriputes.get(step).get(phase).put(parameter, attripute);
+    public void addAttributeForPhaseAndParameter(String step, String phase, String parameter, RowAttripute attribute) {
+        phasesAttriputes.get(step).get(phase).put(parameter, attribute);
     }
 
-    public RowAttripute getAttriputeForPhaseAndParameter(String step, String phase, String parameter) {
-//        System.err.println("Step =  [" + step + "] Phase =  [" + phase + "] Parameter =  [" + parameter + "] attribute = [" + phasesAttriputes.get(step).get(phase).get(parameter) + "]");
+    public RowAttripute getAttributeForPhaseAndParameter(String step, String phase, String parameter) {
         return phasesAttriputes.get(step).get(phase).get(parameter);
     }
 }

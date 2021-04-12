@@ -14,7 +14,7 @@
 	<name>Batching</name>
 	<description>Batching application</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>15</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -37,6 +37,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Security context -->
+		<!--		<dependency>-->
+		<!--			<groupId>org.springframework.boot</groupId>-->
+		<!--			<artifactId>spring-boot-starter-security</artifactId>-->
+		<!--		</dependency>-->
 		<!-- JavaFX -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
@@ -143,7 +148,7 @@
 		<dependency>
 			<groupId>org.controlsfx</groupId>
 			<artifactId>controlsfx</artifactId>
-			<version>11.0.2</version>
+			<version>11.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>no.tornado</groupId>
@@ -229,6 +234,26 @@
 			<groupId>org.kordamp.ikonli</groupId>
 			<artifactId>ikonli-entypo-pack</artifactId>
 			<version>11.5.0</version>
+		</dependency>
+		<!-- XML -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>2.3.0-b170127.1453</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
 	</dependencies>
 

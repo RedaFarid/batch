@@ -1,8 +1,11 @@
 package com.batch.DTO.RecipeSystemDataDefinitions;
 
+import lombok.ToString;
+
 import java.util.LinkedList;
 import java.util.List;
 
+@ToString
 public class ParallelStepsModel {
 
     private List<StepModel> steps= new LinkedList() ;

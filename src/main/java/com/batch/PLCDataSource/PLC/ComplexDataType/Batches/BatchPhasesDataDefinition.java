@@ -48,8 +48,8 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
             phase.getParameters().forEach(para -> {
                 AttributeName inAttributeName = new AttributeName(phase.getName(), para.getName());
                 AttributeName outAttributeName = new AttributeName(phase.getName(), para.getName());
-                PhasesAttriputes.getAttributes().addAttriputeForPhaseAndParameter(StepNo, phase.getName(), para.getName() + "IN", inAttributeName);
-                PhasesAttriputes.getAttributes().addAttriputeForPhaseAndParameter(StepNo, phase.getName(), para.getName() + "OUT", outAttributeName);
+                PhasesAttriputes.getAttributes().addAttributeForPhaseAndParameter(StepNo, phase.getName(), para.getName() + "IN", inAttributeName);
+                PhasesAttriputes.getAttributes().addAttributeForPhaseAndParameter(StepNo, phase.getName(), para.getName() + "OUT", outAttributeName);
                 if (para.getType().equals(PhaseParameterType.Check.name())) {
                     addAttribute(inAttributeName, EDT.Boolean, new Address(InAddress + InAddressTemp, bitIncrement), new BooleanDataType(Boolean.FALSE), In, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
                     addAttribute(outAttributeName, EDT.Boolean, new Address(OutAddress + OutAddressTemp, bitIncrement), new BooleanDataType(Boolean.FALSE), Out, Alarming.Disable, LogIdentefires.Info, Logging.Disable);

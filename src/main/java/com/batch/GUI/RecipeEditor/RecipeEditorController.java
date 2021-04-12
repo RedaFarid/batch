@@ -2,22 +2,25 @@ package com.batch.GUI.RecipeEditor;
 
 import com.batch.Database.Entities.*;
 import com.batch.Database.Repositories.*;
+import com.batch.Database.Services.RecipeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
-//@Log4j2
-//@Controller
+@Log4j2
+@Controller
 @RequiredArgsConstructor
 public class RecipeEditorController {
 
     private final ParametersRepository parametersRepository;
     private final PhaseRepository phaseRepository;
-    private final RecipesRepository recipesRepository;
+    private final RecipeService recipeService;
     private final TreeViewItemsDataRepository treeViewItemsDataRepository;
     private final RecipeConfRepository recipeConfRepository;
     private final MaterialsRepository materialsRepository;
@@ -28,6 +31,10 @@ public class RecipeEditorController {
     public List<Phase> getAllPhases() {
         return phaseRepository.findAll();
     }
+    public List<Phase> getAllPhasesSortedForAUnit(String unit) {
+        return phaseRepository.findAll().stream().filter(item -> item.getUnit().equals(unit)).sorted(Comparator.comparing(Phase::getPhaseType)).collect(Collectors.toList());
+    }
+
     public List<Material> getAllMaterials() {
         return materialsRepository.findAll();
     }
@@ -48,7 +55,7 @@ public class RecipeEditorController {
         return treeViewItemsDataRepository.save(treeViewItemsData);
     }
     public Recipe createNewRecipe(Recipe recipe) {
-        return recipesRepository.save(recipe);
+        return recipeService.save(recipe);
     }
     public Optional<TreeViewItemsData> getTreeItemById(Long id) {
         return treeViewItemsDataRepository.findById(id);
@@ -58,11 +65,10 @@ public class RecipeEditorController {
     }
 
     public Optional<Recipe> getRecipeById(Long id) {
-        return recipesRepository.findById(id);
+        return recipeService.findById(id);
     }
     public void saveRecipe(Recipe selectedRecipe) {
-        recipesRepository.save(selectedRecipe);
+        recipeService.save(selectedRecipe);
     }
-
 
 }
