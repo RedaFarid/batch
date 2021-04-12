@@ -13,7 +13,7 @@ import javafx.stage.StageStyle;
 
 public class Utilities extends Stage {
 
-    private static volatile Utilities singelton = null;
+    private static volatile Utilities singleton = null;
     private Stage mainWindow;
 
     private BorderPane layout = new BorderPane();
@@ -39,12 +39,12 @@ public class Utilities extends Stage {
     }
 
     public static Utilities getUtilitiesWindow(Stage mainWindow) {
-        if (singelton == null) {
+        if (singleton == null) {
             synchronized (Utilities.class) {
-                singelton = new Utilities(mainWindow);
+                singleton = new Utilities(mainWindow);
             }
         }
-        return singelton;
+        return singleton;
     }
 
     private void initialization() {
@@ -73,14 +73,14 @@ public class Utilities extends Stage {
         gridPane.add(loPressureField, 2, 2);
 
         layout.setTop(label);
-        layout.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, new Insets(2))));
+        layout.setBackground(new Background(new BackgroundFill(Color.DARKBLUE, CornerRadii.EMPTY, new Insets(2))));
         layout.setCenter(gridPane);
         
         setTitle("Air-pressure settings");
         initOwner(mainWindow);
         initStyle(StageStyle.UTILITY);
         setScene(new Scene(layout));
-        setHeight(500);
+        setHeight(300);
         setWidth(500);
         setResizable(false);
         

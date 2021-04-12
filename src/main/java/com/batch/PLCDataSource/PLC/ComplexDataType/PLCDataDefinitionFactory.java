@@ -13,9 +13,9 @@ import java.util.Map;
 
 public class PLCDataDefinitionFactory {
 
-    private static volatile PLCDataDefinitionFactory singelton = null;
+    private static volatile PLCDataDefinitionFactory singleton = null;
 
-    private PLCDataDefinition definition = new PLCDataDefinition();
+    private final PLCDataDefinition definition = new PLCDataDefinition();
 
     private final RecipeConfRepository recipesRepository;
     private final UnitsRepository unitsRepository;
@@ -83,11 +83,11 @@ public class PLCDataDefinitionFactory {
 
     public static PLCDataDefinitionFactory getSystem() {
         synchronized (PLCDataDefinitionFactory.class) {
-            if (singelton == null) {
-                singelton = new PLCDataDefinitionFactory();
+            if (singleton == null) {
+                singleton = new PLCDataDefinitionFactory();
             }
         }
-        return singelton;
+        return singleton;
     }
 
     public Map<String, RowDataDefinition> getAllDevicesDataModel() {

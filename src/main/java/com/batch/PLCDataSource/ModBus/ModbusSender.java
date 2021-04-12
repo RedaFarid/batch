@@ -34,7 +34,7 @@ public class ModbusSender extends ModbusSystem {
             if (connectionStatus.getValue() && bufferSunchronized.getValue()) {
                 dataMapperTask.run();
                 for (j = 0; j < swap; j++) {
-                    taskprocedure(j * uniteDataAddress, uniteDataAddress);
+                    taskProcedure(j * uniteDataAddress, uniteDataAddress);
                 }
             }
         } catch (Exception e) {
@@ -43,7 +43,7 @@ public class ModbusSender extends ModbusSystem {
     }
 
     @Override
-    protected void taskprocedure(int start, int quantity) throws Exception {
+    protected void taskProcedure(int start, int quantity) throws Exception {
         List<Byte> tempBuffer = super.buffer.values().stream().collect(Collectors.toList());
         for (i = 0; i < quantity; i++) {
             int address = ((j * uniteDataAddress * 2) + (i * 2));

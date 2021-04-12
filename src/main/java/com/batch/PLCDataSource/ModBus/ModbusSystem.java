@@ -37,5 +37,5 @@ public abstract class ModbusSystem implements Runnable{
     public ModbusClientUpdated getConnection(){
         return modbusClient;
     }
-    protected abstract void taskprocedure(int start, int quantity) throws Exception;
+    protected abstract void taskProcedure(int start, int quantity) throws Exception;
 }

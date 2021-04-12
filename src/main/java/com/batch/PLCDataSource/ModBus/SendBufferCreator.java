@@ -30,7 +30,7 @@ public class SendBufferCreator extends ModbusSystem {
                 if (!bufferSunchronized.getValue()) {
                     buffer.clear();
                     for (j = 0; j < swap; j++) {
-                        taskprocedure(j * uniteDataAddress, uniteDataAddress);
+                        taskProcedure(j * uniteDataAddress, uniteDataAddress);
                     }
                     bufferSunchronized.setValue(Boolean.TRUE);
                     dataMapperTask.run();
@@ -42,7 +42,7 @@ public class SendBufferCreator extends ModbusSystem {
     }
 
     @Override
-    protected void taskprocedure(int start, int quantity) throws Exception {
+    protected void taskProcedure(int start, int quantity) throws Exception {
         int[] v = modbusClient.ReadHoldingRegisters(start, quantity);
         for (i = 0; i < quantity; i++) {
             buffer.put((j * uniteDataAddress * 2) + (i * 2), intToBytes(v[i])[0]);

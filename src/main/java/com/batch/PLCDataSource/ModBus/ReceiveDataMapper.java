@@ -9,14 +9,14 @@ import com.batch.Utilities.LogIdentefires;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-class RecieveDataMapper implements Runnable {
+class ReceiveDataMapper implements Runnable {
 
-    private Map<String, RowDataDefinition> devices;
-    private Map<Integer, Byte> buffer;
+    private final Map<String, RowDataDefinition> devices;
+    private final Map<Integer, Byte> buffer;
 
     private final LoggingService loggingService;
 
-    public RecieveDataMapper(Map<String, RowDataDefinition> definitions, Map<Integer, Byte> buffer, LoggingService loggingService) {
+    public ReceiveDataMapper(Map<String, RowDataDefinition> definitions, Map<Integer, Byte> buffer, LoggingService loggingService) {
         this.devices = definitions;
         this.buffer = buffer;
         this.loggingService = loggingService;
@@ -71,8 +71,8 @@ class RecieveDataMapper implements Runnable {
                     if (device.getInOutIndecation().get(k)) {
                         ValueObject value = getValueFromBuffer(device.getTypes().get(k), v);
                         if (value == null) {
-                            Log log = new Log(LogIdentefires.System.name(), "Recieve data mapper : Value = null ");
-                            log.setSource("Recieve data mapper");
+                            Log log = new Log(LogIdentefires.System.name(), "Receive data mapper : Value = null ");
+                            log.setSource("Receive data mapper");
                             loggingService.LogRecord(log);
                         } else {
                             device.setValue(k, value);
@@ -81,7 +81,7 @@ class RecieveDataMapper implements Runnable {
                 });
             });
         } catch (Exception e) {
-            loggingService.LogRecordForException("Modbus reciever data mapper", e);
+            loggingService.LogRecordForException("Modbus receiver data mapper", e);
         }
     }
 }

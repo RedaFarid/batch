@@ -11,28 +11,28 @@ import java.util.logging.Logger;
 
 public class ModbusConnectionMonitor {
 
-    private static volatile ModbusConnectionMonitor singelton = null;
+    private static volatile ModbusConnectionMonitor singleton = null;
 
-    private BooleanProperty connectionStatus;
-    private BooleanProperty bufferSunchronized;
+    private final BooleanProperty connectionStatus;
+    private final BooleanProperty bufferSynchronized;
 
-    private AtomicInteger life = new AtomicInteger(1);
+    private final AtomicInteger life = new AtomicInteger(1);
 
     private final LoggingService loggingService;
 
-    private ModbusConnectionMonitor(BooleanProperty connectionStatus, BooleanProperty bufferSunchronized, LoggingService loggingService) {
+    private ModbusConnectionMonitor(BooleanProperty connectionStatus, BooleanProperty bufferSynchronized, LoggingService loggingService) {
         this.connectionStatus = connectionStatus;
-        this.bufferSunchronized = bufferSunchronized;
+        this.bufferSynchronized = bufferSynchronized;
         this.loggingService = loggingService;
     }
 
-    public static ModbusConnectionMonitor getService(String IP, BooleanProperty connectionStatus, BooleanProperty bufferSunchronized, LoggingService loggingService) {
+    public static ModbusConnectionMonitor getService(String IP, BooleanProperty connectionStatus, BooleanProperty bufferSynchronized, LoggingService loggingService) {
         synchronized (ModbusConnectionMonitor.class) {
-            if (singelton == null) {
-                singelton = new ModbusConnectionMonitor(connectionStatus, bufferSunchronized, loggingService);
+            if (singleton == null) {
+                singleton = new ModbusConnectionMonitor(connectionStatus, bufferSynchronized, loggingService);
             }
         }
-        return singelton;
+        return singleton;
     }
 
     public synchronized void checkConnection(ModbusClientUpdated connection, String IP) throws Exception {
@@ -41,7 +41,7 @@ public class ModbusConnectionMonitor {
                 if (!connection.isConnected()) {
                     connection.Connect();
                     connectionStatus.setValue(Boolean.FALSE);
-                    bufferSunchronized.setValue(Boolean.FALSE);
+                    bufferSynchronized.setValue(Boolean.FALSE);
                 } else {
                     writeToLifeSignalOnPLC(connection, life.getAndAdd(1));
                     connectionStatus.setValue(Boolean.TRUE);
@@ -49,11 +49,11 @@ public class ModbusConnectionMonitor {
             } else {
                 connection.Disconnect();
                 connectionStatus.setValue(Boolean.FALSE);
-                bufferSunchronized.setValue(Boolean.FALSE);
+                bufferSynchronized.setValue(Boolean.FALSE);
             }
         } catch (Exception e) {
             connectionStatus.setValue(Boolean.FALSE);
-            bufferSunchronized.setValue(Boolean.FALSE);
+            bufferSynchronized.setValue(Boolean.FALSE);
             DisconnectConnection(connection);
             loggingService.LogRecordForException("Modbus Connection monitor", e);
         }
