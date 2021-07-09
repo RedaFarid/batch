@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Locale;
 
 @Entity
 @Data
@@ -36,5 +37,10 @@ public class Log {
     public Log(String identifier, String event) {
         this.identifier = identifier;
         Event = event;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%-7S]  %-10s %-50S  %-14S  %-10S ",identifier.toUpperCase(Locale.UK).trim() ,source, Event, Date,time);
     }
 }

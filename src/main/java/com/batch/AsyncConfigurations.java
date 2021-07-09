@@ -27,7 +27,6 @@ public class AsyncConfigurations {
         scheduler.setErrorHandler(t -> log.fatal(t.getMessage()));
         scheduler.setWaitForTasksToCompleteOnShutdown(true);
         scheduler.setThreadNamePrefix("Service-layer-scheduler");
-        scheduler.setDaemon(true);
         scheduler.initialize();
         return scheduler;
     }
@@ -41,7 +40,6 @@ public class AsyncConfigurations {
         executor.setQueueCapacity(Integer.MAX_VALUE);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix("Service-layer-executor");
-        executor.setDaemon(true);
         executor.initialize();
         return executor;
     }
@@ -53,7 +51,6 @@ public class AsyncConfigurations {
         scheduler.setErrorHandler(t -> log.fatal(t.getMessage()));
         scheduler.setWaitForTasksToCompleteOnShutdown(true);
         scheduler.setThreadNamePrefix("Mod_bus-scheduler");
-        scheduler.setDaemon(true);
         scheduler.initialize();
         return scheduler;
     }

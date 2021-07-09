@@ -26,6 +26,9 @@ public class ModBusService {
     private final BooleanProperty bufferSynchronized = new SimpleBooleanProperty(Boolean.FALSE);
 
     @Autowired
+    private PLCDataDefinitionFactory plcDataDefinitionFactory;
+
+    @Autowired
     private LoggingService loggingService;
 
     @Autowired(required = false)
@@ -43,7 +46,7 @@ public class ModBusService {
 
     @EventListener
     public void initializeAndStartService(ContextStartedEvent event) {
-        Map<String, RowDataDefinition> devices = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel();
+        Map<String, RowDataDefinition> devices = plcDataDefinitionFactory.getAllDevicesDataModel();
 
         Map<Integer, Byte> sendBuffer = new LinkedHashMap<>();
         Map<Integer, Byte> receiveBuffer = new LinkedHashMap<>();

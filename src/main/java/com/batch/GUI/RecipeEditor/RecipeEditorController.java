@@ -50,7 +50,7 @@ public class RecipeEditorController {
     }
 
     public RecipeConf getRecipeConfigurations() {
-        AtomicReference<RecipeConf> recipeConf = new AtomicReference<>();
+        AtomicReference<RecipeConf> recipeConf = new AtomicReference<>(new RecipeConf());
         recipeConfRepository.findAll().stream().findAny().ifPresentOrElse(recipeConf::set, () -> recipeConf.set(recipeConfRepository.save(new RecipeConf())));
         return recipeConf.get();
     }
@@ -61,14 +61,15 @@ public class RecipeEditorController {
     public TreeViewItemsData saveTreeItem(TreeViewItemsData treeViewItemsData) {
         return treeViewItemsDataRepository.save(treeViewItemsData);
     }
-    public Recipe createNewRecipe(Recipe recipe) {
-        return recipeService.save(recipe);
-    }
     public Optional<TreeViewItemsData> getTreeItemById(Long id) {
         return treeViewItemsDataRepository.findById(id);
     }
     public void deleteTreeItemById(long itemID) {
         treeViewItemsDataRepository.deleteById(itemID);
+    }
+
+    public Recipe createNewRecipe(Recipe recipe) {
+        return recipeService.save(recipe);
     }
 
     public Optional<Recipe> getRecipeById(Long id) {

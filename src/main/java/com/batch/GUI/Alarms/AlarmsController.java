@@ -28,6 +28,7 @@ public class AlarmsController {
 
     private Map<String, RowDataDefinition> allDevices;
     private final AlarmsModel model = new AlarmsModel();
+    private final PLCDataDefinitionFactory plcDataDefinitionFactory;
 
     private final LoggingService loggingService;
 
@@ -52,8 +53,8 @@ public class AlarmsController {
     }
 
     @EventListener
-    public void afterRefreshed(ApplicationContext.ApplicationListener event) {
-        allDevices = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel();
+    public void afterRefreshed(ApplicationContext.GraphicsInitializerEvent event) {
+        allDevices = plcDataDefinitionFactory.getAllDevicesDataModel();
     }
 
     @EventListener

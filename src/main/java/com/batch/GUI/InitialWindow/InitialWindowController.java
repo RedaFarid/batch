@@ -1,8 +1,12 @@
 package com.batch.GUI.InitialWindow;
 
 import com.batch.ApplicationContext;
+import com.batch.Database.Entities.Batch;
+import com.batch.Database.Entities.BatchControllerData;
 import com.batch.Database.Entities.Unit;
 import com.batch.Database.Repositories.UnitsRepository;
+import com.batch.Database.Services.BatchControllerDataService;
+import com.batch.Database.Services.BatchesService;
 import com.batch.PLCDataSource.ModBus.ModBusService;
 import com.batch.PLCDataSource.PLC.ComplexDataType.*;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
@@ -14,8 +18,10 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -27,6 +33,9 @@ public class InitialWindowController {
 
     private final ModBusService modBusService;
     private final UnitsRepository unitsRepository;
+    private final BatchesService batchesService;
+    private final PLCDataDefinitionFactory plcDataDefinitionFactory;
+    private final BatchControllerDataService batchControllerDataService;
 
 
 
@@ -80,8 +89,8 @@ public class InitialWindowController {
 
 
     @EventListener
-    public void afterRefreshed(ApplicationContext.ApplicationListener event){
-        allDataDefinitions = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel();
+    public void afterRefreshed(ApplicationContext.GraphicsInitializerEvent event){
+        allDataDefinitions = plcDataDefinitionFactory.getAllDevicesDataModel();
     }
 
     @EventListener
@@ -109,7 +118,7 @@ public class InitialWindowController {
             });
         }else {
             Platform.runLater(() -> {
-                model.getConnectionInfo().setValue("Connection to PLC is has been lost ");
+                model.getConnectionInfo().setValue("Connection to PLC has been lost ");
                 model.getConnectionStatus().setValue(false);
             });
         };
@@ -158,5 +167,13 @@ public class InitialWindowController {
 
     public List<String> getAllUnitsNames() {
         return unitsRepository.findAll().stream().map(Unit::getName).collect(Collectors.toList());
+    }
+
+    public List<BatchControllerData> getAllBatchControllerData() {
+        return batchControllerDataService.findAll();
+    }
+
+    public Optional<Batch> getBatchById(long runningBatchID) {
+        return batchesService.findById(runningBatchID);
     }
 }

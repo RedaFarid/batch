@@ -6,13 +6,14 @@ import com.batch.DTO.BatchSystemDataDefinitions.BatchStates;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchStepModel;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhaseParameterType;
 import com.batch.Database.Entities.Batch;
-import com.batch.Database.Repositories.BatchesRepository;
+import com.batch.Database.Entities.Log;
 import com.batch.Database.Repositories.PhaseRepository;
-import com.batch.Database.Repositories.RecipeConfRepository;
 import com.batch.Database.Services.BatchControllerDataService;
+import com.batch.Database.Services.BatchesService;
+import com.batch.Database.Services.RecipeConfigService;
 import com.batch.PLCDataSource.ModBus.ModBusService;
 import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.BatchControl;
-import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.PhasesAttriputes;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.PhasesAttributes;
 import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowAttripute;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
@@ -20,14 +21,15 @@ import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class BatchService {
@@ -36,12 +38,19 @@ public class BatchService {
     private int i;
     private final int j = 0;
 
+    private int batchHeight = 0;
+    private int currentParallelStep = 0;
+    private long currentBatchId = 0;
+    private String unitName;
+    private boolean controlBit = false;
+
     
     private final ModBusService modBusService;
-    private final BatchesRepository batchesRepository;
+    private final BatchesService batchesService;
     private final BatchControllerDataService batchControllerDataService;
-    private final RecipeConfRepository recipeConfRepository;
+    private final RecipeConfigService recipeConfigService;
     private final PhaseRepository phaseRepository;
+    private final PLCDataDefinitionFactory plcDataDefinitionFactory;
 
 
     @Scheduled(fixedDelay = 100)
@@ -50,21 +59,11 @@ public class BatchService {
             if (modBusService.getConnectionStatus().getValue()) {
                 batchControllerDataService.findAll().forEach(data -> {
                     try {
-                        Optional<Batch> onLineBatchOptional;
-                        Batch onLineBatch;
-                        int batchHeight = 0;
-                        int currentParallelStep = 0;
-                        long currentBatchId = 0;
-                        String unitName;
-                        boolean controlBit = false;
-
                         currentParallelStep = data.getCurrentParallelStepsNo();
                         currentBatchId = data.getRunningBatchID();
                         controlBit = data.isControlBit();
                         if (currentBatchId > 0) {
-                            onLineBatchOptional = batchesRepository.findById(currentBatchId);
-                            if (onLineBatchOptional.isPresent()) {
-                                onLineBatch = onLineBatchOptional.get();
+                            batchesService.findById(currentBatchId).ifPresentOrElse(onLineBatch -> {
                                 batchHeight = onLineBatch.getModel().getParallelSteps().size();
                                 unitName = onLineBatch.getUnitName();
                                 if (batchHeight > (currentParallelStep + 1)) {
@@ -89,7 +88,7 @@ public class BatchService {
                                         if (idle) {
                                             data.setCurrentParallelStepsNo(1);
                                             data.setRunningBatchID(currentBatchId);
-                                            batchControllerDataService.update(data);
+                                            batchControllerDataService.save(data);
                                         }
                                         return;
                                     }
@@ -141,7 +140,7 @@ public class BatchService {
 
                                     //Adjusting data and sending to PLC and updating database
                                     adjustBatchState(onLineBatch, currentParallelStep, batchHeight);
-                                    batchesRepository.save(onLineBatch);
+                                    batchesService.save(onLineBatch);
 
                                     data.setCurrentParallelStepsNo(currentParallelStep);
                                     data.setControlBit(controlBit);
@@ -152,24 +151,24 @@ public class BatchService {
                                 } else {
                                     data.setCurrentParallelStepsNo(0);
                                     data.setRunningBatchID(0L);
-                                    batchControllerDataService.update(data);
+                                    batchControllerDataService.save(data);
                                 }
-                            } else {
+                            }, () -> {
                                 data.setCurrentParallelStepsNo(0);
                                 data.setRunningBatchID(0L);
-                                batchControllerDataService.update(data);
-                            }
+                                batchControllerDataService.save(data);
+                            });
                         } else {
                             clearRowDataDefinition(data.getUnit());
                         }
 
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.fatal(e, e);
                     }
                 });
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.fatal(e, e);
         }
     }
 
@@ -278,81 +277,130 @@ public class BatchService {
     }
 
     private void updateCurrentBatchFromPLC(Batch batch, int parallelStepNo, String unitName) {
-        int maxNumberOfParallelSteps = recipeConfRepository.findAll().stream().findAny().get().getMaxParallelSteps();
-        if (maxNumberOfParallelSteps > 0) {
-            counter = 1;
-            batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().forEach(step -> {
-                if (counter <= maxNumberOfParallelSteps) {
-                    RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unitName + " [" + counter + "]");
-                    String batchPhaseName = step.getPhaseName();
-                    step.getParametersType().forEach(batchParameter -> {
-                        try {
-                            String batchParameterName = batchParameter.getName();
-                            RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unitName + " [" + counter + "]", batchPhaseName, batchParameterName + "IN");
-                            if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                                boolean value = ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).getValue();
-                                step.getActualCheckParametersData().replace(batchParameterName, value);
-                            } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                                double value = ((RealDataType) dataDefinition.getAllValues().get(attribute)).getValue();
-                                step.getActualvalueParametersData().replace(batchParameterName, value);
-                            } else {
-                                System.err.println("DataType error   ");
+        recipeConfigService.findAll().stream().findAny().ifPresent(recipeConfig -> {
+            final int maxNumberOfParallelSteps = recipeConfig.getMaxParallelSteps();
+            if (maxNumberOfParallelSteps > 0) {
+                counter = 1;
+                batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().forEach(step -> {
+                    if (counter <= maxNumberOfParallelSteps) {
+                        RowDataDefinition dataDefinition = plcDataDefinitionFactory.getAllDevicesDataModel().get(unitName + " [" + counter + "]");
+                        String batchPhaseName = step.getPhaseName();
+                        step.getParametersType().forEach(batchParameter -> {
+                            try {
+                                String batchParameterName = batchParameter.getName();
+                                RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unitName + " [" + counter + "]", batchPhaseName, batchParameterName + "IN");
+                                if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
+                                    boolean value = ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).getValue();
+                                    step.getActualCheckParametersData().replace(batchParameterName, value);
+                                } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
+                                    double value = ((RealDataType) dataDefinition.getAllValues().get(attribute)).getValue();
+                                    step.getActualvalueParametersData().replace(batchParameterName, value);
+                                } else {
+                                    System.err.println("DataType error   ");
+                                }
+                                int phaseNumber = ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseIn)).getValue();
+                                int status = ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Status)).getValue();
+                                step.setState(getStatusToStep(status));
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                            int phaseNumber = ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseIn)).getValue();
-                            int satus = ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Status)).getValue();
-                            step.setState(getStatusToStep(satus));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-                    counter++;
-                }
-            });
-        }
+                        });
+                        counter++;
+                    }
+                });
+            }
+        });
     }
     private void updatePLCFromCurrentBatch(Batch batch, int parallelStepNo, String unitName) {
         clearRowDataDefinitionForOperation(batch, parallelStepNo, unitName);
-        int maxNumberOfParallelSteps = recipeConfRepository.findAll().stream().findAny().get().getMaxParallelSteps();
-        if (maxNumberOfParallelSteps > 0) {
-            counter = 1;
-            batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().forEach(step -> {
-                if (counter <= maxNumberOfParallelSteps) {
-                    RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unitName + " [" + counter + "]");
-                    String batchPhaseName = step.getPhaseName();
-                    step.getParametersType().forEach(batchParameter -> {
-                        String batchParameterName = batchParameter.getName();
-                        RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unitName + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
-                        if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                            boolean value = step.getCheckParametersData().get(batchParameterName);
-                            ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(value);
-                        } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                            double value = step.getValueParametersData().get(batchParameterName);
-                            ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(value);
-                        } else {
-                            System.err.println("DataType error   ");
-                        }
-                        ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(step.getPhaseID());
-                        ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(getOrderFromStep(step.getOrder()));
-                    });
-                    counter++;
-                }
-            });
-        }
+        recipeConfigService.findAll().stream().findAny().ifPresent(recipeConfig -> {
+            final int maxNumberOfParallelSteps = recipeConfig.getMaxParallelSteps();
+            if (maxNumberOfParallelSteps > 0) {
+                counter = 1;
+                batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().forEach(step -> {
+                    if (counter <= maxNumberOfParallelSteps) {
+                        RowDataDefinition dataDefinition = plcDataDefinitionFactory.getAllDevicesDataModel().get(unitName + " [" + counter + "]");
+                        String batchPhaseName = step.getPhaseName();
+                        step.getParametersType().forEach(batchParameter -> {
+                            String batchParameterName = batchParameter.getName();
+                            RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unitName + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
+                            if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
+                                boolean value = step.getCheckParametersData().get(batchParameterName);
+                                ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(value);
+                            } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
+                                double value = step.getValueParametersData().get(batchParameterName);
+                                ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(value);
+                            } else {
+                                System.err.println("DataType error   ");
+                            }
+                            ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(step.getPhaseID());
+                            ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(getOrderFromStep(step.getOrder()));
+                        });
+                        counter++;
+                    }
+                });
+            }
+        });
     }
 
     private void clearRowDataDefinition(String unit) {
-        int maxNumberOfParallelSteps = recipeConfRepository.findAll().stream().findAny().get().getMaxParallelSteps();
-        if (maxNumberOfParallelSteps > 0) {
-            for (counter = 1; counter <= maxNumberOfParallelSteps; counter++) {
-                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unit + " [" + counter + "]");
-                if (dataDefinition != null) {
+        recipeConfigService.findAll().stream().findAny().ifPresent(recipeConfig -> {
+            final int maxNumberOfParallelSteps = recipeConfig.getMaxParallelSteps();
+            if (maxNumberOfParallelSteps > 0) {
+                for (counter = 1; counter <= maxNumberOfParallelSteps; counter++) {
+                    RowDataDefinition dataDefinition = plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + counter + "]");
+                    if (dataDefinition != null) {
+                        ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
+                        ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
+                        phaseRepository.findAll().stream().filter(Phase -> Phase.getUnit().equals(unit)).forEachOrdered(phase -> {
+                            String batchPhaseName = phase.getName();
+                            phase.getParameters().forEach(batchParameter -> {
+                                String batchParameterName = batchParameter.getName();
+                                RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
+                                if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
+                                    ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
+                                } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
+                                    ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0f);
+                                } else {
+                                    System.err.println("DataType error   ");
+                                }
+                            });
+                        });
+                    }
+                }
+            }
+        });
+    }
+    private void clearRowDataDefinitionForOperation(Batch batch, int parallelStepNo, String unit) {
+        recipeConfigService.findAll().stream().findAny().ifPresent(recipeConfig -> {
+            final int maxNumberOfParallelSteps = recipeConfig.getMaxParallelSteps();
+            if (maxNumberOfParallelSteps > 0) {
+                for (counter = 1; counter <= batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().size(); counter++) {
+                    RowDataDefinition dataDefinition = plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + counter + "]");
+                    phaseRepository.findAll().stream().filter(Phase -> Phase.getUnit().equals(unit)).filter(Phase -> !batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().stream().map(BatchStepModel::getPhaseName).collect(Collectors.toList()).contains(Phase.getName())).forEachOrdered(phase -> {
+                        String batchPhaseName = phase.getName();
+                        phase.getParameters().forEach(batchParameter -> {
+                            String batchParameterName = batchParameter.getName();
+                            RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
+                            if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
+                                ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
+                            } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
+                                ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0f);
+                            } else {
+                                System.err.println("DataType error   ");
+                            }
+                        });
+                    });
+                }
+                for (counter = batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().size() + 1; counter <= maxNumberOfParallelSteps; counter++) {
+                    RowDataDefinition dataDefinition = plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + counter + "]");
                     ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
                     ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
                     phaseRepository.findAll().stream().filter(Phase -> Phase.getUnit().equals(unit)).forEachOrdered(phase -> {
                         String batchPhaseName = phase.getName();
                         phase.getParameters().forEach(batchParameter -> {
                             String batchParameterName = batchParameter.getName();
-                            RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
+                            RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
                             if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
                                 ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
                             } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
@@ -364,48 +412,7 @@ public class BatchService {
                     });
                 }
             }
-        }
-    }
-    private void clearRowDataDefinitionForOperation(Batch batch, int parallelStepNo, String unit) {
-        int maxNumberOfParallelSteps = recipeConfRepository.findAll().stream().findAny().get().getMaxParallelSteps();
-        if (maxNumberOfParallelSteps > 0) {
-            for (counter = 1; counter <= batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().size(); counter++) {
-                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unit + " [" + counter + "]");
-                phaseRepository.findAll().stream().filter(Phase -> Phase.getUnit().equals(unit)).filter(Phase -> !batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().stream().map(step -> step.getPhaseName()).collect(Collectors.toList()).contains(Phase.getName())).forEachOrdered(phase -> {
-                    String batchPhaseName = phase.getName();
-                    phase.getParameters().forEach(batchParameter -> {
-                        String batchParameterName = batchParameter.getName();
-                        RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
-                        if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                            ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
-                        } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                            ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0f);
-                        } else {
-                            System.err.println("DataType error   ");
-                        }
-                    });
-                });
-            }
-            for (counter = batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().size() + 1; counter <= maxNumberOfParallelSteps; counter++) {
-                RowDataDefinition dataDefinition = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel().get(unit + " [" + counter + "]");
-                ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
-                ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
-                phaseRepository.findAll().stream().filter(Phase -> Phase.getUnit().equals(unit)).forEachOrdered(phase -> {
-                    String batchPhaseName = phase.getName();
-                    phase.getParameters().forEach(batchParameter -> {
-                        String batchParameterName = batchParameter.getName();
-                        RowAttripute attribute = PhasesAttriputes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + counter + "]", batchPhaseName, batchParameterName + "OUT");
-                        if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                            ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
-                        } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                            ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0f);
-                        } else {
-                            System.err.println("DataType error   ");
-                        }
-                    });
-                });
-            }
-        }
+        });
     }
 
     private int getOrderFromStep(String StepOrder) {

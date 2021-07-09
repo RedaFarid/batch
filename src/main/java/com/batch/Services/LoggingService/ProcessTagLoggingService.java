@@ -12,7 +12,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,10 +26,11 @@ public class ProcessTagLoggingService {
 
     private Map<String, RowDataDefinition> allDevices;
     private final TagLogRepository tagLogRepository;
+    private final PLCDataDefinitionFactory plcDataDefinitionFactory;
 
     @EventListener
-    public void atStart(ApplicationContext.ApplicationListener event){
-        allDevices = PLCDataDefinitionFactory.getSystem().getAllDevicesDataModel();
+    public void atStart(ApplicationContext.GraphicsInitializerEvent event){
+        allDevices = plcDataDefinitionFactory.getAllDevicesDataModel();
     }
 
     @Scheduled(fixedDelay = 1000)

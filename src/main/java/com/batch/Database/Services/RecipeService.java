@@ -14,6 +14,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Log4j2
@@ -41,7 +43,10 @@ public class RecipeService {
                 });
     }
 
-
+    @Cacheable("recipes")
+    public List<Recipe> findAll() {
+        return recipesRepository.findAll();
+    }
 
 
 
@@ -77,4 +82,6 @@ public class RecipeService {
         Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
         return ((RecipeModel) unMarshaller.unmarshal(new StringReader(model)));
     }
+
+
 }

@@ -1,12 +1,17 @@
 package com.batch.GUI.InitialWindow;
 
 import com.batch.ApplicationContext;
+import com.batch.Database.Entities.Batch;
+import com.batch.Database.Entities.Log;
 import com.batch.GUI.Alarms.AllAlarmsWindow;
 import com.batch.GUI.Alarms.Utilities;
+import com.batch.GUI.BatchWindow.WindowComponents.BatchCreator;
+import com.batch.GUI.BatchWindow.WindowComponents.BatchObserver;
 import com.batch.GUI.FacePlates.MixerFacePlate;
 import com.batch.GUI.FacePlates.PumpFacePlate;
 import com.batch.GUI.FacePlates.ValveFacePlate;
 import com.batch.GUI.FacePlates.WeightFacePlate;
+import com.batch.GUI.InitialWindow.SubWindows.*;
 import com.batch.GUI.MaterialsWindow.MaterialsWindow;
 import com.batch.GUI.PhasesWindow.PhasesWindow;
 import com.batch.GUI.RecipeEditor.WindowComponents.RecipeEditor;
@@ -16,7 +21,10 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.*;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.batch.Services.LoggingService.LoggingService;
+import com.batch.Utilities.LogIdentefires;
 import com.batch.Utilities.Round;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Resources;
 import eu.hansolo.medusa.*;
 import eu.hansolo.medusa.skins.QuarterSkin;
@@ -26,7 +34,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -39,7 +46,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Stop;
@@ -49,20 +55,22 @@ import javafx.stage.StageStyle;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Log4j2
 @Component
-public class InitialWindow implements ApplicationListener<ApplicationContext.ApplicationListener> {
+public class InitialWindow implements ApplicationListener<ApplicationContext.GraphicsInitializerEvent> {
 
     //Stages
     private Stage initialStage;
@@ -131,9 +139,8 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
     private final Label lastAlarmField = new Label();
 
     private RecipeEditor recipeEditor;
-//    private BatchCreator batchCreator;
-//    private List<BatchObserver> batchObservers = Collections.synchronizedList(new LinkedList<>());
-//    private AutoUpdateAlarmsWindow logWindow;
+    private BatchCreator batchCreator;
+    private final Map<Long, BatchObserver> batchObservers = new ConcurrentHashMap<>();
     private AllAlarmsWindow allAlarmsWindow;
 
     private String returnData;
@@ -141,26 +148,42 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
 
     private final Background HEALTHY_BACKGROUND = new Background(new BackgroundFill(Color.LIGHTGREEN,  new CornerRadii(5), Insets.EMPTY));
     private final Background FAULTY_BACKGROUND = new Background(new BackgroundFill(Color.RED.brighter(),  new CornerRadii(5), Insets.EMPTY));
+    private final Background CONNECTION_LOSS_BACKGROUND = new Background(new BackgroundFill(Color.ORANGE,  new CornerRadii(5), Insets.EMPTY));
 
 
     private InitialWindowModel model;
 
     //Injected Beans
     @Autowired(required = false)
-    private LoggingService logger;
+    private LoggingService loggingService;
     @Autowired(required = false)
     private InitialWindowController controller;
+    @Autowired
+    private PLCDataDefinitionFactory plcDataDefinitionFactory;
 
-
+    private Map<String, RowDataDefinition> allDataDefinitions;
 
 
     @Override
-    public void onApplicationEvent(ApplicationContext.ApplicationListener listener) {
+    public void onApplicationEvent(ApplicationContext.GraphicsInitializerEvent listener) {
         try {
             initialStage = listener.getStage();
             model = controller.getModel();
             allAlarmsWindow = AllAlarmsWindow.getWindow(initialStage);
             recipeEditor = RecipeEditor.getWindow(initialStage);
+            batchCreator = BatchCreator.getWindow(initialStage);
+
+            recipeEditor.setHeight(900);
+            recipeEditor.setWidth(1500);
+            recipeEditor.initOwner(initialStage);
+
+            batchCreator.setHeight(600);
+            batchCreator.setWidth(1100);
+            batchCreator.setMinHeight(600);
+            batchCreator.setMinWidth(800);
+            batchCreator.setResizable(false);
+            batchCreator.initOwner(initialStage);
+
             graphicsBuilder();
         }catch (Exception e){
             e.printStackTrace();
@@ -168,11 +191,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
     }
 
     private void graphicsBuilder() {
-        recipeEditor.setHeight(900);
-        recipeEditor.setWidth(1500);
-//        batchCreator.setHeight(600);
-//        batchCreator.setWidth(800);
-
 
         lastAlarmField.prefWidthProperty().bind(topBars.widthProperty());
         lastAlarmField.setPadding(new Insets(3));
@@ -251,8 +269,8 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
         //----------------------------------------------------------------------------------------------------------------------------------
         //Binding data
         connectionStatus.textProperty().bind(model.getConnectionInfo());
-        connectionStatus.backgroundProperty().bind(Bindings.when(model.getConnectionStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
-        connectionStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+        connectionStatus.backgroundProperty().bind(Bindings.when(model.getConnectionStatus()).then(HEALTHY_BACKGROUND).otherwise(CONNECTION_LOSS_BACKGROUND));
+        connectionStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.BLACK));
 
         airPressureStatus.textProperty().bind(model.getAirPressureInfo());
         airPressureStatus.backgroundProperty().bind(Bindings.when(model.getAirPressureStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
@@ -285,8 +303,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
             Units.setOnAction(action -> UnitsWindow.getWindow(initialStage).show());
             Phases.setOnAction(action -> PhasesWindow.getWindow(initialStage).show());
             materialItem.setOnAction(action -> MaterialsWindow.getMaterialsWindow(initialStage).show());
-
-//            batchCreatorItem.setOnAction(this::onBatchCreatorRequest);
+            batchCreatorItem.setOnAction(this::onBatchCreatorRequest);
             recipeEditorItem.setOnAction(this::onRecipeEditorRequest);
             reportingSystem.setOnAction(action -> BatchArchiveWindow.getWindow(initialStage).show());
             configurations.setOnAction(action -> {
@@ -332,7 +349,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
 
 
             setWaterTankLevel();
-//            confirmationMessageControl();
+            confirmationMessageControl();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -792,6 +809,20 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
         imView.setEffect(blend2);
     }
 
+    private void createBatchObserver(Batch batch) {
+        BatchObserver batchObserver = new BatchObserver(initialStage, batch);
+        if (!containerPane.getTabs().contains(batchObserver)) {
+            containerPane.getTabs().add(batchObserver);
+            batchObservers.put(batch.getId(), batchObserver);
+            batchObserver.setOnBatchClose((BatchObserver batchObserver1) -> {
+                containerPane.getTabs().remove(batchObserver1);
+                batchObservers.remove(batchObserver1.getBatchID());
+            });
+            batchObserver.update();
+            containerPane.getSelectionModel().select(batchObserver);
+        }
+    }
+
     private void adjustGauges() {
         Gauge gauge1 = getGauge("Water level", "Meter");
         Gauge gauge2 = getGauge("Air pressure", "Bar");
@@ -871,20 +902,14 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
                 .build();
     }
 
-//    private synchronized void onBatchCreatorRequest(ActionEvent event) {
-//        try {
-//            scene.setCursor(Cursor.WAIT);
-//            CompletableFuture.supplyAsync(() -> {
-//                Platform.runLater(() -> {
-//                    handleEvents(mainWindow, batchCreator, batchObservers, containerPane);
-//                    scene.setCursor(Cursor.DEFAULT);
-//                });
-//                return null;
-//            }, service);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    private synchronized void onBatchCreatorRequest(ActionEvent event) {
+        try {
+            batchCreator.showAndReturnBatch().ifPresent(this::createBatchObserver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void onRecipeEditorRequest(ActionEvent event) {
         try {
             String retVal = selectUnitWindow();
@@ -982,288 +1007,182 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.App
 
         return returnData;
     }
-//
 
-//    private void updateLastAlarmField() {
-//        CompletableFuture.supplyAsync(() -> {
-//            return LogsDAOImpl.getInstance().getLastEneteredLog();
-//        }).thenAccept(log -> {
-//            Platform.runLater(() -> {
-//                if (!lastAlarmField.getText().equals(log.toString())) {
-//                    lastAlarmField.setText(log.toString());
-//                    if (log.getIdentifier().equals(LogIdentefires.Error.name())) {
-//                        lastAlarmField.setStyle("-fx-background-color: red; -fx-dark-text-color: white;-fx-mid-text-color: white;"
-//                                + "-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
-//                    } else if (log.getIdentifier().equals(LogIdentefires.Warning.name())) {
-//                        lastAlarmField.setStyle("-fx-background-color: yellow; -fx-dark-text-color: black;-fx-mid-text-color: black;"
-//                                + "-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
-//                    } else if (log.getIdentifier().equals(LogIdentefires.Info.name())) {
-//                        lastAlarmField.setStyle("-fx-background-color: wheat; -fx-dark-text-color: black;-fx-mid-text-color: black;"
-//                                + "-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
-//                    } else if (log.getIdentifier().equals(LogIdentefires.System.name())) {
-//                        lastAlarmField.setStyle("-fx-background-color: black; -fx-dark-text-color: white;-fx-mid-text-color: white;"
-//                                + "-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
-//                    }
-//                }
-//            });
-//        });
-//    }
-//    private void initialization() {
-//        BatchControllerDataDAOImpl.getInstance().GetAll().stream().filter(data -> data.getRunningBatchID() > 0).forEach(item -> {
-//            Platform.runLater(() -> {
-//                BatchDTO batch = BatchDAOImpl.getInstance().getByID(String.valueOf(item.getRunningBatchID()));
-//                System.err.println("Batch " + batch.getState());
-//                handleEventsAtInitialization(mainWindow, batchObservers, containerPane, batch);
-//            });
-//        });
-//    }
-//
-//    private void confirmationMessageControl() {
-//        //Check for start
-//        Platform.runLater(() -> {
-//            if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
-//                if (!Mixer_1_Manual_Add_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                    Mixer_1_Manual_Add_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                }
-//            }
-//        });
-//        Platform.runLater(() -> {
-//            if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue()) {
-//                if (!Mixer_2_Manual_Add_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                    Mixer_2_Manual_Add_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                }
-//            }
-//        });
-//
-//        Platform.runLater(() -> {
-//            if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue()) {
-//                if (!IPC_Fill_From_Mixer_1_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                    IPC_Fill_From_Mixer_1_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                }
-//            }
-//        });
-//        Platform.runLater(() -> {
-//            if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue()) {
-//                if (!IPC_Fill_From_Mixer_2_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                    IPC_Fill_From_Mixer_2_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                }
-//            }
-//        });
-//        Platform.runLater(() -> {
-//            if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue()) {
-//                if (!IPC_Fill_From_Tank_1_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                    IPC_Fill_From_Tank_1_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                }
-//            }
-//        });
-//        Platform.runLater(() -> {
-//            if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue()) {
-//                if (!IPC_Fill_From_Tank_2_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                    IPC_Fill_From_Tank_2_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                }
-//            }
-//        });
-//        Platform.runLater(() -> {
-//            if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue()) {
-//                if (!IPC_Fill_From_Tank_3_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                    IPC_Fill_From_Tank_3_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                }
-//            }
-//        });
-//
-//        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//                if (newValue) {
-//                    Platform.runLater(() -> {
-//                        if (!Mixer_1_Manual_Add_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                            Mixer_1_Manual_Add_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//                if (newValue) {
-//                    Platform.runLater(() -> {
-//                        if (!Mixer_2_Manual_Add_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                            Mixer_2_Manual_Add_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//
-//        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//                if (newValue) {
-//                    Platform.runLater(() -> {
-//                        if (!IPC_Fill_From_Mixer_1_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                            IPC_Fill_From_Mixer_1_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//                if (newValue) {
-//                    Platform.runLater(() -> {
-//                        if (!IPC_Fill_From_Mixer_2_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                            IPC_Fill_From_Mixer_2_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//                if (newValue) {
-//                    Platform.runLater(() -> {
-//                        if (!IPC_Fill_From_Tank_1_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                            IPC_Fill_From_Tank_1_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//                if (newValue) {
-//                    Platform.runLater(() -> {
-//                        if (!IPC_Fill_From_Tank_2_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                            IPC_Fill_From_Tank_2_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-//                if (newValue) {
-//                    Platform.runLater(() -> {
-//                        if (!IPC_Fill_From_Tank_3_Message.getWindow(mainWindow, allDataDefinitions).isShowing()) {
-//                            IPC_Fill_From_Tank_3_Message.getWindow(mainWindow, allDataDefinitions).showAndWait();
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//
-//    }
-//    private void confirmationMessageReset() {
-//
-//        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
-//            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_1_Manual_Add_Confirmation)).setValue(false);
-//        }
-//        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue()) {
-//            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_2_Manual_Add_Confirmation)).setValue(false);
-//        }
-//
-//        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue()) {
-//            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_1_Message_Confirmation)).setValue(false);
-//        }
-//        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue()) {
-//            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_2_Message_Confirmation)).setValue(false);
-//        }
-//        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue()) {
-//            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_1_Message_Confirmation)).setValue(false);
-//        }
-//        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue()) {
-//            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_2_Message_Confirmation)).setValue(false);
-//        }
-//        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue()) {
-//            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_3_Message_Confirmation)).setValue(false);
-//        }
-//
-//    }
-//
+    private void confirmationMessageControl() {
+        //Check for start
 
-//
-//    private synchronized void handleEvents(Stage mainWindow, BatchCreator batchCreator, List<BatchObserver> batchObservers, TabPane containerPane) {
-//        try {
-//            batchCreator = new BatchCreator(mainWindow);
-//            batchCreator.initOwner(mainWindow);
-//            batchCreator.setHeight(600);
-//            batchCreator.setWidth(1100);
-//            batchCreator.setMinHeight(600);
-//            batchCreator.setMinWidth(800);
-//            batchCreator.setResizable(false);
-//            BatchDTO batch = batchCreator.showAndReturnBatch();
-//            if (batch != null) {
-//                BatchObserver batchObserver = new BatchObserver(mainWindow, batch);
-//                if (!containerPane.getTabs().contains(batchObserver)) {
-//                    containerPane.getTabs().add(batchObserver);
-//                    batchObservers.add(batchObserver);
-//                    batchObserver.setOnBatchClose((BatchObserver batchObserver1) -> {
-//                        containerPane.getTabs().remove(batchObserver1);
-//                        batchObservers.remove(batchObserver1);
-//                    });
-//                } else {
-//                }
-//            } else {
-//                logger.LogRecord(new LogDTO(LogIdentefires.Error.name(), "Returned batch is null"));
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            String message = null;
-//            for (StackTraceElement object : e.getStackTrace()) {
-//                message += "\n" + object.toString();
-//            }
-//            logger.LogRecord(new LogDTO(LogIdentefires.System.name(), "error creating batch  "));
-//        }
-//    }
-//    private synchronized void handleEventsAtInitialization(Stage mainWindow, List<BatchObserver> batchObservers, TabPane containerPane, BatchDTO batch) {
-//        try {
-//            if (batch != null) {
-//                BatchObserver batchObserver = new BatchObserver(mainWindow, batch);
-//                if (!containerPane.getTabs().contains(batchObserver)) {
-//                    containerPane.getTabs().add(batchObserver);
-//                    batchObserver.update();
-//                    batchObservers.add(batchObserver);
-//                    batchObserver.setOnBatchClose((BatchObserver batchObserver1) -> {
-//                        containerPane.getTabs().remove(batchObserver1);
-//                        batchObservers.remove(batchObserver1);
-//                    });
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            String message = null;
-//            for (StackTraceElement object : e.getStackTrace()) {
-//                message += "\n" + object.toString();
-//            }
-//            logger.LogRecord(new LogDTO(LogIdentefires.System.name(), "error creating batch  "));
-//        }
-//    }
+        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
+            if (!Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+            }
+        }
+        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue()) {
+            if (!Mixer_2_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                Mixer_2_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+            }
+        }
+        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue()) {
+            if (!IPC_Fill_From_Mixer_1_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                IPC_Fill_From_Mixer_1_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+            }
+        }
+        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue()) {
+            if (!IPC_Fill_From_Mixer_2_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                IPC_Fill_From_Mixer_2_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+            }
+        }
+        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue()) {
+            if (!IPC_Fill_From_Tank_1_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                IPC_Fill_From_Tank_1_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+            }
+        }
+        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue()) {
+            if (!IPC_Fill_From_Tank_2_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                IPC_Fill_From_Tank_2_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+            }
+        }
+        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue()) {
+            if (!IPC_Fill_From_Tank_3_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                IPC_Fill_From_Tank_3_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+            }
+        }
+
+        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                Platform.runLater(() -> {
+                    if (!Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                        Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    }
+                });
+            }
+        });
+        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                Platform.runLater(() -> {
+                    if (!Mixer_2_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                        Mixer_2_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    }
+                });
+            }
+        });
+
+        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                Platform.runLater(() -> {
+                    if (!IPC_Fill_From_Mixer_1_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Mixer_1_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    }
+                });
+            }
+        });
+        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                Platform.runLater(() -> {
+                    if (!IPC_Fill_From_Mixer_2_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Mixer_2_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    }
+                });
+            }
+        });
+        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                Platform.runLater(() -> {
+                    if (!IPC_Fill_From_Tank_1_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Tank_1_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    }
+                });
+            }
+        });
+        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                Platform.runLater(() -> {
+                    if (!IPC_Fill_From_Tank_2_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Tank_2_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    }
+                });
+            }
+        });
+        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                Platform.runLater(() -> {
+                    if (!IPC_Fill_From_Tank_3_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Tank_3_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    }
+                });
+            }
+        });
+
+    }
+    private void confirmationMessageReset() {
+        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
+            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_1_Manual_Add_Confirmation)).setValue(false);
+        }
+        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue()) {
+            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_2_Manual_Add_Confirmation)).setValue(false);
+        }
+
+        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue()) {
+            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_1_Message_Confirmation)).setValue(false);
+        }
+        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue()) {
+            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_2_Message_Confirmation)).setValue(false);
+        }
+        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue()) {
+            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_1_Message_Confirmation)).setValue(false);
+        }
+        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue()) {
+            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_2_Message_Confirmation)).setValue(false);
+        }
+        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue()) {
+            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_3_Message_Confirmation)).setValue(false);
+        }
+    }
 
 
+    @EventListener
+    public void atStartedToInitialize(ContextStartedEvent event){
+        controller.getAllBatchControllerData().stream().filter(data -> data.getRunningBatchID() > 0).forEach(item -> {
+            controller.getBatchById(item.getRunningBatchID()).ifPresentOrElse(this::createBatchObserver, () -> {
+                loggingService.LogRecord(new Log(LogIdentefires.System.name(), "error creating batch view as batch not found in database  \n" + item));
+            });
+        });
+    }
+
+    @EventListener
+    public void atRefreshed(ContextRefreshedEvent event){
+        allDataDefinitions = plcDataDefinitionFactory.getAllDevicesDataModel();
+    }
+
+    @Scheduled(fixedDelay = 500, initialDelay = 2000)
     public void run() {
         try {
-//            batchObservers.forEach(batchObserver -> {
-//                batchObserver.update();
-//            });
-//            updateLastAlarmField();
-//            if (logWindow != null) {
-//                logWindow.run();
-//            }
-//            confirmationMessageReset();
+            batchObservers.forEach((id, batchObserver) -> batchObserver.update());
+            confirmationMessageReset();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
-    //Stages getter
-    public Stage getInitialStage() {
-        return initialStage;
+    @Scheduled(fixedDelay = 1000)
+    public void updateAlarms(){
+        try {
+            final Log lastEnteredLog = loggingService.getLastEnteredLog();
+            Platform.runLater(() -> {
+                if (!lastAlarmField.getText().equals(lastEnteredLog.toString())) {
+                    lastAlarmField.setText(lastEnteredLog.toString());
+                    if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Error.name())) {
+                        lastAlarmField.setStyle("-fx-background-color: red; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Warning.name())) {
+                        lastAlarmField.setStyle("-fx-background-color: yellow; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Info.name())) {
+                        lastAlarmField.setStyle("-fx-background-color: wheat; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.System.name())) {
+                        lastAlarmField.setStyle("-fx-background-color: black; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                    }
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
-
 }

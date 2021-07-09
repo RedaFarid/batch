@@ -24,4 +24,10 @@ public class CachingConfig {
         return new ConcurrentMapCacheManager("batches");
     }
 
+    @Bean
+    @Qualifier(value = "Recipe_Config")
+    public CacheManager cacheManagerForRecipeConfig() {
+        return new ConcurrentMapCacheManager("recipe_config");
+    }
+
 }

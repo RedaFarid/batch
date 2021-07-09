@@ -8,7 +8,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
 @Log4j2
@@ -18,7 +20,7 @@ public class ApplicationContext extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        applicationContext.publishEvent(new ApplicationListener(stage));
+        applicationContext.publishEvent(new GraphicsInitializerEvent(stage));
         applicationContext.start();
     }
 
@@ -31,24 +33,20 @@ public class ApplicationContext extends Application {
                 .sources(BatchingApplication.class)
                 .initializers(initializer)
                 .run(getParameters().getRaw().toArray(new String[0]));
+        applicationContext.registerShutdownHook();
+        applicationContext.addApplicationListener((ApplicationListener <ContextClosedEvent>) event -> Platform.exit());
         super.init();
     }
 
     @Override
     public void stop() throws Exception {
-        Platform.exit();
         applicationContext.stop();
-        Thread.sleep(2000);
-        applicationContext.close();
+        Thread.sleep(500);
         System.exit(0);
     }
 
-    public static void startApplicationContext(){
-        applicationContext.start();
-    }
-
-    public static class ApplicationListener extends ApplicationEvent {
-        public ApplicationListener(Stage stage) {
+    public static class GraphicsInitializerEvent extends ApplicationEvent {
+        public GraphicsInitializerEvent(Stage stage) {
             super(stage);
         }
         public Stage getStage() {

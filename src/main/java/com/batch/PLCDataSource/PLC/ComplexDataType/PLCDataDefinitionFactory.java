@@ -8,23 +8,25 @@ import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import javafx.beans.value.ObservableValue;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
 
+@Component
+@RequiredArgsConstructor
 public class PLCDataDefinitionFactory {
-
-    private static volatile PLCDataDefinitionFactory singleton = null;
 
     private final PLCDataDefinition definition = new PLCDataDefinition();
 
-    private final RecipeConfRepository recipesRepository;
+    private final RecipeConfRepository recipeConfRepository;
     private final UnitsRepository unitsRepository;
 
-    public PLCDataDefinitionFactory() {
-        this.recipesRepository = ApplicationContext.applicationContext.getBean(RecipeConfRepository.class);
-        this.unitsRepository = ApplicationContext.applicationContext.getBean(UnitsRepository.class);
+    @PostConstruct
+    public void init() {
         try {
-
             addNewDeviceToDataDefinition(new LifeSignal("CommCheck"));
             
             addNewDeviceToDataDefinition(new Pump("P01"));
@@ -75,19 +77,18 @@ public class PLCDataDefinitionFactory {
             addNewDeviceToDataDefinition(new Weight("L01"));
             
             addNewDeviceToDataDefinition(new General("General"));
+
+
             
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static PLCDataDefinitionFactory getSystem() {
-        synchronized (PLCDataDefinitionFactory.class) {
-            if (singleton == null) {
-                singleton = new PLCDataDefinitionFactory();
-            }
-        }
-        return singleton;
+    @EventListener
+    public void afterAppStart(ApplicationContext.GraphicsInitializerEvent event){
+        AddBatchData();
+//        addListenerToAllInPropertiesOfAllDevices();
     }
 
     public Map<String, RowDataDefinition> getAllDevicesDataModel() {
@@ -95,14 +96,16 @@ public class PLCDataDefinitionFactory {
     }
     
     public void AddBatchData() {
-        int maxParallelSteps = recipesRepository.findAll().stream().findAny().get().getMaxParallelSteps();
-        if (maxParallelSteps > 0) {
-            unitsRepository.findAll().forEach(unit -> {
-                for (int i = 1; i <= maxParallelSteps; i++) {
-                    addBatchDataToDataDefinition(String.valueOf(unit.getName() + " [" + i + "]"), new BatchPhasesDataDefinition(String.valueOf(unit.getName() + " [" + i + "]"), unit.getName()));
-                }
-            });
-        }
+        recipeConfRepository.findAll().stream().findAny().ifPresent(recipeConfig -> {
+            final int maxParallelSteps = recipeConfig.getMaxParallelSteps();
+            if (maxParallelSteps > 0) {
+                unitsRepository.findAll().forEach(unit -> {
+                    for (int i = 1; i <= maxParallelSteps; i++) {
+                        addBatchDataToDataDefinition(unit.getName() + " [" + i + "]", new BatchPhasesDataDefinition(unit.getName() + " [" + i + "]", unit.getName()));
+                    }
+                });
+            }
+        });
     }
 
     public void addListenerToAllInPropertiesOfAllDevices() {

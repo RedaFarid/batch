@@ -51,7 +51,10 @@ public class BatchesService {
         }).collect(Collectors.toList());
     }
 
-
+    @Cacheable(value = "batches", cacheManager = "cacheManagerForBatches")
+    public Optional<Batch> findByName(String batchName) {
+        return batchesRepository.findByBatchName(batchName);
+    }
 
 
 
@@ -86,5 +89,10 @@ public class BatchesService {
         JAXBContext jaxbcontext = JAXBContext.newInstance(BatchModel.class);
         Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
         return ((BatchModel) unMarshaller.unmarshal(new StringReader(model)));
+    }
+
+
+    public void updateBatchControlOrder(long batchId, String order) {
+        batchesRepository.updateBatchControlOrder(batchId, order);
     }
 }

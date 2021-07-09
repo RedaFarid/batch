@@ -23,11 +23,11 @@ import java.util.List;
 public class ProcessAlarmLoggingService {
 
     private final LoggingService loggingService;
+    private final PLCDataDefinitionFactory plcDataDefinitionFactory;
 
     @EventListener
-    private void initialization(ApplicationContext.ApplicationListener event) {
-        PLCDataDefinitionFactory
-                .getSystem()
+    private void initialization(ApplicationContext.GraphicsInitializerEvent event) {
+        plcDataDefinitionFactory
                 .getAllDevicesDataModel()
                 .values()
                 .stream()

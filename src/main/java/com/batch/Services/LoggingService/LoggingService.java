@@ -19,6 +19,8 @@ public class LoggingService {
     private long greaterID = 0;
     private final LogRepository logRepository;
 
+    private Log lastLog;
+
 
     public List<Log> getAllLogs() {
         return logRepository.findAll();
@@ -56,5 +58,12 @@ public class LoggingService {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public Log getLastEnteredLog() {
+        if (lastLog == null){
+            lastLog = logRepository.findLast().orElse(new Log());
+        }
+        return lastLog;
     }
 }
