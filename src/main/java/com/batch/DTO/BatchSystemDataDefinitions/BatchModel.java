@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class BatchModel {
 
-    private List<BatchParallelStepsModel> parallelSteps = new LinkedList();
+    private List<BatchParallelStepsModel> parallelSteps = new LinkedList<>();
 
     public BatchModel(List<BatchParallelStepsModel> parallelSteps) {
         this.parallelSteps = parallelSteps;

@@ -169,7 +169,7 @@ public class BatchArchiveWindow extends Stage {
                             .collect(Collectors.toList());
                     double totalActualPercent = data.stream().map(ReportTableDataModel::getActualPercent).reduce(0.0, Double::sum);
                     data.add(new ReportTableDataModel(counter, "", Round.RoundDouble(totalRequired, 4), Round.RoundDouble(totalLoaded, 4), Round.RoundDouble(totalError, 4), 100.0, totalActualPercent));
-                    BatchReport report = new BatchReport(new ReportModel(ID, batchName, date, time, data), this);
+                    BatchReport report = new BatchReport(new ReportModel(ID, batchName, date, time, data), this, controller::exportReport);
                     report.show();
                 } catch (Exception e) {
                     e.printStackTrace();

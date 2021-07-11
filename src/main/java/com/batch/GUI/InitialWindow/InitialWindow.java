@@ -2,6 +2,7 @@ package com.batch.GUI.InitialWindow;
 
 import com.batch.ApplicationContext;
 import com.batch.Database.Entities.Batch;
+import com.batch.Database.Entities.Group;
 import com.batch.Database.Entities.Log;
 import com.batch.GUI.Alarms.AllAlarmsWindow;
 import com.batch.GUI.Alarms.Utilities;
@@ -17,14 +18,16 @@ import com.batch.GUI.PhasesWindow.PhasesWindow;
 import com.batch.GUI.RecipeEditor.WindowComponents.RecipeEditor;
 import com.batch.GUI.Reporting.BatchArchiveWindow;
 import com.batch.GUI.UnitsWindow.UnitsWindow;
+import com.batch.GUI.UserAdministration.UserAdministrationWindow;
 import com.batch.PLCDataSource.PLC.ComplexDataType.*;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.batch.Services.LoggingService.LoggingService;
+import com.batch.Services.UserAdministration.UserEvent;
+import com.batch.Services.UserAdministration.UserEventMessage;
+import com.batch.Services.UserAdministration.WindowData;
 import com.batch.Utilities.LogIdentefires;
 import com.batch.Utilities.Round;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Resources;
 import eu.hansolo.medusa.*;
 import eu.hansolo.medusa.skins.QuarterSkin;
@@ -158,6 +161,8 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
     private LoggingService loggingService;
     @Autowired(required = false)
     private InitialWindowController controller;
+    @Autowired(required = false)
+    private UserAdministrationWindow userAdministrationWindow;
     @Autowired
     private PLCDataDefinitionFactory plcDataDefinitionFactory;
 
@@ -336,7 +341,16 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             changeAllDevicesToAutomatic.setOnMousePressed(action -> controller.onSetAllInAutoPressed(mixers, pumps, valves));
             changeAllDevicesToAutomatic.setOnMouseReleased(action -> controller.onSetAllInAutoReleased());
 
-            UserAdministrationMenuItem.setOnAction(action -> {});
+            UserAdministrationMenuItem.setOnAction(action -> {
+                Stage stage = new Stage();
+                Scene scene = new Scene(new BorderPane(userAdministrationWindow));
+                stage.setScene(scene);
+                stage.initOwner(initialStage);
+                stage.initStyle(StageStyle.UTILITY);
+                stage.setMinWidth(1200);
+                stage.setMinHeight(900);
+                stage.show();
+            });
             logIn.setOnMouseClicked(action -> controller.onLogIn());
             logOut.setOnMouseClicked(action -> controller.onLogOut());
             LoginItem.setOnAction(action -> controller.onLogIn());
@@ -1010,7 +1024,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
 
     private void confirmationMessageControl() {
         //Check for start
-
         if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
             if (!Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
                 Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
@@ -1065,7 +1078,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
                 });
             }
         });
-
         ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(() -> {
@@ -1111,33 +1123,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
                 });
             }
         });
-
     }
-    private void confirmationMessageReset() {
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_1_Manual_Add_Confirmation)).setValue(false);
-        }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_2_Manual_Add_Confirmation)).setValue(false);
-        }
-
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_1_Message_Confirmation)).setValue(false);
-        }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_2_Message_Confirmation)).setValue(false);
-        }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_1_Message_Confirmation)).setValue(false);
-        }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_2_Message_Confirmation)).setValue(false);
-        }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_3_Message_Confirmation)).setValue(false);
-        }
-    }
-
 
     @EventListener
     public void atStartedToInitialize(ContextStartedEvent event){
@@ -1151,13 +1137,21 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
     @EventListener
     public void atRefreshed(ContextRefreshedEvent event){
         allDataDefinitions = plcDataDefinitionFactory.getAllDevicesDataModel();
+
+        //Registering window to userAuthorizationService
+        controller.registerWindowToUserAuthorizationService(new WindowData("Recipe window"));
+        controller.registerWindowToUserAuthorizationService(new WindowData("Batch window"));
+        controller.registerWindowToUserAuthorizationService(new WindowData("Users window"));
+        controller.registerWindowToUserAuthorizationService(new WindowData("Phases window"));
+        controller.registerWindowToUserAuthorizationService(new WindowData("Units window"));
+        controller.registerWindowToUserAuthorizationService(new WindowData("Reporting window"));
+        controller.registerWindowToUserAuthorizationService(new WindowData("Material window"));
     }
 
     @Scheduled(fixedDelay = 500, initialDelay = 2000)
     public void run() {
         try {
             batchObservers.forEach((id, batchObserver) -> batchObserver.update());
-            confirmationMessageReset();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1183,6 +1177,35 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             });
         }catch (Exception e){
             e.printStackTrace();
+        }
+    }
+
+    @EventListener
+    public void newUserLogIn(UserEvent event){
+        final UserEventMessage message = event.getMessage();
+        if (message.isLoggedOn()){
+            if (message.getUser().getUserName().equals("Administrator")){
+                recipeEditorItem.setDisable(false);
+                batchCreatorItem.setDisable(false);
+                Phases.setDisable(false);
+                UserAdministrationMenuItem.setDisable(false);
+                Units.setDisable(false);
+                reportingSystem.setDisable(false);
+                materialItem.setDisable(false);
+            }
+            message.getAllGroupsDTO().getList().forEach(windowGroupsDTO -> {
+                final LinkedHashMap<String, List<Group>> rowGroup = windowGroupsDTO.getRowGroup();
+            });
+        }else {
+            Platform.runLater(() -> {
+                recipeEditorItem.setDisable(true);
+                batchCreatorItem.setDisable(true);
+                Phases.setDisable(true);
+                UserAdministrationMenuItem.setDisable(true);
+                Units.setDisable(true);
+                reportingSystem.setDisable(true);
+                materialItem.setDisable(true);
+            });
         }
     }
 }

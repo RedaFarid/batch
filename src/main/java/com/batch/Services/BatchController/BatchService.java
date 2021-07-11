@@ -35,8 +35,6 @@ import java.util.stream.Collectors;
 public class BatchService {
 
     private int counter;
-    private int i;
-    private final int j = 0;
 
     private int batchHeight = 0;
     private int currentParallelStep = 0;
@@ -219,31 +217,31 @@ public class BatchService {
                 });
     }
 
-    private void adjustBatchState(Batch Batch, int paralelStepsNo, int batchHeight) {
+    private void adjustBatchState(Batch Batch, int parallelStepsNo, int batchHeight) {
         boolean aborted = false;
         boolean held = false;
         boolean idle = false;
         boolean finished = false;
-        if ((paralelStepsNo + 1) <= batchHeight) {
-            aborted = Batch.getModel().getParallelSteps().get(paralelStepsNo).getSteps()
+        if ((parallelStepsNo + 1) <= batchHeight) {
+            aborted = Batch.getModel().getParallelSteps().get(parallelStepsNo).getSteps()
                     .stream()
                     .filter(item -> !item.getPhaseName().equals("Start"))
                     .filter(item -> !item.getPhaseName().equals("End"))
                     .map(BatchStepModel::getState)
                     .allMatch(item -> item.equals(BatchStates.Aborted.name()));
-            held = Batch.getModel().getParallelSteps().get(paralelStepsNo).getSteps()
+            held = Batch.getModel().getParallelSteps().get(parallelStepsNo).getSteps()
                     .stream()
                     .filter(item -> !item.getPhaseName().equals("Start"))
                     .filter(item -> !item.getPhaseName().equals("End"))
                     .map(BatchStepModel::getState)
                     .allMatch(item -> (item.equals(BatchStates.Held.name()) || (item.equals(BatchStates.Finished.name()))));
-            idle = Batch.getModel().getParallelSteps().get(paralelStepsNo).getSteps()
+            idle = Batch.getModel().getParallelSteps().get(parallelStepsNo).getSteps()
                     .stream()
                     .filter(item -> !item.getPhaseName().equals("Start"))
                     .filter(item -> !item.getPhaseName().equals("End"))
                     .map(BatchStepModel::getState)
                     .allMatch(item -> item.equals(BatchStates.Idle.name()));
-            finished = Batch.getModel().getParallelSteps().get(paralelStepsNo).getSteps()
+            finished = Batch.getModel().getParallelSteps().get(parallelStepsNo).getSteps()
                     .stream()
                     .filter(item -> !item.getPhaseName().equals("Start"))
                     .filter(item -> !item.getPhaseName().equals("End"))

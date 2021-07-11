@@ -14,7 +14,7 @@
 	<name>Batching</name>
 	<description>Batching application</description>
 	<properties>
-		<java.version>15</java.version>
+		<java.version>16</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -262,14 +262,91 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!--                <configuration>-->
+				<!--                    <arguments>&#45;&#45;enable-preview</arguments>-->
+				<!--                    <jvmArguments>&#45;&#45;enable-preview</jvmArguments>-->
+				<!--                </configuration>-->
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!--                <version>3.0.0-M4</version>-->
+				<!--                <configuration>-->
+				<!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
+				<!--                </configuration>-->
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
 				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
+					<source>15</source>
+					<target>15</target>
+					<!--                    <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
+					<!--                    <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
+					<!--					<compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
 				</configuration>
+				<!--				<configuration>-->
+				<!--					<compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
+				<!--                    <source>14</source>-->
+				<!--                    <target>14</target>-->
+				<!--                </configuration>-->
+			</plugin>
+			<plugin>
+				<groupId>com.akathist.maven.plugins.launch4j</groupId>
+				<artifactId>launch4j-maven-plugin</artifactId>
+				<version>1.7.25</version>
+				<executions>
+					<execution>
+						<id>l4j-clui</id>
+						<phase>package</phase>
+						<goals>
+							<goal>launch4j</goal>
+						</goals>
+						<configuration>
+							<headerType>gui</headerType>
+							<outfile>target/MIXING_PLATFORM.exe</outfile>
+							<jar>target/batch-0.0.1.jar</jar>
+							<errTitle>encc</errTitle>
+							<singleInstance>
+								<mutexName>MIXING_PLATFORM</mutexName>
+								<windowTitle>MIXING_PLATFORM</windowTitle>
+							</singleInstance>
+							<splash>
+								<file>E:\splash .bmp</file>
+								<waitForWindow>true</waitForWindow>
+								<timeout>900</timeout>
+							</splash>
+							<stayAlive>false</stayAlive>
+							<classPath>
+								<mainClass>org.springframework.boot.loader.JarLauncher</mainClass>
+								<addDependencies>true</addDependencies>
+								<preCp>anything</preCp>
+							</classPath>
+							<jre>
+								<path>bin/jdk-15</path>
+								<bundledJre64Bit>true</bundledJre64Bit>
+								<bundledJreAsFallback>true</bundledJreAsFallback>
+								<!--								<minVersion>14.0.1</minVersion>-->
+								<!--								<jdkPreference>preferJre</jdkPreference>-->
+								<runtimeBits>64/32</runtimeBits>
+							</jre>
+							<versionInfo>
+								<fileVersion>1.0.0.0</fileVersion>
+								<txtFileVersion>1.0.0.0</txtFileVersion>
+								<fileDescription>MIXING_PLATFORM</fileDescription>
+								<copyright>MIXING_PLATFORM</copyright>
+								<productVersion>1.0.0.0</productVersion>
+								<txtProductVersion>1.0.0.0</txtProductVersion>
+								<productName>MIXING_PLATFORM</productName>
+								<originalFilename>MIXING_PLATFORM.exe</originalFilename>
+								<internalName>MIXING_PLATFORM</internalName>
+							</versionInfo>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

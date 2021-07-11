@@ -1,0 +1,50 @@
+<Configuration status="info" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="logger" fileName="Log4J/logger.log" append="false" filePattern="JDBCDriver/logger-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="org.jnativehook" level="error" additivity="false">
+            <AppenderRef ref="ConsoleAppender" level="warn"/>
+            <!--            <AppenderRef ref="databaseAppender" level="warn"/>-->
+        </Logger>
+
+        <Logger name="com.microsoft.sqlserver" level="error" additivity="false">
+            <AppenderRef ref="logger" level="all"/>
+            <AppenderRef ref="logger" level="info"/>
+            <!--            <AppenderRef ref="databaseAppender" level="warn"/>-->
+        </Logger>
+
+        <Logger name="org.springframework.jdbc.core.JdbcTemplate" level="error" additivity="false">
+            <AppenderRef ref="logger" level="debug"/>
+            <AppenderRef ref="logger" level="warn"/>
+            <AppenderRef ref="logger" level="error"/>
+            <!--            <AppenderRef ref="databaseAppender" level="warn"/>-->
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="logger" level="warn"/>
+            <!--            <AppenderRef ref="databaseAppender" level="error"/>-->
+        </Root>
+    </Loggers>
+</Configuration>

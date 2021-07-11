@@ -2,10 +2,14 @@
 package com.batch.Services.LoggingService;
 
 import com.batch.Database.Entities.Log;
+import com.batch.Database.Entities.User;
 import com.batch.Database.Repositories.LogRepository;
+import com.batch.Services.UserAdministration.UserEvent;
+import com.batch.Services.UserAdministration.UserEventMessage;
 import com.batch.Utilities.LogIdentefires;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,8 @@ public class LoggingService {
     private final LogRepository logRepository;
 
     private Log lastLog;
+
+    private User currentUser = new User("System");
 
 
     public List<Log> getAllLogs() {
@@ -40,6 +46,8 @@ public class LoggingService {
 
     @Async
     public void LogRecord(Log log) {
+        log.setUserName(currentUser.getUserName());
+        log.setGroupName(currentUser.getGroup() == null ? "" : currentUser.getGroup());
         logRepository.save(log);
     }
 
@@ -65,5 +73,12 @@ public class LoggingService {
             lastLog = logRepository.findLast().orElse(new Log());
         }
         return lastLog;
+    }
+
+
+    @EventListener
+    public void newUserLogIn(UserEvent event){
+        final UserEventMessage message = event.getMessage();
+        currentUser = message.getUser();
     }
 }

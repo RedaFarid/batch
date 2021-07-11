@@ -15,11 +15,18 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.springframework.data.jpa.repository.Modifying;
+
+import java.io.File;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class BatchReport extends Stage {
 
+    private final BiConsumer<ReportModel, File> consumer;
     private Printer printer = Printer.getDefaultPrinter();
     private PageLayout pageLayout = printer.createPageLayout(Paper.A4, PageOrientation.LANDSCAPE, Printer.MarginType.EQUAL);
     
@@ -40,12 +47,14 @@ public class BatchReport extends Stage {
     private GridPane mainData = new GridPane();
     
     private Button print = new Button("Print report ");
+    private Button export = new Button("export report ");
 
     private ReportModel DataModel;
 
-    public BatchReport(ReportModel model, Stage window) {
+    public BatchReport(ReportModel model, Stage window, BiConsumer<ReportModel, File> consumer) {
         DataModel = model;
         mainWindow = window;
+        this.consumer = consumer;
         graphicsBuilder();
     }
 
@@ -63,6 +72,9 @@ public class BatchReport extends Stage {
         root.setMaxWidth(width);
         root.setMaxHeight(height);
 
+        print.setPrefWidth(150);
+        export.setPrefWidth(150);
+
         root.setTop(Header);
         root.setBottom(Footer);
         root.setCenter(center);
@@ -74,7 +86,7 @@ public class BatchReport extends Stage {
 
         mainRoot.setPadding(new Insets(20));
         mainRoot.setSpacing(5);
-        mainRoot.getChildren().addAll(root, print);
+        mainRoot.getChildren().addAll(root, print, export);
 
         print.setOnMouseClicked(action -> {
             PrinterJob job = PrinterJob.createPrinterJob(printer);
@@ -86,8 +98,16 @@ public class BatchReport extends Stage {
                 System.err.println("Error printing report");
             }
         });
+        export.setOnMouseClicked(action -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Export report to xlsx");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel format", "*.xlsx"));
+            chooser.setInitialFileName("Batch_" + DataModel.getBatchName() + "_.xlsx");
+            File file = chooser.showSaveDialog(mainWindow);
+            consumer.accept(DataModel, file);
+        });
 
-        //window adjustements
+        //window adjustments
         setScene(scene);
         setResizable(false);
         initOwner(mainWindow);

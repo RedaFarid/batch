@@ -31,6 +31,7 @@ public class BatchStepModel {
         this.order = BatchOrders.Create.name();
         this.PhaseType = model.getPhaseType();
         this.PhaseName = model.getPhaseName();
+        System.err.println(model.getPhaseID());
         this.PhaseID = model.getPhaseID();
         this.MaterialID = model.getMaterialID();
         

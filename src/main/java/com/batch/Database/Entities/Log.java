@@ -28,6 +28,10 @@ public class Log {
     @CreatedDate
     private LocalDate Date;
 
+    private String userName;
+    @Column(name = "GroupName")
+    private String groupName;
+
     public Log(String identifier, String source, String event) {
         this.identifier = identifier;
         this.source = source;

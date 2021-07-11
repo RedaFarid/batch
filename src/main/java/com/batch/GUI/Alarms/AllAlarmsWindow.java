@@ -70,7 +70,7 @@ public class AllAlarmsWindow extends Tab {
         SourceColumn.setCellValueFactory(new PropertyValueFactory<>("source"));
         EventColumn.setCellValueFactory(new PropertyValueFactory<>("Event"));
         UsernameColumn.setCellValueFactory(new PropertyValueFactory<>("userName"));
-        GroupColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+        GroupColumn.setCellValueFactory(new PropertyValueFactory<>("groupName"));
         TimeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
         DateColumn.setCellValueFactory(new PropertyValueFactory<>("Date"));
 

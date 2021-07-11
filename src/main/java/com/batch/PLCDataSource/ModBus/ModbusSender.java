@@ -3,6 +3,7 @@ package com.batch.PLCDataSource.ModBus;
 import com.batch.Services.LoggingService.LoggingService;
 import javafx.beans.property.BooleanProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class ModbusSender extends ModbusSystem {
 
     @Override
     protected void taskProcedure(int start, int quantity) throws Exception {
-        List<Byte> tempBuffer = super.buffer.values().stream().collect(Collectors.toList());
+        List<Byte> tempBuffer = new ArrayList<>(super.buffer.values());
         for (i = 0; i < quantity; i++) {
             int address = ((j * uniteDataAddress * 2) + (i * 2));
             intArray[i] = (bytesToInteger(tempBuffer.get(address), tempBuffer.get(address + 1), blank, blank));

@@ -21,4 +21,8 @@ public class InitialWindowModel {
     private DoubleProperty gauge1 = new SimpleDoubleProperty();
     private DoubleProperty gauge2 = new SimpleDoubleProperty();
 
+
+
+
+
 }
