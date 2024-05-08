@@ -128,7 +128,7 @@ public class BatchService {
                                                 .stream()
                                                 .filter(item -> !item.getPhaseName().equals("Start"))
                                                 .filter(item -> !item.getPhaseName().equals("End"))
-                                                .collect(Collectors.toList());
+                                                .toList();
                                         boolean finished = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch(item -> item.equals(BatchStates.Finished.name()));
                                         boolean idle = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch(item -> item.equals(BatchStates.Idle.name()));
                                         if (finished) {

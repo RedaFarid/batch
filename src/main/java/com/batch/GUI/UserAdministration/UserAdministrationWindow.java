@@ -89,9 +89,6 @@ public class UserAdministrationWindow extends TabPane {
 
     private LinkedHashSet<String> setToDelete = new LinkedHashSet<>();
 
-    @Autowired(required = false)
-    private InitialWindow window;
-
 
     @EventListener
     public void atStart(ContextStartedEvent event){

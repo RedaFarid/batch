@@ -7,12 +7,13 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.BatchPhasesDataDefini
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
+import jakarta.annotation.PostConstruct;
 import javafx.beans.value.ObservableValue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+
 import java.util.Map;
 
 @Component

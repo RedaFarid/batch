@@ -2,12 +2,12 @@ package com.batch.Database.Entities;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchModel;
 import com.google.common.base.Objects;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
-import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
