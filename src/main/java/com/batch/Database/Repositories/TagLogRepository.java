@@ -1,6 +1,5 @@
 package com.batch.Database.Repositories;
 
-import com.batch.Database.Entities.Batch;
 import com.batch.Database.Entities.TagLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

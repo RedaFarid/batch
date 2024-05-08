@@ -1,19 +1,13 @@
 package com.batch.Database.Entities;
 
 import com.batch.DTO.RecipeSystemDataDefinitions.RecipeModel;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.*;
-import javax.xml.bind.*;
-import javax.xml.transform.Result;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 

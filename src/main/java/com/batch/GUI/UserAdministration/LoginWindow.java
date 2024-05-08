@@ -1,7 +1,5 @@
 package com.batch.GUI.UserAdministration;
 
-import java.util.Optional;
-
 import com.batch.Database.Entities.User;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -21,6 +19,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import java.util.Optional;
 
 public class LoginWindow extends Stage {
 

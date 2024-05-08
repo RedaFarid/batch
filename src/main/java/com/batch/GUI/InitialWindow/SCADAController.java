@@ -1,12 +1,13 @@
 package com.batch.GUI.InitialWindow;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class SCADAController {
 

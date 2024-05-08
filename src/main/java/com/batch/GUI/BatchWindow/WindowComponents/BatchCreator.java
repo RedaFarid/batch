@@ -1,9 +1,6 @@
 package com.batch.GUI.BatchWindow.WindowComponents;
 
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.batch.ApplicationContext;
 import com.batch.DTO.BatchSystemDataDefinitions.*;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
@@ -17,11 +14,7 @@ import com.batch.GUI.RecipeEditor.WindowComponents.TreeItemType;
 import com.batch.Utilities.RestrictiveTextField;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -29,6 +22,9 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BatchCreator extends Stage {
 

@@ -1,56 +1,36 @@
 package com.batch.GUI.BatchWindow.WindowComponents;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 import com.batch.ApplicationContext;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchOrders;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchStates;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchStepModel;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhaseParameterType;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
-import com.batch.Database.Entities.Batch;
 import com.batch.Database.Entities.Material;
 import com.batch.Database.Entities.Phase;
 import com.batch.GUI.BatchWindow.BatchesController;
-import com.batch.GUI.InitialWindow.InitialWindow;
 import com.batch.Utilities.Round;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.Effect;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.controlsfx.dialog.ExceptionDialog;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BatchStep extends VBox implements Runnable {
 

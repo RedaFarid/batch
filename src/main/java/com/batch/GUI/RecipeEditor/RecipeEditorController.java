@@ -3,19 +3,15 @@ package com.batch.GUI.RecipeEditor;
 import com.batch.Database.Entities.*;
 import com.batch.Database.Repositories.*;
 import com.batch.Database.Services.RecipeService;
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.concurrent.Task;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 

@@ -6,7 +6,6 @@ import com.batch.DTO.BatchSystemDataDefinitions.BatchStates;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchStepModel;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhaseParameterType;
 import com.batch.Database.Entities.Batch;
-import com.batch.Database.Entities.Log;
 import com.batch.Database.Repositories.PhaseRepository;
 import com.batch.Database.Services.BatchControllerDataService;
 import com.batch.Database.Services.BatchesService;

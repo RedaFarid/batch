@@ -1,8 +1,5 @@
 package com.batch.GUI.FacePlates;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import com.batch.PLCDataSource.PLC.ComplexDataType.PumpInput;
 import com.batch.PLCDataSource.PLC.ComplexDataType.PumpOutput;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
@@ -22,6 +19,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class PumpFacePlate extends ControlFacePlate {
 

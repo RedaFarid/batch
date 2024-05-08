@@ -6,7 +6,6 @@ import javafx.beans.property.BooleanProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ModbusSender extends ModbusSystem {
 

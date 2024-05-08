@@ -1,11 +1,10 @@
 package com.batch.Database.Entities;
 
 import com.google.common.base.Objects;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.persistence.*;
 
 @Data
 @Entity

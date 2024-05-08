@@ -1,9 +1,9 @@
 package com.batch.DTO.BatchSystemDataDefinitions;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class BatchModel {

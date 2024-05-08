@@ -1,13 +1,10 @@
 package com.batch.GUI.UserAdministration;
 
 import com.batch.Database.Entities.User;
-import com.batch.GUI.InitialWindow.InitialWindow;
 import com.batch.Services.UserAdministration.UserAuthorizationService;
 import com.batch.Services.UserAdministration.UserEvent;
 import com.batch.Utilities.RestrictiveTextField;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -21,7 +18,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

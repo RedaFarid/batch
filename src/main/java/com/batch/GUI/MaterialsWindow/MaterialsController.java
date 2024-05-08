@@ -7,11 +7,9 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
-import java.nio.channels.SeekableByteChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;

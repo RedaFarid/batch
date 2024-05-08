@@ -1,9 +1,9 @@
 package com.batch.PLCDataSource.ModBus;
 
-import java.util.Map;
-
 import com.batch.Services.LoggingService.LoggingService;
 import javafx.beans.property.BooleanProperty;
+
+import java.util.Map;
 
 public class SendBufferCreator extends ModbusSystem {
 

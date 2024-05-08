@@ -8,7 +8,6 @@ import com.batch.Services.UserAdministration.UserEvent;
 import com.batch.Services.UserAdministration.UserEventMessage;
 import com.batch.Utilities.LogIdentefires;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

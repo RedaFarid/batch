@@ -18,11 +18,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.springframework.data.jpa.repository.Modifying;
 
 import java.io.File;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class BatchReport extends Stage {
 

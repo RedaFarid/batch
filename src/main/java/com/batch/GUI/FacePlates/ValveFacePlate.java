@@ -1,9 +1,6 @@
 package com.batch.GUI.FacePlates;
 
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.PLCDataSource.PLC.ComplexDataType.ValveInput;
 import com.batch.PLCDataSource.PLC.ComplexDataType.ValveOutput;
@@ -23,6 +20,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class ValveFacePlate extends ControlFacePlate {
     private Button Open, close;

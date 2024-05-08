@@ -1,6 +1,5 @@
 package com.batch.Services.UserAdministration;
 
-import com.batch.Database.Entities.Group;
 import com.batch.Database.Entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;

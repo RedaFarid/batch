@@ -5,8 +5,6 @@ import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
 import com.batch.Database.Entities.Batch;
 import com.batch.Database.Entities.Material;
 import com.batch.GUI.Controls.DataEntryPartition;
-import com.batch.GUI.Reporting.Reports.BatchReport;
-import com.batch.GUI.Reporting.Reports.ReportModel;
 import com.batch.GUI.Reporting.Reports.ReportTableDataModel;
 import com.batch.Utilities.Round;
 import javafx.geometry.Insets;
