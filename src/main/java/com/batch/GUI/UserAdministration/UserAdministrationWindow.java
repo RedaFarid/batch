@@ -66,7 +66,7 @@ public class UserAdministrationWindow extends TabPane {
     private final Button deleteGroup = new Button("Delete selected group");
 
     private final Button createUser = new Button("Create User");
-//    private final Button updateUser = new Button("Update User");
+    //    private final Button updateUser = new Button("Update User");
     private final Button deleteUser = new Button("Delete User");
 
     private final RestrictiveTextField groupMainField = new RestrictiveTextField();
@@ -315,30 +315,30 @@ public class UserAdministrationWindow extends TabPane {
                                 windowVBox.getChildren().add(label);
                                 groupsPaneTable.getChildren().add(windowVBox);
                                 groups.forEach(group -> {
-                                            HBox rolesBox = new HBox();
-                                            rolesBox.setPrefHeight(65);
-                                            rolesBox.setSpacing(10);
-                                            rolesBox.setPadding(new Insets(10));
-                                            rolesBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#0099cc"), CornerRadii.EMPTY, Insets.EMPTY)));
-                                            windowVBox.getChildren().add(rolesBox);
-                                            groupsSet.add(group.getGroup());
-                                            descriptionsSet.put(group.getGroup(), group.getDescription());
-                                            //all groups for that window
-                                            group.getRolesStatus().forEach((role, status) -> {
-                                                //roles for that group for that window
-                                                VBox rolesVBox = new VBox();
-                                                rolesVBox.setSpacing(4);
-                                                rolesVBox.setPadding(new Insets(2));
-                                                rolesVBox.setAlignment(Pos.TOP_CENTER);
-                                                Label roleLabel = new Label(role.name());
-                                                CheckBox check = new CheckBox();
-                                                check.setFont(Font.font(12));
-                                                check.setSelected(status);
-                                                rolesVBox.getChildren().addAll(roleLabel, check);
-                                                rolesBox.getChildren().add(rolesVBox);
-                                                check.selectedProperty().addListener((observable, oldValue, newValue) -> userAuthorizationService.updateGroupRole(group.getGroup(), window, role.name(), newValue));
-                                            });
-                                        });
+                                    HBox rolesBox = new HBox();
+                                    rolesBox.setPrefHeight(65);
+                                    rolesBox.setSpacing(10);
+                                    rolesBox.setPadding(new Insets(10));
+                                    rolesBox.setBackground(new Background(new BackgroundFill(Color.valueOf("#0099cc"), CornerRadii.EMPTY, Insets.EMPTY)));
+                                    windowVBox.getChildren().add(rolesBox);
+                                    groupsSet.add(group.getGroup());
+                                    descriptionsSet.put(group.getGroup(), group.getDescription());
+                                    //all groups for that window
+                                    group.getRolesStatus().forEach((role, status) -> {
+                                        //roles for that group for that window
+                                        VBox rolesVBox = new VBox();
+                                        rolesVBox.setSpacing(4);
+                                        rolesVBox.setPadding(new Insets(2));
+                                        rolesVBox.setAlignment(Pos.TOP_CENTER);
+                                        Label roleLabel = new Label(role.name());
+                                        CheckBox check = new CheckBox();
+                                        check.setFont(Font.font(12));
+                                        check.setSelected(status);
+                                        rolesVBox.getChildren().addAll(roleLabel, check);
+                                        rolesBox.getChildren().add(rolesVBox);
+                                        check.selectedProperty().addListener((observable, oldValue, newValue) -> userAuthorizationService.updateGroupRole(group.getGroup(), window, role.name(), newValue));
+                                    });
+                                });
                             });
                 });
 

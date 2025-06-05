@@ -109,7 +109,7 @@ public class LoginWindow extends Stage {
         password.setText("");
         LogIn.setText("Log in");
         username.setEditable(true);
-        
+
         password.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
@@ -136,7 +136,7 @@ public class LoginWindow extends Stage {
         showAndWait();
         return returnValue;
     }
-    
+
     public void showAndUpdatePassword(String user){
         password.setText("");
         username.setText(user);
