@@ -1,4 +1,3 @@
-
 package com.batch.DTO.BatchSystemDataDefinitions;
 
 

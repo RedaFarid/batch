@@ -8,5 +8,6 @@ public enum PhasesTypes {
     Washing_phase,
     Transfere_phase,
     Mixing_phase;
-    
+
 }
+

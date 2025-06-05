@@ -10,16 +10,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-
 public class BatchStepModel {
-    
+
     private long PhaseID;
     private String PhaseType;
     private String PhaseName;
     private String state;
     private String order;
     private long MaterialID;
-    
+
     private List<Parameter> parametersType = new LinkedList<>();
     private Map<String, Double> ValueParametersData = new LinkedHashMap<>();
     private Map<String, Boolean> CheckParametersData = new LinkedHashMap<>();
@@ -34,19 +33,19 @@ public class BatchStepModel {
         System.err.println(model.getPhaseID());
         this.PhaseID = model.getPhaseID();
         this.MaterialID = model.getMaterialID();
-        
+
         model.getParametersType().forEach(item -> {
             this.parametersType.add(new Parameter(item.getName(), item.getType()));
         });
-        
+
         model.getCheckParametersData().forEach((a, b) -> {
             this.CheckParametersData.put(a, b);
         });
-        
+
         model.getValueParametersData().forEach((a, b) -> {
             this.ValueParametersData.put(a, b);
         });
-        
+
         parametersType.forEach(parameter -> {
             ActualvalueParametersData.put(parameter.getName(), 0.0);
             ActualCheckParametersData.put(parameter.getName(), false);
@@ -143,11 +142,11 @@ public class BatchStepModel {
     public void setMaterialID(long MaterialID) {
         this.MaterialID = MaterialID;
     }
-    
+
 
     @Override
     public String toString() {
         return "PhaseID=" + PhaseID + ", PhaseType=" + PhaseType + ", PhaseName=" + PhaseName + ", state=" + state + ", order=" + order ;
     }
-    
+
 }

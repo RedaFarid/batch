@@ -15,9 +15,9 @@ public class BatchModel {
     }
 
     public BatchModel(BatchParallelStepsModel ... firstParallelStepsModel ) {
-        
+
         parallelSteps.addAll(Arrays.asList(firstParallelStepsModel));
-        
+
     }
 
     public BatchModel() {
@@ -30,5 +30,5 @@ public class BatchModel {
     public void setParallelSteps(List<BatchParallelStepsModel> parallelSteps) {
         this.parallelSteps = parallelSteps;
     }
-    
+
 }

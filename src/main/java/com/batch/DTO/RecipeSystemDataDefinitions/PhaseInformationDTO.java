@@ -3,12 +3,12 @@ package com.batch.DTO.RecipeSystemDataDefinitions;
 
 
 public class PhaseInformationDTO {
-    
+
     private String id;
     private String name;
     private String unit;
     private String phaseType;
-    
+
     private String ParameterName;
     private String ParameterType;
 
@@ -69,6 +69,6 @@ public class PhaseInformationDTO {
         this.ParameterType = ParameterType;
     }
 
-    
+
 
 }

@@ -7,3 +7,4 @@ import com.batch.GUI.BatchWindow.WindowComponents.BatchObserver;
 public interface EventOnBatchCloseCallBack {
     void Action(BatchObserver tab);
 }
+
