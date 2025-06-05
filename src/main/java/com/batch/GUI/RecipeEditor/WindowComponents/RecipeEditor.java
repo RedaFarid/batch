@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class RecipeEditor extends Stage {
 
     private static volatile RecipeEditor singleton = null;
-    
+
     private final Stage mainWindow;
     private final Stage ownerWindow;
 
@@ -48,7 +48,7 @@ public class RecipeEditor extends Stage {
     private final RecipeTreeItem root = new RecipeTreeItem("System", TreeItemType.Folder);
     private final ToolBar toolBar = new ToolBar();
     private final ToolBar statusBar = new ToolBar();
-    
+
     private final Button edit = new Button("Edit");
     private final Button discard = new Button("Discard changes");
     private final Button launch = new Button("Release for production");
@@ -57,22 +57,22 @@ public class RecipeEditor extends Stage {
     private final Button cancel = new Button("Cancel editing");
     private final Button maximize = new Button("maximize");
 
-    
+
     private final FlowPane flowPane = new FlowPane();
     private final ScrollPane stepsScrollPane = new ScrollPane(flowPane);
     private final VBox pane = new VBox();
     private final ScrollPane scrollPane = new ScrollPane(pane);
     private final SplitPane splitPane = new SplitPane(treeView, scrollPane, stepsScrollPane);
-    
+
     private final StringProperty editorMode = new SimpleStringProperty();
-    
+
     private long SelectedItemID = -1;
-    
+
     private RecipeModel recipeModel = new RecipeModel();
     private Recipe selectedRecipe;
-    
+
     private String draggedStepPhaseName;
-    
+
     private String returnData = "";
     private String unit;
 
@@ -108,21 +108,21 @@ public class RecipeEditor extends Stage {
         launch.setPrefWidth(200);
         validate.setPrefWidth(200);
         cancel.setPrefWidth(200);
-        
+
         save.setDisable(true);
         edit.setDisable(true);
         discard.setDisable(true);
         launch.setDisable(true);
         validate.setDisable(true);
         cancel.setDisable(true);
-        
+
         scrollPane.prefHeightProperty().bind(heightProperty());
         flowPane.prefHeightProperty().bind(heightProperty());
         flowPane.prefWidthProperty().bind(stepsScrollPane.widthProperty());
-        
+
         stepsScrollPane.setMaxWidth(800);
         scrollPane.setPannable(true);
-        
+
         flowPane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         flowPane.setVgap(5);
         flowPane.setHgap(15);
@@ -148,15 +148,15 @@ public class RecipeEditor extends Stage {
         rootPane.setCenter(splitPane);
         rootPane.setTop(toolBar);
         rootPane.setBottom(statusBar);
-        
+
         splitPane.setDividerPositions(0.1,0.6,0.3);
-        
+
         setTitle("Recipe editor");
         setScene(new Scene(rootPane));
         initOwner(ownerWindow);
         initModality(Modality.WINDOW_MODAL);
         initStyle(StageStyle.UTILITY);
-        
+
     }
     private void actionHandler() {
         maximize.setOnMouseClicked(this::onMaximize);
@@ -177,9 +177,9 @@ public class RecipeEditor extends Stage {
             MenuItem cut = new MenuItem("Cut");
             MenuItem paste = new MenuItem("Paste");
             MenuItem rename = new MenuItem("Rename");
-            
+
             menu.getItems().addAll(createFolder, createRecipe, new SeparatorMenuItem(), refresh, loadRecipe, new SeparatorMenuItem(), delete, copy, cut, paste, new SeparatorMenuItem(), rename);
-            
+
             createFolder.setOnAction(this::onCreateFolder);
             createRecipe.setOnAction(this::onCreateRecipe);
             refresh.setOnAction(this::onRefresh);
@@ -355,7 +355,7 @@ public class RecipeEditor extends Stage {
                 editorMode.setValue("edit");
             }
         }
-        
+
     }
     private void onRefresh(ActionEvent action){
         FillTreeFromDB();
@@ -383,7 +383,7 @@ public class RecipeEditor extends Stage {
         LoadRecipeToGraphicsWithoutEdit();
     }
     private void onCopy(ActionEvent action) {
-        
+
     }
     private void onCut(ActionEvent action) {
         RecipeTreeItem parent = (RecipeTreeItem)treeView.getSelectionModel().getSelectedItem();
@@ -400,7 +400,7 @@ public class RecipeEditor extends Stage {
             }, () -> {});
             FillTreeFromDB();
         }
-        
+
         SelectedItemID = -1;
     }
     private void onSaveClicked(MouseEvent action) {
@@ -426,7 +426,7 @@ public class RecipeEditor extends Stage {
                 .filter(item -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim()))
                 .map(item -> item.getValueParametersData().get("Percentage %"))
                 .reduce(0.0, Double::sum);
-        
+
         if (total == 100 || total == 0.0) {
             List<String> phasesNames = controller.getAllPhases().stream().map(Phase::getName).collect(Collectors.toList());
             recipeModel.setParallelSteps(recipeModel.getParallelSteps()
@@ -598,14 +598,14 @@ public class RecipeEditor extends Stage {
         }
         FillTreeFromDB();
     }
-    
+
     private void DeleteTreeItemInDBRecursiveAction(RecipeTreeItem item){
         item.getChildren().forEach(subItem -> {
             DeleteTreeItemInDBRecursiveAction(((RecipeTreeItem) subItem));
         });
         controller.deleteTreeItemById(item.getItemID());
     }
-    
+
     private void FillTreeFromDB(){
         Map<Long, List<TreeViewItemsData>> groupedItemsByParentID =  controller.getAllTreeItems().stream().collect(Collectors.groupingBy(TreeViewItemsData::getParentID, LinkedHashMap::new , Collectors.toCollection(LinkedList::new )));
         root.setExpanded(true);
@@ -642,13 +642,13 @@ public class RecipeEditor extends Stage {
     private void LoadRecipeToGraphicsWithoutEdit() {
         pane.getChildren().clear();
         for (ParallelStepsModel pSM : recipeModel.getParallelSteps()) {
-                ParallelSteps parallStepTemp = new ParallelSteps();
-                pane.getChildren().add(parallStepTemp);
-                for (StepModel sm : pSM.getSteps()) {
-                    Step step = new Step(sm.getPhaseName(), false, mainWindow);
-                    step.setModel(sm);
-                    parallStepTemp.getChildren().add(step);
-                }
+            ParallelSteps parallStepTemp = new ParallelSteps();
+            pane.getChildren().add(parallStepTemp);
+            for (StepModel sm : pSM.getSteps()) {
+                Step step = new Step(sm.getPhaseName(), false, mainWindow);
+                step.setModel(sm);
+                parallStepTemp.getChildren().add(step);
+            }
         }
     }
     private void LoadRecipeToGraphicsWithEdit() {
@@ -672,13 +672,13 @@ public class RecipeEditor extends Stage {
         adjustDragDropActionsForReceivingContainer(ps);
         pane.getChildren().add(ps);
     }
-    
+
     private boolean notOneOfItsChild(long SelectedItem, long destination) {
         Map<Long, List<TreeViewItemsData>> groupedItemsByParentID =  controller.getAllTreeItems()
                 .stream()
                 .collect(Collectors.groupingBy(TreeViewItemsData::getParentID, LinkedHashMap::new , Collectors.toCollection(LinkedList::new )));
         return ! notOneOfItsChildRecursiveCheck(destination, SelectedItem, groupedItemsByParentID);
-        
+
     }
     private boolean notOneOfItsChildRecursiveCheck(long destination, long SelectedItem, Map<Long, List<TreeViewItemsData>> groupedItemsByParentID) {
         if (groupedItemsByParentID.get(SelectedItem) != null) {
@@ -696,7 +696,7 @@ public class RecipeEditor extends Stage {
         }
         return false;
     }
-    
+
     private void clearPaneForNewRecipe() {
         ParallelSteps startPane = new ParallelSteps();
         ParallelSteps ParallelStepsZero = new ParallelSteps();
@@ -704,52 +704,52 @@ public class RecipeEditor extends Stage {
 
         startPane.getChildren().add(startStep);
         startPane.getModel().getSteps().add(startStep.getModel());
-        
+
         pane.getChildren().clear();
         pane.getChildren().addAll(startPane, ParallelStepsZero);
-        
+
         recipeModel.getParallelSteps().add(startPane.getModel());
         recipeModel.getParallelSteps().add(ParallelStepsZero.getModel());
-        
+
         ParallelStepsZero.getChildren().clear();
         ParallelStepsZero.getModel().getSteps().clear();
-        
+
         adjustDragDropActionsForReceivingContainer(ParallelStepsZero);
-    }    
-    
+    }
+
     private String createNameWindow(String labelString){
-        
+
         Label label = new Label(labelString);
         TextField field = new TextField();
         field.setPromptText("Please enter the name ");
         field.setPrefWidth(350);
-        
-        
+
+
         Button Cancel = new Button("Cancel");
         Button Ok = new Button("Ok");
-        
+
         Cancel.setPrefWidth(150);
         Ok.setPrefWidth(150);
-        
+
         HBox buttonsContainer = new HBox();
         buttonsContainer.getChildren().addAll(Ok, Cancel);
         buttonsContainer.setSpacing(10);
         buttonsContainer.setPadding(new Insets(5));
-        
+
         GridPane container = new GridPane();
         container.add(field, 0, 0);
         container.setPadding(new Insets(5));
         container.setVgap(5);
         container.setHgap(5);
-        
+
         BorderPane root = new BorderPane();
         root.setBottom(buttonsContainer);
         root.setCenter(container);
         root.setTop(label);
         root.setPadding(new Insets(15));
-        
+
         Scene scene = new Scene(root);
-        
+
         Stage stage = new Stage();
         stage.setTitle("Please enter name ");
         stage.initStyle(StageStyle.UTILITY);
@@ -800,11 +800,11 @@ public class RecipeEditor extends Stage {
             }
         });
         stage.setOnCloseRequest(action -> returnData = "Cancel");
-        
+
         field.requestFocus();
         stage.showAndWait();
-        
-        
+
+
         return returnData;
     }
 

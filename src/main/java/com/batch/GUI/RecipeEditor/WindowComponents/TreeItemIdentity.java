@@ -6,7 +6,7 @@ import javafx.scene.control.TreeItem;
 
 
 public class TreeItemIdentity extends TreeItem<String> {
-    
+
     private long itemParent;
     private int itemLevel;
     private long itemID;
@@ -20,7 +20,7 @@ public class TreeItemIdentity extends TreeItem<String> {
 
     public TreeItemIdentity() {
     }
-    
+
 
     public long getItemParent() {
         return itemParent;
@@ -45,6 +45,6 @@ public class TreeItemIdentity extends TreeItem<String> {
     public void setItemID(long itemID) {
         this.itemID = itemID;
     }
-    
-    
+
+
 }

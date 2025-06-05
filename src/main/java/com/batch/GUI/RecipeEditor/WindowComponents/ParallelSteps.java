@@ -11,7 +11,7 @@ import javafx.scene.paint.Color;
 public class ParallelSteps extends HBox {
 
     private ParallelStepsModel model ;
-    
+
     public ParallelSteps() {
         model = new ParallelStepsModel();
         initialization();
@@ -43,6 +43,6 @@ public class ParallelSteps extends HBox {
     public void setModel(ParallelStepsModel model) {
         this.model = model;
     }
-    
-    
+
+
 }

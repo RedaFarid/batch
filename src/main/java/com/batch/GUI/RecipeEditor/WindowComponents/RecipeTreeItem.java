@@ -10,7 +10,7 @@ public class RecipeTreeItem extends TreeItemIdentity{
     private Recipe recipe;
     private TreeItemType itemType;
     private String itemValue;
-    
+
 
     public RecipeTreeItem(String value, TreeItemType type) {
         itemType = type;
@@ -32,7 +32,7 @@ public class RecipeTreeItem extends TreeItemIdentity{
                 return;
         }
         super.setValue(value);
-    super.setGraphic(view);
+        super.setGraphic(view);
     }
 
     public Recipe getRecipe() {
@@ -58,5 +58,5 @@ public class RecipeTreeItem extends TreeItemIdentity{
     public void setItemValue(String itemValue) {
         this.itemValue = itemValue;
     }
-    
+
 }

@@ -40,17 +40,17 @@ public class Step extends VBox {
     private Scene scene = new Scene(root);
 
     private DropShadow shadow = new DropShadow(5, 3, 3, Color.GRAY);
-    
+
     private Map<String, Color> colors = new HashMap();
     private Color selectedColor;
     private boolean tool;
     private int detailedContainerX = 0;
     private int detailedContainerY = 0;
     private StepModel model;
-    
+
     private String var = "";
     private Tooltip tip;
-    
+
     private final LocalTime time = LocalTime.now();
 
     private final RecipeEditorController controller;
@@ -58,7 +58,7 @@ public class Step extends VBox {
     public Step(String text,boolean tool, Stage window) {
         model = new StepModel(text);
         this.controller = ApplicationContext.applicationContext.getBean(RecipeEditorController.class);
-        
+
         List<Phase> list = controller.getAllPhases();
         list.add(new Phase(-1L, "Start", "", "Start",null));
         list.add(new Phase(-1L, "End", "", "End", null));
@@ -86,7 +86,7 @@ public class Step extends VBox {
     }
 
     private void initialization(String type) {
-        
+
         selectedColor = colors.get(type);
         setBackground(new Background(new BackgroundFill(selectedColor, CornerRadii.EMPTY, Insets.EMPTY)));
         setEffect(shadow);
@@ -115,7 +115,7 @@ public class Step extends VBox {
                 Error.showAndWait();
             }
         });
-        
+
         setOnMouseEntered(event -> {
             Tooltip.uninstall(this, tip);
             tip = new Tooltip(getTooltipString());
@@ -123,10 +123,10 @@ public class Step extends VBox {
             setBackground(new Background(new BackgroundFill(selectedColor.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
         });
         setOnMouseExited(action -> setBackground(new Background(new BackgroundFill(selectedColor.brighter(), CornerRadii.EMPTY, Insets.EMPTY))));
-        
+
         createConfigurationWindow();
     }
-    
+
     private void createConfigurationWindow(){
 
         root.setCenter(detailsContainer);
@@ -139,7 +139,7 @@ public class Step extends VBox {
         detailsContainer.setHgap(5);
         detailsContainer.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         detailsContainer.setPadding(new Insets(10));
-        
+
 
         bottomContainer.setSpacing(10);
         bottomContainer.setPadding(new Insets(5));
@@ -151,7 +151,7 @@ public class Step extends VBox {
         stepDetails.setScene(scene);
         stepDetails.setTitle(Name.getText());
         stepDetails.setResizable(false);
-        
+
         labelHBox.getChildren().addAll(Name);
         labelHBox.setSpacing(5);
         labelHBox.setAlignment(Pos.CENTER);
@@ -159,14 +159,14 @@ public class Step extends VBox {
         phaseTypeLabel.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:16;");
         Name.setStyle("-fx-font-weight:normal;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:16;");
     }
-    
+
     private void fillParametersInConfigurationWindow() {
         if (model != null) {
             detailsContainer.getChildren().clear();
             Map<String, Boolean> checksValues = model.getCheckParametersData();
             Map<String, Double> AnalogValues = model.getValueParametersData();
             List<Parameter> types = model.getParametersType();
-            
+
             types.stream().sorted((Parameter t, Parameter t1) -> t1.getType().compareTo(t.getType())).forEach(parameter ->  {
                 if (parameter.getType().equals(PhaseParameterType.Check.name())) {
                     CheckBox box = new CheckBox(parameter.getName());
@@ -174,7 +174,7 @@ public class Step extends VBox {
                     box.selectedProperty().addListener((observable, oldValue, newValue) -> checksValues.replace(parameter.getName(), newValue));
                     box.setPrefWidth(400);
                     detailsContainer.add(box, detailedContainerX, detailedContainerY++);
-                    
+
                 } else if (parameter.getType().equals(PhaseParameterType.Value.name())) {
                     Label label = new Label(parameter.getName());
                     label.setPrefWidth(150);
@@ -213,10 +213,10 @@ public class Step extends VBox {
             }
         }
     }
-    
+
     public String getStepName() {
         return Name.getText();
-    }   
+    }
 
     public StepModel getModel() {
         return model;
@@ -225,7 +225,7 @@ public class Step extends VBox {
     public void setModel(StepModel model) {
         this.model = model;
     }
-    
+
     private String getTooltipString() {
         var = "";
         if (model.getPhaseName().equals("Start") || model.getPhaseName().equals("End")) {
