@@ -22,5 +22,3 @@ public interface BatchControllerDataRepository extends JpaRepository<BatchContro
     @Query(value = "SELECT * FROM BatchControllerData where Unit like ?1 ", nativeQuery = true)
     Optional<BatchControllerData> findByUnitName(String unitName);
 }
-
-
