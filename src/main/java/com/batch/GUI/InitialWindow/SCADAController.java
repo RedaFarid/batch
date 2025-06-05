@@ -55,13 +55,13 @@ public class SCADAController {
 
     @FXML
     private ImageView V_24;
-    
+
     @FXML
     private ImageView V_27;
-    
+
     @FXML
     private ImageView V_28;
-    
+
     @FXML
     private ImageView V_29;
 
@@ -184,7 +184,7 @@ public class SCADAController {
 
     @FXML
     private Label Tank_2_R;
-    
+
     @FXML
     private Pane Water_Press;
 
@@ -258,7 +258,7 @@ public class SCADAController {
             levelLabels.put("W03", Mixer_1_LevelLabel);
             levelLabels.put("W04", Tank_1_LevelLabel);
             levelLabels.put("W05", Tank_2_LevelLabel);
-            
+
             weightLabels.put("W01", Mixer_1_R);
             weightLabels.put("W02", Tank_3_R);
             weightLabels.put("W03", Mixer_2_R);
@@ -266,7 +266,7 @@ public class SCADAController {
             weightLabels.put("W05", Tank_2_R);
 
             Parent = BackGround;
-            
+
             waterLevel = Water_Level;
             WaterPress = Water_Press;
             AirPress = Air_Press;

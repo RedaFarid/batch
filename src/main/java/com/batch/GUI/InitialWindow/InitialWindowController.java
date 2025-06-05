@@ -80,7 +80,7 @@ public class InitialWindowController {
         loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "Set all devices to auto"));
     }
     public synchronized void onSetAllInAutoReleased() {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Make_All_Devices_In_Automatic)).setValue(Boolean.FALSE);
+        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Make_All_Devices_In_Automatic)).setValue(Boolean.FALSE);
     }
 
     public void onLogIn() {

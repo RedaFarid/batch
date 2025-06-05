@@ -938,13 +938,13 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
         }
     }
     private void onJournalAlarmsPressed(ActionEvent event) {
-            try {
-                if (!containerPane.getTabs().contains(allAlarmsWindow)) {
-                    containerPane.getTabs().add(allAlarmsWindow);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        try {
+            if (!containerPane.getTabs().contains(allAlarmsWindow)) {
+                containerPane.getTabs().add(allAlarmsWindow);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     private String selectUnitWindow() {
 

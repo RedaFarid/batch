@@ -21,7 +21,7 @@ public class IPC_Fill_From_Tank_2_Message extends Stage {
     private static IPC_Fill_From_Tank_2_Message singleton = null;
     private Map<String, RowDataDefinition> allDataDefinitions;
     private Stage mainWindow;
-    
+
     private BorderPane root = new BorderPane();
     private Pane pane = new  Pane();
     private HBox hbox = new HBox();
@@ -48,40 +48,40 @@ public class IPC_Fill_From_Tank_2_Message extends Stage {
         label.prefWidthProperty().bind(root.widthProperty());
         label.setPadding(new Insets(10));
         label.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:white;");
-        
-        
-        
+
+
+
         Label content = new Label("Kindly add IPC container and insert flexible hose inside it from V15,\nAfter adjusting setup please press [CONFIRMED] ");
         content.setStyle("-fx-text-fill:white;");
         content.prefWidthProperty().bind(pane.widthProperty());
         content.prefHeightProperty().bind(pane.heightProperty());
         content.setPadding(new Insets(10));
-        
+
         Button ok = new Button("CONFIRMED");
         ok.setPrefWidth(250);
         ok.setOnMouseClicked(action -> {
             ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_2_Message_Confirmation)).setValue(true);
             hide();
         });
-        
-        
+
+
         hbox.getChildren().add(ok);
         hbox.setAlignment(Pos.CENTER);
         hbox.setPadding(new Insets(10));
-        
-        
+
+
         pane.setBackground(new Background(new BackgroundFill(Color.CADETBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
         pane.getChildren().addAll(content);
-        
+
         root.setTop(label);
         root.setCenter(pane);
         root.setBottom(hbox);
         root.setPadding(new Insets(5));
         root.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
-        
+
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/GUI/Styles/Faceplate.css");
-        
+
         setScene(scene);
         setTitle("Tank 2 IPC container filling");
         setWidth(400);
