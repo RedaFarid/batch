@@ -80,7 +80,7 @@ public class BatchCreator extends Stage {
     }
 
     private void graphicsBuilder() {
-        
+
         selectedRecipeID.setPrefWidth(150);
         selectedRecipeName.setPrefWidth(300);
         batchID.setPrefWidth(150);
@@ -135,8 +135,8 @@ public class BatchCreator extends Stage {
         initOwner(mainWindow);
         initModality(Modality.WINDOW_MODAL);
         initStyle(StageStyle.UTILITY);
-        
-        
+
+
     }
     private void actionHandler() {
         CreateBatch.setOnMouseClicked(this::onCreateNewBatch);

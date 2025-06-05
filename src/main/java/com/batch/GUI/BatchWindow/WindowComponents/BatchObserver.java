@@ -33,7 +33,7 @@ public class BatchObserver extends Tab {
 
     private static volatile BatchObserver singleton = null;
     private BorderPane rootPane = new BorderPane();
-    
+
     private Stage mainWindow;
 
     private ToolBar toolBar = new ToolBar();
@@ -85,7 +85,7 @@ public class BatchObserver extends Tab {
     private void graphicsBuilder() {
 
         mainContainer.getChildren().addAll(piePane, scrollPane);
-        
+
         batchState.setPrefWidth(300);
         batchState.setPadding(new Insets(10));
         batchState.setAlignment(Pos.CENTER);
@@ -96,7 +96,7 @@ public class BatchObserver extends Tab {
         resume.setPrefWidth(150);
         close.setPrefWidth(150);
         terminate.setPrefWidth(250);
-        
+
         scrollPane.prefWidthProperty().bind(rootPane.widthProperty().divide(3).multiply(2));
         scrollPane.setStyle("-fx-background-color:white; -fx-focus-color: white;-fx-control-inner-background:white;");
         scrollPane.setBorder(new Border(new BorderStroke(Color.WHITE, BorderStrokeStyle.NONE, CornerRadii.EMPTY, new BorderWidths(0))));
@@ -105,7 +105,7 @@ public class BatchObserver extends Tab {
         pane.setSpacing(5);
         pane.setPadding(new Insets(20));
         pane.prefWidthProperty().bind(scrollPane.widthProperty().subtract(20));
-        
+
         piePane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         piePane.setAlignment(Pos.CENTER);
         piePane.setSpacing(5);
@@ -217,7 +217,7 @@ public class BatchObserver extends Tab {
     }
     private void onCloseBatch(MouseEvent action) {
         try {
-        controller.getBatchControllerDataForUnit(batch.getUnitName()).ifPresentOrElse(batchControllerData -> {
+            controller.getBatchControllerDataForUnit(batch.getUnitName()).ifPresentOrElse(batchControllerData -> {
                 batch.setOrder(BatchOrders.Close.name());
                 controller.UpdateBatchControlOrder(batch.getId(), BatchOrders.Close.name());
                 controller.updateLockGeneralControl(false, batch.getUnitName());
@@ -226,9 +226,9 @@ public class BatchObserver extends Tab {
                 } else {
                     showPopupWindow(Alert.AlertType.ERROR, "Error ", "Error closing the Batch", "Please finish the running batch first or abort it");
                 }
-        }, () -> {
-            showPopupWindow(Alert.AlertType.ERROR, "Error ", "Error aborting the Batch", "Please start the new batch first");
-        });
+            }, () -> {
+                showPopupWindow(Alert.AlertType.ERROR, "Error ", "Error aborting the Batch", "Please start the new batch first");
+            });
         } catch (Exception e) {
             e.printStackTrace();
             showErrorWindowForException(e.getMessage(), e);
