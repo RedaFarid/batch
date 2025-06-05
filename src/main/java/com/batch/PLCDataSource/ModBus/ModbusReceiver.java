@@ -13,7 +13,7 @@ public class ModbusReceiver extends ModbusSystem {
     private final ModbusConnectionMonitor connectionMonitorTask;
 
     private final LoggingService loggingService;
-    
+
     public ModbusReceiver(Map<Integer, Byte> buffer, String connectionName, String IP, int Port, byte Identifier, BooleanProperty bufferSynchronized, BooleanProperty connectionStatus, Runnable dataMapperTask, ModbusConnectionMonitor connectionMonitorTask, LoggingService loggingService) {
         super(buffer, connectionName, IP, Port, Identifier);
         this.bufferSynchronized = bufferSynchronized;
@@ -51,8 +51,8 @@ public class ModbusReceiver extends ModbusSystem {
     private byte[] intToBytes(int data) {
 
         return new byte[]{
-            (byte) ((data >> 8) & 0xff),
-            (byte) ((data) & 0xff),};
+                (byte) ((data >> 8) & 0xff),
+                (byte) ((data) & 0xff),};
     }
 
 }

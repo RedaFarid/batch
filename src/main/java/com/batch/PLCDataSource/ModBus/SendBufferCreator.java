@@ -48,13 +48,13 @@ public class SendBufferCreator extends ModbusSystem {
             buffer.put((j * uniteDataAddress * 2) + (i * 2), intToBytes(v[i])[0]);
             buffer.put((j * uniteDataAddress * 2) + (i * 2) + 1, intToBytes(v[i])[1]);
         }
-        
-        
+
+
     }
 
     private byte[] intToBytes(int data) {
         return new byte[]{
-            (byte) ((data >> 8) & 0xff),
-            (byte) ((data) & 0xff)};
+                (byte) ((data >> 8) & 0xff),
+                (byte) ((data) & 0xff)};
     }
 }

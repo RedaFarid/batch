@@ -15,7 +15,7 @@ public class ModbusSender extends ModbusSystem {
     private ModbusConnectionMonitor connectionMonitorTask;
 
     private final LoggingService loggingService;
-    
+
     private byte blank = 0;
 
     public ModbusSender(Map<Integer, Byte> buffer, String connectionName, String IP, int Port, byte Identifier, BooleanProperty bufferSunchronized, BooleanProperty connectionStatus, Runnable dataMapperTask, ModbusConnectionMonitor connectionMonitorTask, LoggingService loggingService) {
