@@ -9,6 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import lombok.Data;
 
+
 @Data
 public class AlarmsModel {
     private final ObservableList<Log> allAlarmsList = FXCollections.observableArrayList();

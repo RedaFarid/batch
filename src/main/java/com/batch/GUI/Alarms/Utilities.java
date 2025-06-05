@@ -1,5 +1,6 @@
 package com.batch.GUI.Alarms;
 
+
 import com.batch.ApplicationContext;
 import com.batch.GUI.FacePlates.FaceplateTextField;
 import javafx.geometry.Insets;
@@ -59,7 +60,7 @@ public class Utilities extends Stage {
 
         hiPressureField.setPrefWidth(250);
         loPressureField.setPrefWidth(250);
-        
+
         hiPressureField.textProperty().bindBidirectional(model.getAirPressureHiAlarm());
         loPressureField.textProperty().bindBidirectional(model.getAirPressureLoAlarm());
 
@@ -75,7 +76,7 @@ public class Utilities extends Stage {
         layout.setTop(label);
         layout.setBackground(new Background(new BackgroundFill(Color.DARKBLUE, CornerRadii.EMPTY, new Insets(2))));
         layout.setCenter(gridPane);
-        
+
         setTitle("Air-pressure settings");
         initOwner(mainWindow);
         initStyle(StageStyle.UTILITY);
@@ -83,7 +84,7 @@ public class Utilities extends Stage {
         setHeight(300);
         setWidth(500);
         setResizable(false);
-        
+
     }
 
     private void actions() {
@@ -101,3 +102,4 @@ public class Utilities extends Stage {
         });
     }
 }
+

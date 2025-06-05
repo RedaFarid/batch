@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.controlsfx.control.table.TableFilter;
 
+
 public class AllAlarmsWindow extends Tab {
 
     private static volatile AllAlarmsWindow Singleton = null;
@@ -118,7 +119,7 @@ public class AllAlarmsWindow extends Tab {
 
             }
         });
-        
+
 
         vbox.getChildren().addAll(dataentery, toolbar);
         root.getChildren().add(vbox);
