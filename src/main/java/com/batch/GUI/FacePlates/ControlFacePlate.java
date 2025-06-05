@@ -49,8 +49,8 @@ public abstract class ControlFacePlate extends Stage {
         imView.setFitHeight(100);
         imView.setEffect(shadow);
 
-        
-        
+
+
         Control = new Label("Controls ");
         Monitoring = new Label("Monitoring ");
         Signals = new Label("Signals ");
@@ -72,7 +72,7 @@ public abstract class ControlFacePlate extends Stage {
         Status.setAlignment(Pos.CENTER);
         Status.setTextAlignment(TextAlignment.CENTER);
         Status.prefWidthProperty().bind(statusVBox.widthProperty());
-        
+
         reset = new Button("Reset");
         reset.prefWidthProperty().bind(statusVBox.widthProperty());
         reset.setOnMousePressed(action -> onResetPressed(action, dataModel));
@@ -123,7 +123,7 @@ public abstract class ControlFacePlate extends Stage {
         initOwner(mainWindow);
         initModality(Modality.NONE);
         setTitle(dataModel.getName());
-        
+
         scene.getStylesheets().add("/GUI/Styles/Faceplate.css");
 
     }
@@ -172,5 +172,5 @@ public abstract class ControlFacePlate extends Stage {
     protected void showFacePlate() {
         show();
     }
-    
+
 }

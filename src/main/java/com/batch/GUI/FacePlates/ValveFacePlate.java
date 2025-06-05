@@ -30,9 +30,9 @@ public class ValveFacePlate extends ControlFacePlate {
     private ComboBox<String> monitoring_enable, mode, source;
     private CheckBox QOpen, QClose, OpenFB, CloseFB;
     private FaceplateTextField monitoring_time;
-    
+
     private boolean faultCondition ;
-            
+
     public ValveFacePlate(Stage stage, RowDataDefinition dataModel) {
         super(stage, dataModel);
     }
@@ -41,13 +41,13 @@ public class ValveFacePlate extends ControlFacePlate {
     protected void customizedGraphicsAndActions(RowDataDefinition dataModel, GridPane controlContainer, GridPane monitoringContainer, GridPane statusContainer) {
         Image image = new Image(Resources.getResource("FacePlatesIcons/Valve.png").toString());
         getImageView().setImage(image);
-        
+
         Open = new Button("Open valve");
         close = new Button("Close Valve");
 
         Open.setPrefWidth(200);
         close.setPrefWidth(200);
-        
+
         //CmboBox
         monitoring_enable = new ComboBox<>();
         mode = new ComboBox<>();
@@ -80,10 +80,10 @@ public class ValveFacePlate extends ControlFacePlate {
         //Labels
         modeLbael = new Label("Mode");
         sourceLabel = new Label("Source");
-        
+
         modeLbael.setPrefWidth(70);
         sourceLabel.setPrefWidth(70);
-        
+
         controlContainer.add(modeLbael, 1, 1);
         controlContainer.add(mode, 2, 1);
         controlContainer.add(sourceLabel, 1, 2);
@@ -98,7 +98,7 @@ public class ValveFacePlate extends ControlFacePlate {
         statusContainer.add(QClose, 1, 2);
         statusContainer.add(OpenFB, 1, 3);
         statusContainer.add(CloseFB, 1, 4);
-        
+
 
         checkDataForInitializingGraphics(dataModel);
         actionHandler(dataModel);
@@ -152,9 +152,9 @@ public class ValveFacePlate extends ControlFacePlate {
 
         ((BooleanDataType) dataModel.getAllValues().get(ValveInput.Opened_Closed)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> setOnOpenedClosedChange(dataModel));
         ((BooleanDataType) dataModel.getAllValues().get(ValveInput.Fault)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> setOnFaultChange(dataModel));
-        
+
         ((IntegerDataType) dataModel.getAllValues().get(ValveOutput.Monitoring_Time)).addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> monitoring_time.setText(String.valueOf(newValue)));
-        
+
         ((BooleanDataType) dataModel.getAllValues().get(ValveInput.QOpen)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> QOpen.setSelected(newValue));
         ((BooleanDataType) dataModel.getAllValues().get(ValveInput.QClose)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> QClose.setSelected(newValue));
         ((BooleanDataType) dataModel.getAllValues().get(ValveInput.FB_Open)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> OpenFB.setSelected(newValue));
@@ -179,7 +179,7 @@ public class ValveFacePlate extends ControlFacePlate {
         boolean actualSource =  ((BooleanDataType) dataModel.getAllValues().get(ValveOutput.Source)).getValue();
         boolean actualonitoringEnable =  ((BooleanDataType) dataModel.getAllValues().get(ValveOutput.Enable_Monitoring)).getValue();
         int actualMonitoringTime =  ((IntegerDataType) dataModel.getAllValues().get(ValveOutput.Monitoring_Time)).getValue();
-        
+
         if (actualMode) {
             mode.getSelectionModel().select(Mode.Automatic.name());
         }else{
@@ -196,7 +196,7 @@ public class ValveFacePlate extends ControlFacePlate {
             monitoring_enable.getSelectionModel().select(FB_Monitoring.Disable_monitoring.name());
         }
         monitoring_time.setText(String.valueOf(actualMonitoringTime));
-        
+
         setOnOpenedClosedChange(dataModel);
         setOnFaultChange(dataModel);
 
@@ -205,7 +205,7 @@ public class ValveFacePlate extends ControlFacePlate {
         OpenFB.setSelected(((BooleanDataType) dataModel.getAllValues().get(ValveInput.FB_Open)).getValue());
         CloseFB.setSelected(((BooleanDataType) dataModel.getAllValues().get(ValveInput.FB_Close)).getValue());
     }
-    
+
     private void onOpenPressed(RowDataDefinition dataModel) {
         ((BooleanDataType) dataModel.getAllValues().get(ValveOutput.Open)).setValue(Boolean.TRUE);
     }
@@ -220,7 +220,7 @@ public class ValveFacePlate extends ControlFacePlate {
     }
     private void setOnOpenedClosedChange(RowDataDefinition dataModel) {
         boolean opened_closed = ((BooleanDataType) dataModel.getAllValues().get(ValveInput.Opened_Closed)).getValue();
-        
+
         if (opened_closed) {
             changeStatus("Opened", Color.GREEN);
             changeColorOfImageView(Color.GREEN);

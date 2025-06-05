@@ -80,10 +80,10 @@ public class PumpFacePlate extends ControlFacePlate {
         //Labels
         modeLabel = new Label("Mode");
         sourceLabel = new Label("Source");
-        
+
         modeLabel.setPrefWidth(70);
         sourceLabel.setPrefWidth(70);
-        
+
         controlContainer.add(modeLabel, 1, 1);
         controlContainer.add(mode, 2, 1);
         controlContainer.add(sourceLabel, 1, 2);
@@ -117,7 +117,7 @@ public class PumpFacePlate extends ControlFacePlate {
                 return null;
             }
         });
-        
+
         monitoring_enable.valueProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -174,7 +174,7 @@ public class PumpFacePlate extends ControlFacePlate {
         boolean actualSource =  ((BooleanDataType) dataModel.getAllValues().get(PumpOutput.Source)).getValue();
         boolean actualonitoringEnable =  ((BooleanDataType) dataModel.getAllValues().get(PumpOutput.Enable_Monitoring)).getValue();
         int actualMonitoringTime =  ((IntegerDataType) dataModel.getAllValues().get(PumpOutput.Monitoring_Time)).getValue();
-        
+
         if (actualMode) {
             mode.getSelectionModel().select(Mode.Automatic.name());
         }else{
@@ -191,11 +191,11 @@ public class PumpFacePlate extends ControlFacePlate {
             monitoring_enable.getSelectionModel().select(FB_Monitoring.Disable_monitoring.name());
         }
         monitoring_time.setText(String.valueOf(actualMonitoringTime));
-        
+
         FB.setSelected(((BooleanDataType) dataModel.getAllValues().get(PumpInput.Feedback)).getValue());
         QControl.setSelected(((BooleanDataType) dataModel.getAllValues().get(PumpInput.QControl)).getValue());
         Fault.setSelected(((BooleanDataType) dataModel.getAllValues().get(PumpInput.Fault)).getValue());
-        
+
         setOnRunningChange(dataModel);
         setOnFaultChange(dataModel);
     }

@@ -72,31 +72,31 @@ public class MixerFacePlate extends ControlFacePlate {
         Speed.setRestrict("[0-9].");
         Speed.setMaxLength(10);
         Speed.setPrefWidth(80);
-        
+
         FinalSpeed = new FaceplateTextField();
         FinalSpeed.setPromptText("0.0");
         FinalSpeed.setRestrict("[0-9].");
         FinalSpeed.setMaxLength(10);
         FinalSpeed.setPrefWidth(120);
         FinalSpeed.setEditable(false);
-        
+
         Ampere = new FaceplateTextField();
         Ampere.setPromptText("0.0");
         Ampere.setRestrict("[0-9].");
         Ampere.setMaxLength(10);
         Ampere.setPrefWidth(120);
         Ampere.setEditable(false);
-        
+
         //Labels
         modeLbael = new Label("Mode");
         sourceLabel = new Label("Source");
         SpeedLabel = new Label("Setpoint");
         FinalSpeedLabel = new Label("Output Speed");
         AmpereLabel = new Label("Motor Current");
-        
+
         modeLbael.setPrefWidth(70);
         sourceLabel.setPrefWidth(70);
-        
+
         controlContainer.add(modeLbael, 1, 1);
         controlContainer.add(mode, 2, 1);
         controlContainer.add(sourceLabel, 1, 2);
@@ -108,7 +108,7 @@ public class MixerFacePlate extends ControlFacePlate {
 
         statusContainer.add(QControl, 1, 1);
         statusContainer.add(Fault, 1, 2);
-        
+
         monitoringContainer.add(FinalSpeedLabel, 1, 1);
         monitoringContainer.add(FinalSpeed, 2, 1);
         monitoringContainer.add(AmpereLabel, 1, 2);
@@ -144,7 +144,7 @@ public class MixerFacePlate extends ControlFacePlate {
                 }
             }
         });
-        
+
         Speed.onEneterKeyPressed(new Callback<String, Double>() {
             @Override
             public Double call(String param) {
@@ -154,7 +154,7 @@ public class MixerFacePlate extends ControlFacePlate {
                 return null;
             }
         });
-        
+
         ((RealDataType) dataModel.getAllValues().get(MixerInput.Output_Speed)).addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> FinalSpeed.setText(String.valueOf(newValue)));
         ((RealDataType) dataModel.getAllValues().get(MixerInput.Ampere_Reading)).addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> Ampere.setText(String.valueOf(newValue)));
 
@@ -180,11 +180,11 @@ public class MixerFacePlate extends ControlFacePlate {
     protected void checkDataForInitializingGraphics(RowDataDefinition dataModel) {
         boolean actualMode =  ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Mode)).getValue();
         boolean actualSource =  ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Source)).getValue();
-        
+
         double AmpereReading = ((RealDataType) dataModel.getAllValues().get(MixerInput.Ampere_Reading)).getValue();
         double SpeedReading = ((RealDataType) dataModel.getAllValues().get(MixerOutput.Speed_Setpoint)).getValue();
         double outputSpeed = ((RealDataType) dataModel.getAllValues().get(MixerInput.Output_Speed)).getValue();
-        
+
         if (actualMode) {
             mode.getSelectionModel().select(Mode.Automatic.name());
         }else{
@@ -195,15 +195,15 @@ public class MixerFacePlate extends ControlFacePlate {
         }else{
             source.getSelectionModel().select(Source.Local.name());
         }
-        
+
         QControl.setSelected(((BooleanDataType) dataModel.getAllValues().get(MixerInput.QControl)).getValue());
         Ampere.setText(String.valueOf(AmpereReading));
         Speed.setText(String.valueOf(SpeedReading));
         FinalSpeed.setText(String.valueOf(outputSpeed));
-        
+
         Fault.setSelected(((BooleanDataType) dataModel.getAllValues().get(MixerInput.Fault)).getValue());
         QControl.setSelected(((BooleanDataType) dataModel.getAllValues().get(MixerInput.QControl)).getValue());
-        
+
         setOnRunningChange(dataModel);
         setOnFaultChange(dataModel);
     }

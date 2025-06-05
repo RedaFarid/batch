@@ -13,12 +13,12 @@ public class FaceplateTextField extends RestrictiveTextField {
 
     private Background back;
     private Callback<String, Double> callback = (String param) -> null;
-            
+
     public FaceplateTextField() {
         back = new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY));
         intialize();
     }
-    
+
     private void intialize(){
         setBorder(new Border(new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(0.5))));
         addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
@@ -39,7 +39,7 @@ public class FaceplateTextField extends RestrictiveTextField {
             }
         });
     }
-    
+
     public void onEneterKeyPressed(Callback<String, Double> callback){
         this.callback = callback;
     }

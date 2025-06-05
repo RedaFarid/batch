@@ -66,29 +66,29 @@ public abstract class MeasurementFacePlate extends Stage {
                 ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Warning_SP)),
                 ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Alarm_SP))
         );
-        
+
         Control = new Label("Configurations ");
         Alarm = new Label("Alarms ");
         Signals = new Label("Signals ");
         Status = new Label();
         simulation = new Label("Simulation");
         simulationValueLabel = new Label("Value");
-        
+
         simulationValueLabel.setPrefWidth(100);
-        
+
         reading = new TextField();
         reading.setEditable(false);
         reading.setFont(Font.font(17));
         reading.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN.brighter(), CornerRadii.EMPTY, Insets.EMPTY)));
         reading.setText(String.format("Reading : %20.8f  " + unit, ((RealDataType) dataModel.getAllValues().get(WeightInput.Weight)).getValue()));
-        
-        
+
+
         simulationValueField = new FaceplateTextField();
         simulationValueField.setPromptText("0.0");
         simulationValueField.setPrefWidth(130);
-        
+
         enableSimulation = new CheckBox("Enable simulation");
-        
+
 
         controlContainer = new VBox();
         statusContainer = new VBox();
@@ -106,7 +106,7 @@ public abstract class MeasurementFacePlate extends Stage {
         Status.setAlignment(Pos.CENTER);
         Status.setTextAlignment(TextAlignment.CENTER);
         Status.prefWidthProperty().bind(statusVBox.widthProperty());
-        
+
         reset = new Button("Reset");
         reset.prefWidthProperty().bind(statusVBox.widthProperty());
         reset.setOnMousePressed(action -> onResetPressed(action, dataModel));
@@ -121,7 +121,7 @@ public abstract class MeasurementFacePlate extends Stage {
         controlPane.setPadding(new Insets(5));
         alarmsPane.setPadding(new Insets(5));
         simulationPane.setPadding(new Insets(5));
-        
+
 
         signalsPane.setVgap(5);
         controlPane.setVgap(5);
@@ -137,11 +137,11 @@ public abstract class MeasurementFacePlate extends Stage {
         controlPane.setBorder(new Border(new BorderStroke(Color.LIGHTBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
         alarmsPane.setBorder(new Border(new BorderStroke(Color.LIGHTBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
         simulationPane.setBorder(new Border(new BorderStroke(Color.LIGHTBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
-        
+
         simulationPane.add(simulationValueLabel, 0, 1);
         simulationPane.add(simulationValueField, 1, 1);
         simulationPane.add(enableSimulation, 0, 0, 2, 1);
-        
+
 
         statusContainer.getChildren().addAll(Signals, signalsPane);
         controlContainer.getChildren().addAll(reading, Control, controlPane, Alarm, alarmsPane, simulation, simulationPane);
@@ -166,7 +166,7 @@ public abstract class MeasurementFacePlate extends Stage {
         initOwner(mainWindow);
         initModality(Modality.NONE);
         setTitle(dataModel.getName());
-        
+
         scene.getStylesheets().add("/GUI/Styles/Faceplate.css");
 
     }
@@ -228,5 +228,5 @@ public abstract class MeasurementFacePlate extends Stage {
     protected void showFacePlate() {
         show();
     }
-    
+
 }
