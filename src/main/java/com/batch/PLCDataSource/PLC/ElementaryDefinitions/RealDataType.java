@@ -9,5 +9,5 @@ public class RealDataType extends SimpleFloatProperty implements ValueObject {
     public RealDataType(float initialValue) {
         super(initialValue);
     }
-    
+
 }

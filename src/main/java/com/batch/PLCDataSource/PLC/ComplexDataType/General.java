@@ -28,7 +28,7 @@ public class General extends RowDataDefinition {
         addAttribute(GeneralInput.Lo_Air_Pressure_Alarm, EDT.Boolean, new Address(InAddress + 9, 0), new BooleanDataType(false), In, Alarming.Enable, LogIdentefires.Error, Logging.Disable);
         addAttribute(GeneralInput.Over_Under_Voltage_Alarm, EDT.Boolean, new Address(InAddress + 9, 1), new BooleanDataType(false), In, Alarming.Enable, LogIdentefires.Error, Logging.Disable);
         addAttribute(GeneralInput.ESD_Alarm, EDT.Boolean, new Address(InAddress + 9, 2), new BooleanDataType(false), In, Alarming.Enable, LogIdentefires.Error, Logging.Disable);
-        
+
         addAttribute(GeneralOutput.HI_Air_Pressure_Limit, EDT.Real, new Address(OutAddress, 0), new RealDataType(0.0f), Out, Alarming.Disable, LogIdentefires.Warning, Logging.Enable);
         addAttribute(GeneralOutput.LO_Air_Pressure_Limit, EDT.Real, new Address(OutAddress + 4, 0), new RealDataType(0.0f), Out, Alarming.Disable, LogIdentefires.Warning, Logging.Enable);
         addAttribute(GeneralOutput.Make_All_Devices_In_Automatic, EDT.Boolean, new Address(OutAddress + 8, 0), new BooleanDataType(false), Out, Alarming.Enable, LogIdentefires.Info, Logging.Disable);

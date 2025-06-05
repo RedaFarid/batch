@@ -29,7 +29,7 @@ public class Address {
 
     public void setBitNumber(int bitNumber) {
         this.bitNumber = bitNumber;
-    } 
-    
-    
+    }
+
+
 }

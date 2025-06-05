@@ -8,7 +8,7 @@ import com.batch.Utilities.LogIdentefires;
 
 public class Valve extends RowDataDefinition {
 
-    
+
     public Valve(String name) {
         super(name, 2, 4);
     }

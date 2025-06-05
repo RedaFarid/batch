@@ -28,13 +28,13 @@ public class PLCDataDefinitionFactory {
     public void init() {
         try {
             addNewDeviceToDataDefinition(new LifeSignal("CommCheck"));
-            
+
             addNewDeviceToDataDefinition(new Pump("P01"));
             addNewDeviceToDataDefinition(new Pump("P02"));
             addNewDeviceToDataDefinition(new Pump("P03"));
             addNewDeviceToDataDefinition(new Pump("P04"));
             addNewDeviceToDataDefinition(new Pump("P05"));
-            
+
             addNewDeviceToDataDefinition(new Valve("V01"));
             addNewDeviceToDataDefinition(new Valve("V02"));
             addNewDeviceToDataDefinition(new Valve("V03"));
@@ -64,22 +64,22 @@ public class PLCDataDefinitionFactory {
             addNewDeviceToDataDefinition(new Valve("V27"));
             addNewDeviceToDataDefinition(new Valve("V28"));
             addNewDeviceToDataDefinition(new Valve("V29"));
-            
+
             addNewDeviceToDataDefinition(new Mixer("M01"));
             addNewDeviceToDataDefinition(new Mixer("M02"));
-            
+
             addNewDeviceToDataDefinition(new Weight("W01"));
             addNewDeviceToDataDefinition(new Weight("W02"));
             addNewDeviceToDataDefinition(new Weight("W03"));
             addNewDeviceToDataDefinition(new Weight("W04"));
             addNewDeviceToDataDefinition(new Weight("W05"));
-            
+
             addNewDeviceToDataDefinition(new Weight("L01"));
-            
+
             addNewDeviceToDataDefinition(new General("General"));
 
 
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,7 +94,7 @@ public class PLCDataDefinitionFactory {
     public Map<String, RowDataDefinition> getAllDevicesDataModel() {
         return definition.getAllDevices();
     }
-    
+
     public void AddBatchData() {
         recipeConfRepository.findAll().stream().findAny().ifPresent(recipeConfig -> {
             final int maxParallelSteps = recipeConfig.getMaxParallelSteps();
@@ -113,66 +113,66 @@ public class PLCDataDefinitionFactory {
             ((RowDataDefinition) device).getAddresses().forEach((attributeName, attribute) -> {
                 System.err.println(deviceNme + " " + attributeName + " " + attribute);
 //                if (((RowDataDefinition) device).getInOutIndecation().get(attributeName).equals(true)) {
-                    switch (((RowDataDefinition) device).getTypes().get(attributeName)) {
-                        case Boolean:
-                            ((BooleanDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                                System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue);
-                            });
-                            break;
-                        case Integer:
-                            ((IntegerDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
-                                System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue);
-                            });
-                            break;
-                        case Real:
-                            ((RealDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
-                                System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue);
-                            });
-                            break;
-                        default:
-                            break;
-                    }
+                switch (((RowDataDefinition) device).getTypes().get(attributeName)) {
+                    case Boolean:
+                        ((BooleanDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                            System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue);
+                        });
+                        break;
+                    case Integer:
+                        ((IntegerDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
+                            System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue);
+                        });
+                        break;
+                    case Real:
+                        ((RealDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
+                            System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue);
+                        });
+                        break;
+                    default:
+                        break;
+                }
 //                }
             });
         });
     }
     public void addListenerToAllInPropertiesOfBatchData() {
         RowDataDefinition device = definition.getAllDevices().get("BatchSystem");
-                String deviceNme = "BatchSystem";
-            
-            device.getAddresses().forEach((attributeName, attribute) -> {
-                System.err.println(deviceNme + " " + attributeName + " " + attribute);
-                if (device.getInOutIndecation().get(attributeName).equals(true)) {
-                    switch (device.getTypes().get(attributeName)) {
-                        case Boolean:
-                            ((BooleanDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                                System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue);
-                            });
-                            break;
-                        case Integer:
-                            ((IntegerDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
-                                System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue);
-                            });
-                            break;
-                        case Real:
-                            ((RealDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
-                                System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue);
-                            });
-                            break;
-                        default:
-                            break;
-                    }
+        String deviceNme = "BatchSystem";
+
+        device.getAddresses().forEach((attributeName, attribute) -> {
+            System.err.println(deviceNme + " " + attributeName + " " + attribute);
+            if (device.getInOutIndecation().get(attributeName).equals(true)) {
+                switch (device.getTypes().get(attributeName)) {
+                    case Boolean:
+                        ((BooleanDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                            System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue);
+                        });
+                        break;
+                    case Integer:
+                        ((IntegerDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
+                            System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue);
+                        });
+                        break;
+                    case Real:
+                        ((RealDataType) ((RowDataDefinition) device).getAllValues().get(attributeName)).addListener((ObservableValue<? extends Object> observable, Object oldValue, Object newValue) -> {
+                            System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue);
+                        });
+                        break;
+                    default:
+                        break;
                 }
-            });
-            
-            
+            }
+        });
+
+
     }
 
     private void addNewDeviceToDataDefinition(RowDataDefinition device) throws Exception {
         int InLastAddress = definition.getInLastAddress();
         int OutLastAddress = definition.getOutLastAddress();
 
-        
+
         device.createNewDeviceDataModel(InLastAddress, OutLastAddress);
 
         definition.setInLastAddress(InLastAddress + device.getInAddress());
@@ -183,10 +183,10 @@ public class PLCDataDefinitionFactory {
     private void addBatchDataToDataDefinition( String step, BatchPhasesDataDefinition batch) {
         int InLastAddress = definition.getInLastAddress();
         int OutLastAddress = definition.getOutLastAddress();
-        
+
         ((BatchPhasesDataDefinition) batch).setStepNo(step);
         batch.createNewDeviceDataModel(InLastAddress, OutLastAddress);
-        
+
         definition.setInLastAddress(InLastAddress + batch.getInAddress());
         definition.setOutLastAddress(OutLastAddress + batch.getOutAddress());
 

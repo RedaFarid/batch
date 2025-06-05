@@ -17,12 +17,12 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
     private int InAddressTemp = 2;
     private int OutAddressTemp = 2;
     private int bitIncrement = 0;
-    
+
     private String StepNo;
     private String unit = "";
 
     private final PhaseRepository phaseRepository;
-        
+
     public BatchPhasesDataDefinition(String name, String unit) {
         super(name, 6, 6);
         this.unit = unit;
@@ -31,15 +31,15 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
 
     @Override
     public void createNewDeviceDataModel(int InAddress, int OutAddress) {
-        
+
         //Status
         addAttribute(BatchControl.PhaseIn, EDT.Integer, new Address(InAddress, 0), new IntegerDataType(0), In, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
         addAttribute(BatchControl.Status, EDT.Integer, new Address(InAddress + 2, 0), new IntegerDataType(0), In, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-        
+
         //Orders
         addAttribute(BatchControl.PhaseOut, EDT.Integer, new Address(OutAddress, 0), new IntegerDataType(0), Out, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
         addAttribute(BatchControl.Order, EDT.Integer, new Address(OutAddress + 2, 0), new IntegerDataType(0), Out, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-        
+
         InAddressTemp = 4;
         OutAddressTemp = 4;
         PhasesAttributes.getAttributes().addNewStep(StepNo);
@@ -79,7 +79,7 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
         setInAddress(InAddressTemp);
         setOutAddress(OutAddressTemp);
     }
-    
+
     public String getStepNo() {
         return StepNo;
     }
@@ -92,7 +92,7 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
 
         private String phase;
         private String Parameter;
-        
+
         public AttributeName(String phase, String parameter) {
             this.Parameter = parameter;
             this.phase = phase;
@@ -113,7 +113,7 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
         public void setParameter(String Parameter) {
             this.Parameter = Parameter;
         }
-        
+
         @Override
         public String toString() {
             return phase + " " +  Parameter + hashCode();

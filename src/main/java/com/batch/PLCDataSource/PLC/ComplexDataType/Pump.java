@@ -8,7 +8,7 @@ import com.batch.Utilities.LogIdentefires;
 
 public class Pump extends RowDataDefinition {
 
-    
+
 
     public Pump(String name) {
         super(name, 2, 4);

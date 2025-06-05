@@ -9,7 +9,7 @@ import com.batch.Utilities.LogIdentefires;
 
 public class Weight extends RowDataDefinition {
 
-    
+
 
     public Weight(String name) {
         super(name, 6, 34);
