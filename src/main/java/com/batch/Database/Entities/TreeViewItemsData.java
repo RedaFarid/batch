@@ -1,4 +1,3 @@
-
 package com.batch.Database.Entities;
 
 import jakarta.persistence.*;

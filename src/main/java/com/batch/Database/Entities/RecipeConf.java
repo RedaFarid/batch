@@ -23,5 +23,5 @@ public class RecipeConf {
     private int acceptedErrorInDosePhases;
     @Column(name = "MaxBatchSize")
     private double maxBatchSize;
-    
+
 }

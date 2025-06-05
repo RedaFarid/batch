@@ -18,5 +18,5 @@ public class BatchControllerData {
     private int CurrentParallelStepsNo  ;
     private boolean controlBit;
     private boolean lockGeneralControl;
-    
+
 }

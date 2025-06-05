@@ -37,7 +37,7 @@ public class Batch {
     private String rowModel;
     @Transient
     private BatchModel model;
-    
+
     public Batch(Long id, String batchName, String state, String order, String comment, BatchModel model) {
         this.id = id;
         this.batchName = batchName;
@@ -68,7 +68,7 @@ public class Batch {
         this.order = order;
         this.model = model;
     }
-    
+
     public Batch(Long id, String state, BatchModel model) {
         this.id = id;
         this.state = state;
