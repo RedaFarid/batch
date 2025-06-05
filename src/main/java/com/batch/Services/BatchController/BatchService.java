@@ -41,7 +41,7 @@ public class BatchService {
     private String unitName;
     private boolean controlBit = false;
 
-    
+
     private final ModBusService modBusService;
     private final BatchesService batchesService;
     private final BatchControllerDataService batchControllerDataService;

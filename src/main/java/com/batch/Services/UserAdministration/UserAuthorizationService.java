@@ -47,7 +47,7 @@ public class UserAuthorizationService {
 
     private long setPointDuration = 0;
     private long elapsedTime = 0;
-    
+
     private final UserDaoService userDaoService;
 
 
@@ -94,7 +94,7 @@ public class UserAuthorizationService {
     public void requestLogIn() {
         requestForLogin.setValue(true);
     }
-    
+
     //request logoff 
     public void requestLogOff() {
         requestForLogOff.setValue(true);
@@ -167,7 +167,7 @@ public class UserAuthorizationService {
                 .findAny().ifPresent(groupEntity -> {
                     groupEntity.getRolesStatus().replace(Roles.valueOf(role), roleStatus);
                     userDaoService.saveGroup(groupEntity);
-        });
+                });
     }
     public void updateGroupDescription(String group, String desc) {
         userDaoService.updateGroupDescByData(group, desc);

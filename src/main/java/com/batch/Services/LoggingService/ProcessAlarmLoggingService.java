@@ -44,34 +44,34 @@ public class ProcessAlarmLoggingService {
                     });
                     return list.stream();
                 }).forEach(element -> {
-            switch (element.getType()) {
-                case Boolean:
-                    ((BooleanProperty) element.getValue()).addListener((observable, oldValue, newValue) -> {
-                        Log record;
-                        if (newValue) {
-                            record = new Log(element.getIdentifier().name(), element.getName(), "Alarm : -->" + element.getAttribute().toString() + "<-- was activated [changed from 0 to 1]");
-                        } else {
-                            record = new Log(element.getIdentifier().name(), element.getName(), "Alarm : -->" + element.getAttribute().toString() + "<-- was deactivated [changed from 1 to 0]");
-                        }
-                        loggingService.LogRecord(record);
-                    });
-                    break;
-                case Integer:
-                    ((IntegerProperty) element.getValue()).addListener((observable, oldValue, newValue) -> {
-                        Log record = new Log(element.getIdentifier().name(), element.getName(), " Alarm : -->" + element.getAttribute().toString() + "<-- Value changed from " + oldValue + " to " + newValue);
-                        loggingService.LogRecord(record);
-                    });
-                    break;
-                case Real:
-                    ((FloatProperty) element.getValue()).addListener((observable, oldValue, newValue) -> {
-                        Log record = new Log(element.getIdentifier().name(), element.getName(), " Alarm : -->" + element.getAttribute().toString() + "<-- Value changed from " + oldValue + " to " + newValue);
-                        loggingService.LogRecord(record);
-                    });
-                    break;
-                default:
-                    break;
-            }
-        });
+                    switch (element.getType()) {
+                        case Boolean:
+                            ((BooleanProperty) element.getValue()).addListener((observable, oldValue, newValue) -> {
+                                Log record;
+                                if (newValue) {
+                                    record = new Log(element.getIdentifier().name(), element.getName(), "Alarm : -->" + element.getAttribute().toString() + "<-- was activated [changed from 0 to 1]");
+                                } else {
+                                    record = new Log(element.getIdentifier().name(), element.getName(), "Alarm : -->" + element.getAttribute().toString() + "<-- was deactivated [changed from 1 to 0]");
+                                }
+                                loggingService.LogRecord(record);
+                            });
+                            break;
+                        case Integer:
+                            ((IntegerProperty) element.getValue()).addListener((observable, oldValue, newValue) -> {
+                                Log record = new Log(element.getIdentifier().name(), element.getName(), " Alarm : -->" + element.getAttribute().toString() + "<-- Value changed from " + oldValue + " to " + newValue);
+                                loggingService.LogRecord(record);
+                            });
+                            break;
+                        case Real:
+                            ((FloatProperty) element.getValue()).addListener((observable, oldValue, newValue) -> {
+                                Log record = new Log(element.getIdentifier().name(), element.getName(), " Alarm : -->" + element.getAttribute().toString() + "<-- Value changed from " + oldValue + " to " + newValue);
+                                loggingService.LogRecord(record);
+                            });
+                            break;
+                        default:
+                            break;
+                    }
+                });
 
     }
 

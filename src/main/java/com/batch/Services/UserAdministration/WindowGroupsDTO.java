@@ -16,7 +16,7 @@ public class WindowGroupsDTO {
         this.rowGroup = rowGroup;
     }
 
-    
+
     public LinkedHashMap<String, List<Group>> getRowGroup() {
         return rowGroup;
     }
@@ -24,5 +24,5 @@ public class WindowGroupsDTO {
     public void setRowGroup(LinkedHashMap<String, List<Group>> rowGroup) {
         this.rowGroup = rowGroup;
     }
-    
+
 }

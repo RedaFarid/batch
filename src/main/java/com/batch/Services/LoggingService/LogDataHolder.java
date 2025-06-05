@@ -17,5 +17,5 @@ public class LogDataHolder {
     private RowAttripute attribute;
     private ValueObject value;
     private EDT type;
-    
+
 }
