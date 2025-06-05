@@ -25,7 +25,7 @@ public class AESystem {
     }
 
     public static String decrypt(String Data) throws Exception {
-        
+
         Key key = generateKey();
         Cipher cipher = Cipher.getInstance(ALGO);
         cipher.init(Cipher.DECRYPT_MODE, key);

@@ -25,8 +25,8 @@ public class HashingAlgorithm {
         }
         return DatatypeConverter.printHexBinary(digest).toUpperCase();
     }
-    
-        public static String SHA512Hash(String Input) {
+
+    public static String SHA512Hash(String Input) {
         byte[] digest = null;
 
         try {

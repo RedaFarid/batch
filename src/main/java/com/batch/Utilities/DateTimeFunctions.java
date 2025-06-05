@@ -21,7 +21,7 @@ public class DateTimeFunctions {
 
     }
     public static LocalDate fromSQLDate(java.sql.Date sqldate) {
-        
+
         long time = sqldate.getTime();
         Date date = new Date(time);
         Instant instant = date.toInstant();
@@ -29,17 +29,17 @@ public class DateTimeFunctions {
         return localdate;
 
     }
-    
+
     public static Time getFromLocalTimeFormat(LocalTime localtime){
         return java.sql.Time.valueOf(localtime);
     }
-    
-     public static LocalTime getFromSQLTime(java.sql.Time time){
+
+    public static LocalTime getFromSQLTime(java.sql.Time time){
         return LocalTime.ofSecondOfDay(time.getSeconds());
     }
-     
+
     public static java.sql.Date getCurrentDate(){
-        return java.sql.Date.valueOf(LocalDate.now()); 
+        return java.sql.Date.valueOf(LocalDate.now());
     }
     public static Time getCurrentTime(){
         return java.sql.Time.valueOf(LocalTime.now());
