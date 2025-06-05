@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReportTableDataModel {
-    
+
     private int number;
     private String materialName;
     private double required;
@@ -18,5 +18,5 @@ public class ReportTableDataModel {
     private double requiredPercent;
     private double actualPercent;
 
-    
+
 }

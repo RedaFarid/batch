@@ -27,14 +27,14 @@ public class BatchReport extends Stage {
     private final BiConsumer<ReportModel, File> consumer;
     private Printer printer = Printer.getDefaultPrinter();
     private PageLayout pageLayout = printer.createPageLayout(Paper.A4, PageOrientation.LANDSCAPE, Printer.MarginType.EQUAL);
-    
-    
+
+
     private double width = 0.0;
     private double height = 0.0;
 
     private Stage mainWindow = new Stage();
     private VBox mainRoot = new VBox();
-    
+
     private BorderPane root = new BorderPane();
     private VBox center = new VBox();
     private Scene scene = new Scene(mainRoot);
@@ -43,7 +43,7 @@ public class BatchReport extends Stage {
     private GridPane Header = new GridPane();
     private GridPane Footer = new GridPane();
     private GridPane mainData = new GridPane();
-    
+
     private Button print = new Button("Print report ");
     private Button export = new Button("export report ");
 
@@ -118,7 +118,7 @@ public class BatchReport extends Stage {
     private void tableGraphics() {
         Pane pane = new Pane();
         pane.setPrefSize(10, 10);
-        
+
         table.setPadding(new Insets(10));
         table.setSpacing(1);
         table.getChildren().clear();
@@ -142,7 +142,7 @@ public class BatchReport extends Stage {
         label2.setAlignment(Pos.BASELINE_LEFT);
         label2.setTextAlignment(TextAlignment.CENTER);
         label2.setPrefWidth(width * 2 / 3 );
-        
+
         ImageView imageView = new ImageView(new Image(Resources.getResource("Icons/stocks.png").toString()));
         imageView.setFitWidth(90);
         imageView.setFitHeight(50);
@@ -167,7 +167,7 @@ public class BatchReport extends Stage {
         textArea.setPrefHeight(80);
         textArea.setAlignment(Pos.CENTER);
         textArea.setTextAlignment(TextAlignment.JUSTIFY);
-        
+
         TextField Name = new TextField("Name");
         Name.setStyle("-fx-font-weight:Normal;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         Name.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 1, 1))));
@@ -175,7 +175,7 @@ public class BatchReport extends Stage {
         Name.setAlignment(Pos.CENTER);
         Name.setPrefWidth(width / 10 * 3);
         Name.setEditable(false);
-        
+
         TextField Signature = new TextField("Signature");
         Signature.setStyle("-fx-font-weight:Normal;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         Signature.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 1, 0))));
@@ -183,7 +183,7 @@ public class BatchReport extends Stage {
         Signature.setAlignment(Pos.CENTER);
         Signature.setPrefWidth(width / 10 * 2);
         Signature.setEditable(false);
-        
+
         TextField Name2 = new TextField("Name");
         Name2.setStyle("-fx-font-weight:Normal;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         Name2.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 1, 0))));
@@ -191,7 +191,7 @@ public class BatchReport extends Stage {
         Name2.setAlignment(Pos.CENTER);
         Name2.setPrefWidth(width / 10 * 3);
         Name2.setEditable(false);
-        
+
         TextField Signature2 = new TextField("Signature");
         Signature2.setStyle("-fx-font-weight:Normal;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         Signature2.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 1, 0))));
@@ -199,7 +199,7 @@ public class BatchReport extends Stage {
         Signature2.setAlignment(Pos.CENTER);
         Signature2.setPrefWidth(width / 10 * 2);
         Signature2.setEditable(false);
-        
+
         TextField NameD = new TextField("");
         NameD.setStyle("-fx-font-weight:Normal;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         NameD.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 1, 1))));
@@ -207,7 +207,7 @@ public class BatchReport extends Stage {
         NameD.setAlignment(Pos.CENTER);
         NameD.setPrefWidth(width / 10 * 3);
         NameD.setEditable(false);
-        
+
         TextField SignatureD = new TextField("");
         SignatureD.setStyle("-fx-font-weight:Normal;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         SignatureD.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 1, 0))));
@@ -215,7 +215,7 @@ public class BatchReport extends Stage {
         SignatureD.setAlignment(Pos.CENTER);
         SignatureD.setPrefWidth(width / 10 * 2);
         SignatureD.setEditable(false);
-        
+
         TextField Name2D = new TextField("");
         Name2D.setStyle("-fx-font-weight:Normal;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         Name2D.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 1, 0))));
@@ -223,7 +223,7 @@ public class BatchReport extends Stage {
         Name2D.setAlignment(Pos.CENTER);
         Name2D.setPrefWidth(width / 10 * 3);
         Name2D.setEditable(false);
-        
+
         TextField Signature2D = new TextField("");
         Signature2D.setStyle("-fx-font-weight:Normal;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         Signature2D.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 1, 0))));
@@ -233,19 +233,19 @@ public class BatchReport extends Stage {
         Signature2D.setEditable(false);
 
         Footer.add(textArea, 0, 0, 4,1);
-        
+
         Footer.add(Name, 0, 1);
         Footer.add(Signature, 1, 1);
-        
+
         Footer.add(Name2, 2, 1);
         Footer.add(Signature2, 3, 1);
-        
+
         Footer.add(NameD, 0, 2);
         Footer.add(SignatureD, 1, 2);
-        
+
         Footer.add(Name2D, 2, 2);
         Footer.add(Signature2D, 3, 2);
-        
+
 
         Footer.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.NONE, new CornerRadii(0), new BorderWidths(0))));
         Footer.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(0), Insets.EMPTY)));
@@ -395,26 +395,26 @@ public class BatchReport extends Stage {
         hbox.getChildren().addAll(label, label2);
         return hbox;
     }
-    
+
     private HBox FieldLabel(String text, double width){
-        
+
         Label label = new Label(" " + text);
         label.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:10;-fx-font-family: 'Times New Roman';");
         label.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 0, 1))));
         label.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN.saturate().darker(), new CornerRadii(0), new Insets(0, 0, 0, 0))));
         label.setPrefWidth(width);
         label.setPrefHeight(15);
-        
+
         HBox hbox = new HBox();
         hbox.getChildren().add(label);
-        
+
         return hbox;
     }
 
     private HBox tableRow(ReportTableDataModel recordModel) {
         HBox hbox = new HBox();
         hbox.setSpacing(1);
-        
+
         RestrictiveTextField No = new RestrictiveTextField();
         RestrictiveTextField material = new RestrictiveTextField();
         RestrictiveTextField required = new RestrictiveTextField();
@@ -430,7 +430,7 @@ public class BatchReport extends Stage {
         error.setText(String.valueOf(recordModel.getError()));
         requiredPercent.setText(String.valueOf(recordModel.getRequiredPercent()));
         loadedPercent.setText(String.valueOf(recordModel.getActualPercent()));
-        
+
         No.setAlignment(Pos.CENTER);
         material.setAlignment(Pos.CENTER);
         required.setAlignment(Pos.CENTER);
@@ -438,8 +438,8 @@ public class BatchReport extends Stage {
         error.setAlignment(Pos.CENTER);
         requiredPercent.setAlignment(Pos.CENTER);
         loadedPercent.setAlignment(Pos.CENTER);
-        
-        
+
+
         No.setPrefWidth((width / 14) - 2);
         material.setPrefWidth(width / 14 * 3);
         required.setPrefWidth(width / 14 * 2);
@@ -447,8 +447,8 @@ public class BatchReport extends Stage {
         error.setPrefWidth(width / 14 * 2);
         requiredPercent.setPrefWidth(width / 14 * 2);
         loadedPercent.setPrefWidth(width / 14 * 2);
-        
-        
+
+
         No.setAlignment(Pos.BASELINE_LEFT);
         material.setAlignment(Pos.BASELINE_LEFT);
         required.setAlignment(Pos.BASELINE_LEFT);
@@ -456,7 +456,7 @@ public class BatchReport extends Stage {
         error.setAlignment(Pos.BASELINE_LEFT);
         requiredPercent.setAlignment(Pos.BASELINE_LEFT);
         loadedPercent.setAlignment(Pos.BASELINE_LEFT);
-        
+
         No.setPadding(new Insets(1));
         material.setPadding(new Insets(1));
         required.setPadding(new Insets(1));
@@ -464,7 +464,7 @@ public class BatchReport extends Stage {
         error.setPadding(new Insets(1));
         requiredPercent.setPadding(new Insets(1));
         loadedPercent.setPadding(new Insets(1));
-        
+
         No.setEditable(false);
         material.setEditable(true);
         required.setEditable(true);
@@ -510,37 +510,37 @@ public class BatchReport extends Stage {
         error.setText(String.valueOf(recordModel.getError()));
         requiredPercent.setText(String.valueOf(recordModel.getRequiredPercent()));
         loadedPercent.setText(String.valueOf(recordModel.getActualPercent()));
-        
+
         Total.setAlignment(Pos.CENTER);
         required.setAlignment(Pos.CENTER);
         loaded.setAlignment(Pos.CENTER);
         error.setAlignment(Pos.CENTER);
         requiredPercent.setAlignment(Pos.CENTER);
         loadedPercent.setAlignment(Pos.CENTER);
-        
-        
+
+
         Total.setPrefWidth((width / 14 * 4) -2);
         required.setPrefWidth(width / 14 * 2);
         loaded.setPrefWidth(width / 14 * 2);
         error.setPrefWidth(width / 14 * 2);
         requiredPercent.setPrefWidth(width / 14 * 2);
         loadedPercent.setPrefWidth(width / 14 * 2);
-        
-        
+
+
         Total.setAlignment(Pos.BASELINE_LEFT);
         required.setAlignment(Pos.BASELINE_LEFT);
         loaded.setAlignment(Pos.BASELINE_LEFT);
         error.setAlignment(Pos.BASELINE_LEFT);
         requiredPercent.setAlignment(Pos.BASELINE_LEFT);
         loadedPercent.setAlignment(Pos.BASELINE_LEFT);
-        
+
         Total.setPadding(new Insets(0));
         required.setPadding(new Insets(0));
         loaded.setPadding(new Insets(0));
         error.setPadding(new Insets(0));
         requiredPercent.setPadding(new Insets(0));
         loadedPercent.setPadding(new Insets(0));
-        
+
         Total.setEditable(true);
         required.setEditable(true);
         loaded.setEditable(true);
@@ -571,13 +571,13 @@ public class BatchReport extends Stage {
         hbox.setSpacing(1);
         hbox.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(0), Insets.EMPTY)));
         hbox.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(1, 1, 1, 1))));
-        
+
         Label number = new Label("No");
         number.setAlignment(Pos.CENTER);
         number.setTextAlignment(TextAlignment.CENTER);
         number.setPrefSize(width / 14, 40);
         number.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 0, 0))));
-        
+
         Label material = new Label("Material name");
         material.setAlignment(Pos.CENTER);
         material.setTextAlignment(TextAlignment.CENTER);
@@ -607,17 +607,17 @@ public class BatchReport extends Stage {
         rewuiredPercentage.setTextAlignment(TextAlignment.CENTER);
         rewuiredPercentage.setPrefSize(width / 7 - 1, 40);
         rewuiredPercentage.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 0, 0))));
-        
+
         Label actualPercentage = new Label("Actual %");
         actualPercentage.setAlignment(Pos.CENTER);
         actualPercentage.setTextAlignment(TextAlignment.CENTER);
         actualPercentage.setPrefSize(width / 7 - 1, 40);
         actualPercentage.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(0), new BorderWidths(0, 1, 0, 0))));
-        
+
 
         hbox.getChildren().addAll(number, material, required, loaded, error, rewuiredPercentage, actualPercentage);
 
         return hbox;
     }
-    
+
 }

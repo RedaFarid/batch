@@ -14,12 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportModel {
-    
+
     private long batchID;
     private String batchName;
     private LocalDate creationDate;
     private LocalTime creationTime;
-    
+
     private List<ReportTableDataModel> data = new LinkedList<>();
 
 }
