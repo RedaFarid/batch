@@ -58,7 +58,7 @@ public class InitialWindowController {
     private final LoggingService loggingService;
     private final InitialWindow initialWindow;
     @Autowired
-    @BackGroundServices
+//    @BackGroundServices
     private final NotificationService notificationService;
 
     public InitialWindowModel getModel() {
@@ -285,7 +285,7 @@ public class InitialWindowController {
     }
 
     public List<String> getAllUnitsNames() {
-        return (List)Lists.newArrayList(this.unitsRepository.findAll()).stream().map(Unit::getName).collect(Collectors.toList());
+        return Lists.newArrayList(this.unitsRepository.findAll()).stream().map(Unit::getName).collect(Collectors.toList());
     }
 
     public List<BatchControllerData> getAllBatchControllerData() {

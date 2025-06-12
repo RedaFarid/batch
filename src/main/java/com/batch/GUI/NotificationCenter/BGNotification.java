@@ -11,6 +11,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -64,7 +65,7 @@ public class BGNotification extends BorderPane {
     }
 
     private void errorHandler() {
-        this.errorObject.getErrorMessage().addListener((change) -> {
+        this.errorObject.getErrorMessage().addListener((SetChangeListener<String>) change -> {
             try {
                 String elementAdded = (String)change.getElementAdded();
                 if (elementAdded != null) {

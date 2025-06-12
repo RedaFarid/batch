@@ -1,6 +1,7 @@
 
 package com.batch.GUI.UserAdministration;
 
+import com.batch.Database.Entities.Group;
 import com.batch.Database.Entities.User;
 import com.batch.GUI.InitialWindow.InitialWindow;
 import com.batch.Services.UserAdministration.UserAuthorizationService;
@@ -215,10 +216,10 @@ public class UserAdministrationWindow extends TabPane {
 
         });
         this.deleteGroup.setOnMouseClicked((action) -> {
-            LinkedHashSet var10000 = this.setToDelete;
-            UserAuthorizationService var10001 = this.userAuthorizationService;
-            Objects.requireNonNull(var10001);
-            var10000.forEach(var10001::deleteGroup);
+            LinkedHashSet<String> toBeDeleted = this.setToDelete;
+            UserAuthorizationService authorizationService = this.userAuthorizationService;
+            Objects.requireNonNull(authorizationService);
+            toBeDeleted.forEach(authorizationService::deleteGroup);
             this.update();
         });
     }

@@ -203,7 +203,7 @@ public class BatchCreator extends Stage {
                                                     Batch createdBatchNew = new Batch(this.batchID.getText(), this.selectedRecipe.getUnitName(), BatchStates.Idle.name(), BatchOrders.Create.name(), this.batchComment.getText(), batchModel);
                                                     List<BatchParallelStepsModel> listOfBatchParallelStepModel = new LinkedList();
                                                     batchModel.setParallelSteps(listOfBatchParallelStepModel);
-                                                    this.selectedRecipe.getModel().getParallelSteps().forEach((recipeParallelStep) -> listOfBatchParallelStepModel.add(new BatchParallelStepsModel((List)recipeParallelStep.getSteps().stream().map((item) -> {
+                                                    this.selectedRecipe.getModel().getParallelSteps().forEach((recipeParallelStep) -> listOfBatchParallelStepModel.add(new BatchParallelStepsModel(recipeParallelStep.getSteps().stream().map((item) -> {
                                                         if (item.getPhaseType() != null && item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
                                                             double percentage = (Double)item.getValueParametersData().get("Percentage %");
                                                             double totalQty = this.quantity * percentage / (double)100.0F;
@@ -281,7 +281,7 @@ public class BatchCreator extends Stage {
 
     private void FillTreeItemRecursiveAction(long parentID, RecipeTreeItem parent, Map<Long, List<TreeViewItemsData>> groupedItemsByParentID) {
         if (groupedItemsByParentID.get(parentID) != null) {
-            ((List)groupedItemsByParentID.get(parentID)).forEach((element) -> {
+            (groupedItemsByParentID.get(parentID)).forEach((element) -> {
                 if (element.getItemType().equals(TreeItemType.Folder.name())) {
                     RecipeTreeItem item = new RecipeTreeItem(element.getName(), TreeItemType.Folder);
                     item.setExpanded(true);

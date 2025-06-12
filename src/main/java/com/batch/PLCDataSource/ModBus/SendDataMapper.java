@@ -30,23 +30,26 @@ class SendDataMapper implements Runnable {
     private void setValueToBuffer(EDT type, Address address, ValueObject value) {
         if (this.buffer.size() > address.getByteNumber()) {
             switch (type) {
-                case Boolean:
-                    boolean val = ((BooleanDataType)value).getValue();
-                    this.buffer.replace(address.getByteNumber(), this.setBit((Byte)this.buffer.get(address.getByteNumber()), address.getBitNumber(), val));
+                case Boolean: {
+                    boolean val = ((BooleanDataType) value).getValue();
+                    this.buffer.replace(address.getByteNumber(), this.setBit((Byte) this.buffer.get(address.getByteNumber()), address.getBitNumber(), val));
                     break;
-                case Integer:
-                    int val = ((IntegerDataType)value).getValue();
+                }
+                case Integer: {
+                    int val = ((IntegerDataType) value).getValue();
                     byte[] result = this.intToBytes(val);
                     this.buffer.replace(address.getByteNumber(), result[0]);
                     this.buffer.replace(address.getByteNumber() + 1, result[1]);
                     break;
-                case Real:
-                    float val = ((RealDataType)value).getValue();
+                }
+                case Real: {
+                    float val = ((RealDataType) value).getValue();
                     byte[] result = this.floatToBytes(val);
                     this.buffer.replace(address.getByteNumber(), result[0]);
                     this.buffer.replace(address.getByteNumber() + 1, result[1]);
                     this.buffer.replace(address.getByteNumber() + 2, result[2]);
                     this.buffer.replace(address.getByteNumber() + 3, result[3]);
+                }
             }
         }
 

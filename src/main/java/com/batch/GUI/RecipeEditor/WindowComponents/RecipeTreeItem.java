@@ -16,16 +16,18 @@ public class RecipeTreeItem extends TreeItemIdentity {
         this.itemValue = value;
         ImageView view = null;
         switch (type) {
-            case Folder:
+            case Folder: {
                 Image image = new Image(Resources.getResource("Icons/Folder.png").toString());
                 view = new ImageView(image);
                 break;
-            case Recipe:
+            }
+            case Recipe: {
                 Image image = new Image(Resources.getResource("Icons/Recipe.png").toString());
                 view = new ImageView(image);
-                view.setFitHeight((double)20.0F);
-                view.setFitWidth((double)20.0F);
+                view.setFitHeight((double) 20.0F);
+                view.setFitWidth((double) 20.0F);
                 break;
+            }
             default:
                 return;
         }

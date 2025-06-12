@@ -2,7 +2,10 @@
 package com.batch.Database.Repositories;
 
 import com.batch.Database.Entities.Phase;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.stereotype.Repository;
 
-public interface PhaseRepository extends PagingAndSortingRepository<Phase, Long> {
+@Repository
+public interface PhaseRepository extends CrudRepository<Phase, Long> {
 }

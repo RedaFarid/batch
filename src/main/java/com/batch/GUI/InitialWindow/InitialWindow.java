@@ -225,7 +225,9 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             required = false
     )
     private UserAdministrationWindow userAdministrationWindow;
-    @Autowired
+    @Autowired(
+            required = false
+    )
     private PLCDataDefinitionFactory plcDataDefinitionFactory;
     private NCServicesView ncServicesView;
     private Map<String, RowDataDefinition> allDataDefinitions;

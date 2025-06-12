@@ -12,10 +12,11 @@ import java.awt.TrayIcon;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.MouseEvent;
 import java.net.URL;
-import javax.annotation.PostConstruct;
 import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputListener;
+
+import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -123,7 +124,7 @@ public class TrayIconManager {
         });
     }
 
-    @PostConstruct
+   @PostConstruct
     private void atPostConstruct() {
         this.resource = TrayIconManager.class.getResource("icon");
         this.toolTip = this.toolTip;

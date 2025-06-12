@@ -31,18 +31,22 @@ class SendBufferDataMapper implements Runnable {
     private ValueObject getValueFromBuffer(EDT type, Address address) {
         if (this.buffer.size() > address.getByteNumber()) {
             switch (type) {
-                case Boolean:
-                    byte x = (Byte)this.buffer.get(address.getByteNumber());
+                case Boolean: {
+                    byte x = (Byte) this.buffer.get(address.getByteNumber());
                     boolean val = this.getBit(x, address.getBitNumber());
                     return new BooleanDataType(val);
-                case Integer:
-                    int val = this.getInteger((Byte)this.buffer.get(address.getByteNumber()), (Byte)this.buffer.get(address.getByteNumber() + 1));
+                }
+                case Integer: {
+                    int val = this.getInteger((Byte) this.buffer.get(address.getByteNumber()), (Byte) this.buffer.get(address.getByteNumber() + 1));
                     return new IntegerDataType(val);
-                case Real:
-                    float val = this.getReal((Byte)this.buffer.get(address.getByteNumber()), (Byte)this.buffer.get(address.getByteNumber() + 1), (Byte)this.buffer.get(address.getByteNumber() + 2), (Byte)this.buffer.get(address.getByteNumber() + 3));
+                }
+                case Real: {
+                    float val = this.getReal((Byte) this.buffer.get(address.getByteNumber()), (Byte) this.buffer.get(address.getByteNumber() + 1), (Byte) this.buffer.get(address.getByteNumber() + 2), (Byte) this.buffer.get(address.getByteNumber() + 3));
                     return new RealDataType(val);
+                }
             }
         }
+
 
         return null;
     }

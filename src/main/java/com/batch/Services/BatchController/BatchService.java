@@ -71,7 +71,7 @@ public class BatchService {
                                 if (this.batchHeight > this.currentParallelStep + 1) {
                                     if (this.currentParallelStep == 0) {
                                         this.updateCurrentBatchFromPLC(onLineBatch, 1, this.unitName);
-                                        List<BatchStepModel> currentBatchSteps = (List)((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(1)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
+                                        List<BatchStepModel> currentBatchSteps = ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(1)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
                                         this.closeSteps(currentBatchSteps);
                                         this.updatePLCFromCurrentBatch(onLineBatch, 1, this.unitName);
                                         boolean idle = ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(1)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
@@ -86,7 +86,7 @@ public class BatchService {
 
                                     this.updateCurrentBatchFromPLC(onLineBatch, this.currentParallelStep, this.unitName);
                                     if (!data.isLockGeneralControl()) {
-                                        List<BatchStepModel> currentBatchSteps = (List)((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(this.currentParallelStep)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
+                                        List<BatchStepModel> currentBatchSteps = ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(this.currentParallelStep)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
                                         boolean finished = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Finished.name()));
                                         boolean idle = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
                                         boolean created = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Created.name()));
@@ -109,7 +109,7 @@ public class BatchService {
                                             }
                                         }
                                     } else {
-                                        List<BatchStepModel> currentBatchSteps = (List)((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(this.currentParallelStep)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
+                                        List<BatchStepModel> currentBatchSteps = ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(this.currentParallelStep)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
                                         boolean finished = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Finished.name()));
                                         boolean idle = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
                                         if (finished) {
@@ -325,7 +325,7 @@ public class BatchService {
             if (maxNumberOfParallelSteps > 0) {
                 for(this.counter = 1; this.counter <= ((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNo)).getSteps().size(); ++this.counter) {
                     RowDataDefinition dataDefinition = (RowDataDefinition)this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + this.counter + "]");
-                    Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((Phase) -> Phase.getUnit().equals(unit)).filter((Phase) -> !((List)((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNo)).getSteps().stream().map(BatchStepModel::getPhaseName).collect(Collectors.toList())).contains(Phase.getName())).forEachOrdered((phase) -> {
+                    Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((Phase) -> Phase.getUnit().equals(unit)).filter((Phase) -> !(((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNo)).getSteps().stream().map(BatchStepModel::getPhaseName).collect(Collectors.toList())).contains(Phase.getName())).forEachOrdered((phase) -> {
                         String batchPhaseName = phase.getName();
                         phase.getParameters().forEach((batchParameter) -> {
                             String batchParameterName = batchParameter.getName();

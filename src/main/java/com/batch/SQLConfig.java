@@ -47,7 +47,7 @@ public class SQLConfig extends AbstractJdbcConfiguration {
         dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         dataSource.setUsername("sa");
         dataSource.setPassword("123456");
-        dataSource.setUrl("jdbc:sqlserver://localhost:1433;databaseName=MIXINGBase;");
+        dataSource.setUrl("jdbc:sqlserver://localhost:1434;databaseName=MIXINGBase;;encrypt=true;trustServerCertificate=true");
         return dataSource;
     }
 

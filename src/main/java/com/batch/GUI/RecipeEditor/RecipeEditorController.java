@@ -48,7 +48,7 @@ public class RecipeEditorController {
     }
 
     public List<Phase> getAllPhasesSortedForAUnit(String unit) {
-        return (List)Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((item) -> item.getUnit().equals(unit)).sorted(Comparator.comparing(Phase::getPhaseType)).collect(Collectors.toList());
+        return Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((item) -> item.getUnit().equals(unit)).sorted(Comparator.comparing(Phase::getPhaseType)).collect(Collectors.toList());
     }
 
     public List<Material> getAllMaterials() {
@@ -61,10 +61,10 @@ public class RecipeEditorController {
 
     public RecipeConf getRecipeConfigurations() {
         AtomicReference<RecipeConf> recipeConf = new AtomicReference(new RecipeConf());
-        Optional var10000 = Lists.newArrayList(this.recipeConfRepository.findAll()).stream().findAny();
+        Optional<RecipeConf> anyRecipeConf = Lists.newArrayList(this.recipeConfRepository.findAll()).stream().findAny();
         Objects.requireNonNull(recipeConf);
-        var10000.ifPresentOrElse(recipeConf::set, () -> recipeConf.set((RecipeConf)this.recipeConfRepository.save(new RecipeConf())));
-        System.err.println(recipeConf);
+        anyRecipeConf.ifPresentOrElse(recipeConf::set, () -> recipeConf.set((RecipeConf)this.recipeConfRepository.save(new RecipeConf())));
+        log.error(recipeConf);
         return (RecipeConf)recipeConf.get();
     }
 
@@ -118,7 +118,7 @@ public class RecipeEditorController {
             this.executor.execute(longListLinkedHashMapTask);
             return new ReturnData<LinkedHashMap<Long, List<TreeViewItemsData>>>(true, readOnlyBooleanProperty, (LinkedHashMap)longListLinkedHashMapTask.get(), (Exception)null);
         } catch (Exception e) {
-            return new ReturnData<LinkedHashMap<Long, List<TreeViewItemsData>>>(false, (ReadOnlyBooleanProperty)null, (Object)null, e);
+            return new ReturnData<LinkedHashMap<Long, List<TreeViewItemsData>>>(false, (ReadOnlyBooleanProperty)null, null, e);
         }
     }
 

@@ -60,7 +60,7 @@ public class ReportsController {
         return new Task<Boolean>() {
             protected Boolean call() throws Exception {
                 ObservableList<Batch> dataList = ReportsController.this.model.getList();
-                List<Batch> dataBaseList = (List)function.apply(ReportsController.this.batchesService.findAll());
+                List<Batch> dataBaseList = function.apply(ReportsController.this.batchesService.findAll());
                 Platform.runLater(() -> dataList.removeAll((Collection)((ObservableList)dataBaseList.stream().filter((item) -> !dataList.contains(item)).collect(() -> dataList, List::add, List::addAll)).stream().filter((tableListItem) -> dataBaseList.stream().noneMatch((dataBaseItem) -> dataBaseItem.equals(tableListItem))).collect(Collectors.toList())));
                 return true;
             }
@@ -70,7 +70,7 @@ public class ReportsController {
     public ReadOnlyBooleanProperty onFilterByDate() {
         if (this.model.getFromDate().getValue() != null && this.model.getToDate().getValue() != null) {
             this.model.getList().clear();
-            return this.update((list) -> (List)list.stream().filter((item) -> item.getCreationDate().isAfter((ChronoLocalDate)this.model.getFromDate().getValue())).filter((item) -> item.getCreationDate().isBefore((ChronoLocalDate)this.model.getToDate().get())).sorted(Comparator.comparing(Batch::getId).reversed()).collect(Collectors.toList()));
+            return this.update(list -> list.stream().filter((item) -> item.getCreationDate().isAfter((ChronoLocalDate)this.model.getFromDate().getValue())).filter((item) -> item.getCreationDate().isBefore((ChronoLocalDate)this.model.getToDate().get())).sorted(Comparator.comparing(Batch::getId).reversed()).collect(Collectors.toList()));
         } else {
             return new SimpleBooleanProperty(false);
         }
@@ -79,7 +79,7 @@ public class ReportsController {
     public ReadOnlyBooleanProperty onFilterByName() {
         if (this.model.getFilterString().getValue() != null) {
             this.model.getList().clear();
-            return this.update((list) -> (List)list.stream().filter((item) -> item.getBatchName().toLowerCase().trim().contains(this.model.getFilterString().getValue())).sorted(Comparator.comparing(Batch::getId).reversed()).collect(Collectors.toList()));
+            return this.update(list -> list.stream().filter((item) -> item.getBatchName().toLowerCase().trim().contains(this.model.getFilterString().getValue())).sorted(Comparator.comparing(Batch::getId).reversed()).collect(Collectors.toList()));
         } else {
             return new SimpleBooleanProperty(false);
         }
@@ -87,7 +87,7 @@ public class ReportsController {
 
     public ReadOnlyBooleanProperty updateTable() {
         this.model.getList().clear();
-        return this.update((list) -> (List)list.stream().sorted(Comparator.comparing(Batch::getId).reversed()).collect(Collectors.toList()));
+        return this.update(list -> list.stream().sorted(Comparator.comparing(Batch::getId).reversed()).collect(Collectors.toList()));
     }
 
     public Optional<Material> getMaterialById(long materialID) {

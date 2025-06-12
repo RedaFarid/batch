@@ -11,7 +11,8 @@ import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.google.common.collect.Lists;
 import java.util.Map;
-import javax.annotation.PostConstruct;
+
+import jakarta.annotation.PostConstruct;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -84,7 +85,7 @@ public class PLCDataDefinitionFactory {
     }
 
     public void AddBatchData() {
-        Lists.newArrayList(this.recipeConfRepository.findAll()).stream().findAny().ifPresent((recipeConfig) -> {
+        Lists.newArrayList(this.recipeConfRepository.findAll()).stream().findAny().ifPresent(recipeConfig -> {
             int maxParallelSteps = recipeConfig.getMaxParallelSteps();
             if (maxParallelSteps > 0) {
                 this.unitsRepository.findAll().forEach((unit) -> {

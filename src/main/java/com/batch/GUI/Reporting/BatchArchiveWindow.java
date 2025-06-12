@@ -148,7 +148,7 @@ public class BatchArchiveWindow extends Stage {
                     LocalDate date = batch.getCreationDate();
                     LocalTime time = batch.getCreationTime();
                     LocalDateTime endTime = batch.getEndTime();
-                    List<ReportTableDataModel> data = (List)batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> {
+                    List<ReportTableDataModel> data = batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> {
                         try {
                             double required = (Double)item.getValueParametersData().get("Percentage %");
                             double loaded = (double)0.0F;
@@ -172,7 +172,7 @@ public class BatchArchiveWindow extends Stage {
                     this.totalLoaded = (Double)data.stream().map(ReportTableDataModel::getLoaded).reduce((double)0.0F, Double::sum);
                     this.totalError = (Double)data.stream().map(ReportTableDataModel::getError).reduce((double)0.0F, Double::sum);
                     this.counter = 1;
-                    data = (List)data.stream().map((item) -> new ReportTableDataModel(this.counter++, item.getMaterialName(), item.getRequired(), item.getLoaded(), item.getError(), Round.RoundDouble(item.getRequired() / this.totalRequired * (double)100.0F, 4), Round.RoundDouble(item.getLoaded() / this.totalLoaded * (double)100.0F, 4))).collect(Collectors.toList());
+                    data = data.stream().map((item) -> new ReportTableDataModel(this.counter++, item.getMaterialName(), item.getRequired(), item.getLoaded(), item.getError(), Round.RoundDouble(item.getRequired() / this.totalRequired * (double)100.0F, 4), Round.RoundDouble(item.getLoaded() / this.totalLoaded * (double)100.0F, 4))).collect(Collectors.toList());
                     double totalActualPercent = (Double)data.stream().map(ReportTableDataModel::getActualPercent).reduce((double)0.0F, Double::sum);
                     data.add(new ReportTableDataModel(this.counter, "", Round.RoundDouble(this.totalRequired, 4), Round.RoundDouble(this.totalLoaded, 4), Round.RoundDouble(this.totalError, 4), (double)100.0F, totalActualPercent));
                     ReportModel var10002 = new ReportModel(ID, batchName, date, time, endTime, product, client, comment, data);

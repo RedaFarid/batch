@@ -442,8 +442,8 @@ public class RecipeEditor extends Stage {
         if ((!(total > 99.9) || !(total < 100.1)) && total != (double)0.0F) {
             this.showErrorWindow("Error validating recipe", "Total percentages are not equal to 100% \nThe total equals to " + total);
         } else {
-            List<String> phasesNames = (List)this.controller.getAllPhases().stream().map(Phase::getName).collect(Collectors.toList());
-            this.recipeModel.setParallelSteps((List)this.recipeModel.getParallelSteps().stream().map((psm) -> {
+            List<String> phasesNames = this.controller.getAllPhases().stream().map(Phase::getName).collect(Collectors.toList());
+            this.recipeModel.setParallelSteps(this.recipeModel.getParallelSteps().stream().map((psm) -> {
                 ParallelStepsModel parallelStepsModel = new ParallelStepsModel();
                 psm.getSteps().forEach((a) -> {
                     if ((!a.getPhaseName().equals("End") || !a.getPhaseName().equals("Start")) && phasesNames.contains(a.getPhaseName())) {
@@ -633,7 +633,7 @@ public class RecipeEditor extends Stage {
 
     private void FillTreeItemRecursiveAction(long parentID, RecipeTreeItem parent, Map<Long, List<TreeViewItemsData>> groupedItemsByParentID) {
         if (groupedItemsByParentID.get(parentID) != null) {
-            ((List)groupedItemsByParentID.get(parentID)).forEach((element) -> {
+            (groupedItemsByParentID.get(parentID)).forEach((element) -> {
                 if (element.getItemType().equals(TreeItemType.Folder.name())) {
                     RecipeTreeItem item = new RecipeTreeItem(element.getName(), TreeItemType.Folder);
                     item.setExpanded(true);
@@ -707,7 +707,7 @@ public class RecipeEditor extends Stage {
 
     private boolean notOneOfItsChildRecursiveCheck(long destination, long SelectedItem, Map<Long, List<TreeViewItemsData>> groupedItemsByParentID) {
         if (groupedItemsByParentID.get(SelectedItem) != null) {
-            for(TreeViewItemsData item : (List)groupedItemsByParentID.get(SelectedItem)) {
+            for(TreeViewItemsData item : groupedItemsByParentID.get(SelectedItem)) {
                 if (item.getId() == destination) {
                     return true;
                 }

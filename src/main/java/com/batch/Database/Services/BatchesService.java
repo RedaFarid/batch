@@ -51,7 +51,7 @@ public class BatchesService {
     }
 
     public List<Batch> findAll() {
-        return (List)Lists.newArrayList(this.batchesRepository.findAll()).stream().flatMap((batch) -> this.startUnMarshalling(batch.getRowModel()).map((batchModel) -> {
+        return Lists.newArrayList(this.batchesRepository.findAll()).stream().flatMap((batch) -> this.startUnMarshalling(batch.getRowModel()).map((batchModel) -> {
             batch.setModel(batchModel);
             return batch;
         }).stream()).filter(Objects::nonNull).collect(Collectors.toList());

@@ -129,12 +129,14 @@ public class UserAuthorizationService {
     public AllGroupsDTO getAllGroupsInStructuredForm() {
         AllGroupsDTO allGroups = new AllGroupsDTO();
         List<Group> list = this.userDaoService.GetAllGroups();
-        List<String> distinctWindows = (List)list.stream().map(Group::getWindow).distinct().collect(Collectors.toList());
+        List<String> distinctWindows = list.stream().map(Group::getWindow).distinct().collect(Collectors.toList());
         distinctWindows.forEach((window) -> {
             List<Group> groupListTemp = new ArrayList();
-            Stream var10000 = list.stream().filter((group) -> group.getWindow().equals(window));
+            Stream<Group> items = list.stream().filter((group) -> group.getWindow().equals(window));
+
             Objects.requireNonNull(groupListTemp);
-            var10000.forEach(groupListTemp::add);
+            items.forEach(groupListTemp::add);
+
             WindowGroupsDTO windowGroup = new WindowGroupsDTO();
             windowGroup.getRowGroup().put(window, groupListTemp);
             allGroups.getList().add(windowGroup);
@@ -144,7 +146,7 @@ public class UserAuthorizationService {
 
     public List<String> getAllGroups() {
         List<Group> list = this.userDaoService.GetAllGroups();
-        return (List)list.stream().map(Group::getGroup).distinct().collect(Collectors.toList());
+        return list.stream().map(Group::getGroup).distinct().collect(Collectors.toList());
     }
 
     public List<User> getAllUsers() {

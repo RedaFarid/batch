@@ -31,7 +31,7 @@ public class UserDaoService {
     }
 
     public List<Group> GetAllGroups() {
-        return (List)Lists.newArrayList(this.groupRepository.findAll()).stream().peek((item) -> {
+        return Lists.newArrayList(this.groupRepository.findAll()).stream().peek((item) -> {
             LinkedHashMap<Roles, Boolean> rolesStatus = item.getRolesStatus();
             boolean deleting = item.isDeleting();
             boolean editing = item.isEditing();

@@ -87,8 +87,8 @@ public class BatchStep extends VBox implements Runnable {
         this.materialName = new Label();
         this.controller = (BatchesController)ApplicationContext.applicationContext.getBean(BatchesController.class);
         List<Phase> list = this.controller.getAllPhases();
-        list.add(new Phase(-1L, "Start", "", "Start", (List)null));
-        list.add(new Phase(-1L, "End", "", "End", (List)null));
+        list.add(new Phase(-1L, "Start", "", "Start", null));
+        list.add(new Phase(-1L, "End", "", "End", null));
         list.stream().filter((phase) -> phase.getName().equals(phaseName)).findAny().ifPresent((type) -> {
             this.colors.put(PhasesTypes.Dose_phase.name().replace("_", " ").trim(), Color.GREEN);
             this.colors.put(PhasesTypes.Circulating_Phase.name().replace("_", " ").trim(), Color.OLIVE);

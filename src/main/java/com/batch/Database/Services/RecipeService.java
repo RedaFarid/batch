@@ -43,10 +43,10 @@ public class RecipeService {
 
     @Cacheable({"recipes"})
     public List<Recipe> findAll() {
-        return (List)Lists.newArrayList(this.recipesRepository.findAll()).stream().flatMap((recipe) -> this.startUnMarshalling(recipe.getRowModel()).map((batchModel) -> {
+        return Lists.newArrayList(this.recipesRepository.findAll()).stream().flatMap((recipe) -> this.startUnMarshalling(recipe.getRowModel()).map((batchModel) -> {
             recipe.setModel(batchModel);
             return recipe;
-        }).stream()).filter(Objects::nonNull).collect(Collectors.toList());
+        }).stream()).collect(Collectors.toList());
     }
 
     private Optional<String> startMarshalling(RecipeModel model) {

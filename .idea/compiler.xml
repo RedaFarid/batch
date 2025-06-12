@@ -11,6 +11,7 @@
         <module name="batch" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel target="22" />
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">

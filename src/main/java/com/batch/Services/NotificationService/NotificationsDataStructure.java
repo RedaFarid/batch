@@ -94,7 +94,7 @@ public class NotificationsDataStructure {
     }
 
     public List<String> getListOfAllErrorFamilies(String serviceName) {
-        return (List)this.allAlarmsCache.values().stream().flatMap((item) -> item.keySet().stream()).collect(Collectors.toList());
+        return this.allAlarmsCache.values().stream().flatMap((item) -> item.keySet().stream()).collect(Collectors.toList());
     }
 
     public ErrorObject getFamilyErrorsAsMap(String serviceName, String familyName) {
