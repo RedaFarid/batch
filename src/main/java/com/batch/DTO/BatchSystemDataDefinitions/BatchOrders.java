@@ -1,7 +1,5 @@
 
-
 package com.batch.DTO.BatchSystemDataDefinitions;
-
 
 public enum BatchOrders {
     Create,

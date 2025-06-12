@@ -1,3 +1,4 @@
+
 package com.batch.GUI.RecipeEditor.WindowComponents;
 
 import com.batch.ApplicationContext;
@@ -8,218 +9,215 @@ import com.batch.Database.Entities.Material;
 import com.batch.Database.Entities.Parameter;
 import com.batch.Database.Entities.Phase;
 import com.batch.GUI.RecipeEditor.RecipeEditorController;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class Step extends VBox {
     private Label phaseTypeLabel;
     private Label Name;
-
     private Stage mainWindow;
     private Stage stepDetails = new Stage();
-
     private BorderPane root = new BorderPane();
     private GridPane detailsContainer = new GridPane();
     private HBox bottomContainer = new HBox();
     private HBox labelHBox = new HBox();
-    private Scene scene = new Scene(root);
-
-    private DropShadow shadow = new DropShadow(5, 3, 3, Color.GRAY);
-
-    private Map<String, Color> colors = new HashMap();
+    private Scene scene;
+    private DropShadow shadow;
+    private Map<String, Color> colors;
     private Color selectedColor;
     private boolean tool;
-    private int detailedContainerX = 0;
-    private int detailedContainerY = 0;
+    private int detailedContainerX;
+    private int detailedContainerY;
     private StepModel model;
-
-    private String var = "";
+    private String var;
     private Tooltip tip;
-
-    private final LocalTime time = LocalTime.now();
-
+    private final LocalTime time;
     private final RecipeEditorController controller;
 
-    public Step(String text,boolean tool, Stage window) {
-        model = new StepModel(text);
-        this.controller = ApplicationContext.applicationContext.getBean(RecipeEditorController.class);
+    public Step(String text, boolean tool, Stage window) {
+        this.scene = new Scene(this.root);
+        this.shadow = new DropShadow((double)5.0F, (double)3.0F, (double)3.0F, Color.GRAY);
+        this.colors = new HashMap();
+        this.detailedContainerX = 0;
+        this.detailedContainerY = 0;
+        this.var = "";
+        this.time = LocalTime.now();
+        this.model = new StepModel(text);
+        this.controller = (RecipeEditorController)ApplicationContext.applicationContext.getBean(RecipeEditorController.class);
+        List<Phase> list = this.controller.getAllPhases();
+        list.add(new Phase(-1L, "Start", "", "Start", (List)null));
+        list.add(new Phase(-1L, "End", "", "End", (List)null));
+        list.stream().filter((phase) -> phase.getName().equals(text)).findAny().ifPresent((type) -> {
+            this.colors.put(PhasesTypes.Dose_phase.name().replace("_", " ").trim(), Color.GREEN);
+            this.colors.put(PhasesTypes.Circulating_Phase.name().replace("_", " ").trim(), Color.OLIVE);
+            this.colors.put(PhasesTypes.Washing_phase.name().replace("_", " ").trim(), Color.ORANGERED);
+            this.colors.put(PhasesTypes.Transfere_phase.name().replace("_", " ").trim(), Color.DARKBLUE);
+            this.colors.put(PhasesTypes.Mixing_phase.name().replace("_", " ").trim(), Color.DARKSALMON);
+            this.colors.put("Start", Color.BLACK);
+            this.colors.put("End", Color.BLACK);
+            this.phaseTypeLabel = new Label(type.getPhaseType());
+            if (!type.getName().equals("Start") && !type.getName().equals("End")) {
+                this.Name = new Label(type.getName());
+            } else {
+                this.Name = new Label("");
+            }
 
-        List<Phase> list = controller.getAllPhases();
-        list.add(new Phase(-1L, "Start", "", "Start",null));
-        list.add(new Phase(-1L, "End", "", "End", null));
-        list.stream()
-                .filter(phase -> phase.getName().equals(text))
-                .findAny()
-                .ifPresent(type -> {
-                    colors.put(PhasesTypes.Dose_phase.name().replace("_", " ").trim(), Color.GREEN);
-                    colors.put(PhasesTypes.Circulating_Phase.name().replace("_", " ").trim(), Color.OLIVE);
-                    colors.put(PhasesTypes.Washing_phase.name().replace("_", " ").trim(), Color.ORANGERED);
-                    colors.put(PhasesTypes.Transfere_phase.name().replace("_", " ").trim(), Color.DARKBLUE);
-                    colors.put(PhasesTypes.Mixing_phase.name().replace("_", " ").trim(), Color.DARKSALMON);
-                    colors.put("Start", Color.BLACK);
-                    colors.put("End", Color.BLACK);
-                    phaseTypeLabel = new Label(type.getPhaseType());
-                    if (type.getName().equals("Start") || type.getName().equals("End")) {
-                        Name = new Label("");
-                    } else {
-                        Name = new Label(type.getName());
-                    }
-                    this.mainWindow = window;
-                    this.tool = tool;
-                    initialization(type.getPhaseType());
-                });
+            this.mainWindow = window;
+            this.tool = tool;
+            this.initialization(type.getPhaseType());
+        });
     }
 
     private void initialization(String type) {
-
-        selectedColor = colors.get(type);
-        setBackground(new Background(new BackgroundFill(selectedColor, CornerRadii.EMPTY, Insets.EMPTY)));
-        setEffect(shadow);
-        getChildren().addAll(phaseTypeLabel, labelHBox);
-        setPrefSize(300, 60);
-        setMinWidth(225);
-        setSpacing(5);
-        setAlignment(Pos.CENTER);
-        setPadding(new Insets(10));
-        setPadding(new Insets(10));
-        setOnMouseClicked(action -> {
-            if (model != null) {
-                fillParametersInConfigurationWindow();
-
-                if (tool && action.getClickCount() == 2) {
-                    stepDetails.setX(action.getScreenX());
-                    stepDetails.setY(action.getScreenY());
-                    stepDetails.show();
+        this.selectedColor = (Color)this.colors.get(type);
+        this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(this.selectedColor, CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.setEffect(this.shadow);
+        this.getChildren().addAll(new Node[]{this.phaseTypeLabel, this.labelHBox});
+        this.setPrefSize((double)300.0F, (double)60.0F);
+        this.setMinWidth((double)225.0F);
+        this.setSpacing((double)5.0F);
+        this.setAlignment(Pos.CENTER);
+        this.setPadding(new Insets((double)10.0F));
+        this.setPadding(new Insets((double)10.0F));
+        this.setOnMouseClicked((action) -> {
+            if (this.model != null) {
+                this.fillParametersInConfigurationWindow();
+                if (this.tool && action.getClickCount() == 2) {
+                    this.stepDetails.setX(action.getScreenX());
+                    this.stepDetails.setY(action.getScreenY());
+                    this.stepDetails.show();
                 }
             } else {
-                Alert Error = new Alert(Alert.AlertType.ERROR);
+                Alert Error = new Alert(AlertType.ERROR);
                 Error.setTitle("Error ");
                 Error.setHeaderText("Error Step data");
                 Error.setContentText("Error in step model data ...");
-                Error.initOwner(mainWindow);
+                Error.initOwner(this.mainWindow);
                 Error.showAndWait();
             }
-        });
 
-        setOnMouseEntered(event -> {
-            Tooltip.uninstall(this, tip);
-            tip = new Tooltip(getTooltipString());
-            Tooltip.install(this, tip);
-            setBackground(new Background(new BackgroundFill(selectedColor.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
         });
-        setOnMouseExited(action -> setBackground(new Background(new BackgroundFill(selectedColor.brighter(), CornerRadii.EMPTY, Insets.EMPTY))));
-
-        createConfigurationWindow();
+        this.setOnMouseEntered((event) -> {
+            Tooltip.uninstall(this, this.tip);
+            this.tip = new Tooltip(this.getTooltipString());
+            Tooltip.install(this, this.tip);
+            this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(this.selectedColor.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
+        });
+        this.setOnMouseExited((action) -> this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(this.selectedColor.brighter(), CornerRadii.EMPTY, Insets.EMPTY)})));
+        this.createConfigurationWindow();
     }
 
-    private void createConfigurationWindow(){
-
-        root.setCenter(detailsContainer);
-        root.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
-        root.setPadding(new Insets(5));
-        root.setBottom(bottomContainer);
-        root.setPrefWidth(500);
-
-        detailsContainer.setVgap(5);
-        detailsContainer.setHgap(5);
-        detailsContainer.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-        detailsContainer.setPadding(new Insets(10));
-
-
-        bottomContainer.setSpacing(10);
-        bottomContainer.setPadding(new Insets(5));
-        bottomContainer.setAlignment(Pos.CENTER);
-
-        stepDetails.initOwner(mainWindow);
-        stepDetails.initModality(Modality.WINDOW_MODAL);
-        stepDetails.initStyle(StageStyle.UTILITY);
-        stepDetails.setScene(scene);
-        stepDetails.setTitle(Name.getText());
-        stepDetails.setResizable(false);
-
-        labelHBox.getChildren().addAll(Name);
-        labelHBox.setSpacing(5);
-        labelHBox.setAlignment(Pos.CENTER);
-
-        phaseTypeLabel.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:16;");
-        Name.setStyle("-fx-font-weight:normal;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:16;");
+    private void createConfigurationWindow() {
+        this.root.setCenter(this.detailsContainer);
+        this.root.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.root.setPadding(new Insets((double)5.0F));
+        this.root.setBottom(this.bottomContainer);
+        this.root.setPrefWidth((double)500.0F);
+        this.detailsContainer.setVgap((double)5.0F);
+        this.detailsContainer.setHgap((double)5.0F);
+        this.detailsContainer.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.detailsContainer.setPadding(new Insets((double)10.0F));
+        this.bottomContainer.setSpacing((double)10.0F);
+        this.bottomContainer.setPadding(new Insets((double)5.0F));
+        this.bottomContainer.setAlignment(Pos.CENTER);
+        this.stepDetails.initOwner(this.mainWindow);
+        this.stepDetails.initModality(Modality.WINDOW_MODAL);
+        this.stepDetails.initStyle(StageStyle.UTILITY);
+        this.stepDetails.setScene(this.scene);
+        this.stepDetails.setTitle(this.Name.getText());
+        this.stepDetails.setResizable(false);
+        this.labelHBox.getChildren().addAll(new Node[]{this.Name});
+        this.labelHBox.setSpacing((double)5.0F);
+        this.labelHBox.setAlignment(Pos.CENTER);
+        this.phaseTypeLabel.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:16;");
+        this.Name.setStyle("-fx-font-weight:normal;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:16;");
     }
 
     private void fillParametersInConfigurationWindow() {
-        if (model != null) {
-            detailsContainer.getChildren().clear();
-            Map<String, Boolean> checksValues = model.getCheckParametersData();
-            Map<String, Double> AnalogValues = model.getValueParametersData();
-            List<Parameter> types = model.getParametersType();
-
-            types.stream().sorted((Parameter t, Parameter t1) -> t1.getType().compareTo(t.getType())).forEach(parameter ->  {
+        if (this.model != null) {
+            this.detailsContainer.getChildren().clear();
+            Map<String, Boolean> checksValues = this.model.getCheckParametersData();
+            Map<String, Double> AnalogValues = this.model.getValueParametersData();
+            List<Parameter> types = this.model.getParametersType();
+            types.stream().sorted((t, t1) -> t1.getType().compareTo(t.getType())).forEach((parameter) -> {
                 if (parameter.getType().equals(PhaseParameterType.Check.name())) {
                     CheckBox box = new CheckBox(parameter.getName());
-                    box.setSelected(checksValues.get(parameter.getName()));
+                    box.setSelected((Boolean)checksValues.get(parameter.getName()));
                     box.selectedProperty().addListener((observable, oldValue, newValue) -> checksValues.replace(parameter.getName(), newValue));
-                    box.setPrefWidth(400);
-                    detailsContainer.add(box, detailedContainerX, detailedContainerY++);
-
+                    box.setPrefWidth((double)400.0F);
+                    this.detailsContainer.add(box, this.detailedContainerX, this.detailedContainerY++);
                 } else if (parameter.getType().equals(PhaseParameterType.Value.name())) {
                     Label label = new Label(parameter.getName());
-                    label.setPrefWidth(150);
+                    label.setPrefWidth((double)150.0F);
                     TextField field = new TextField(String.valueOf(AnalogValues.get(parameter.getName())));
-                    field.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
-                    field.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                    field.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
+                    field.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
                         if (KeyCode.ENTER.equals(event.getCode())) {
                             try {
                                 AnalogValues.replace(parameter.getName(), Double.parseDouble(field.getText()));
-                                field.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-                            } catch (Exception e) {
-                                field.setBackground(new Background(new BackgroundFill(Color.ORANGERED, CornerRadii.EMPTY, Insets.EMPTY)));
+                                field.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)}));
+                            } catch (Exception var5) {
+                                field.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.ORANGERED, CornerRadii.EMPTY, Insets.EMPTY)}));
                             }
                         }
-                    });
-                    field.textProperty().addListener((observable, oldValue, newValue) -> field.setBackground(new Background(new BackgroundFill(Color.ORANGE, CornerRadii.EMPTY, Insets.EMPTY))));
-                    field.setPrefWidth(350);
-                    detailsContainer.add(label, detailedContainerX, detailedContainerY);
-                    detailsContainer.add(field, detailedContainerX + 1, detailedContainerY++);
-                }
-            });
 
-            if (phaseTypeLabel.getText().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
+                    });
+                    field.textProperty().addListener((observable, oldValue, newValue) -> field.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.ORANGE, CornerRadii.EMPTY, Insets.EMPTY)})));
+                    field.setPrefWidth((double)350.0F);
+                    this.detailsContainer.add(label, this.detailedContainerX, this.detailedContainerY);
+                    this.detailsContainer.add(field, this.detailedContainerX + 1, this.detailedContainerY++);
+                }
+
+            });
+            if (this.phaseTypeLabel.getText().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
                 Label label = new Label("Material name ");
-                label.setPrefWidth(150);
-                ComboBox<Material> field = new ComboBox<>();
-                field.getItems().addAll(controller.getAllMaterials());
+                label.setPrefWidth((double)150.0F);
+                ComboBox<Material> field = new ComboBox();
+                field.getItems().addAll(this.controller.getAllMaterials());
                 field.setStyle("-fx-font-family: monospace;-fx-font-size: 12px;");
-                field.valueProperty().addListener((observable, oldValue, newValue) -> model.setMaterialID(newValue.getId()));
-                controller.getMaterialById(model.getMaterialID()).ifPresent(material -> {
-                    field.getSelectionModel().select(material);//TODO - check'
-                });
-                field.setPrefWidth(350);
-                detailsContainer.add(label, detailedContainerX, detailedContainerY);
-                detailsContainer.add(field, detailedContainerX + 1, detailedContainerY++);
+                field.valueProperty().addListener((observable, oldValue, newValue) -> this.model.setMaterialID(newValue.getId()));
+                this.controller.getMaterialById(this.model.getMaterialID()).ifPresent((material) -> field.getSelectionModel().select(material));
+                field.setPrefWidth((double)350.0F);
+                this.detailsContainer.add(label, this.detailedContainerX, this.detailedContainerY);
+                this.detailsContainer.add(field, this.detailedContainerX + 1, this.detailedContainerY++);
             }
         }
+
     }
 
     public String getStepName() {
-        return Name.getText();
+        return this.Name.getText();
     }
 
     public StepModel getModel() {
-        return model;
+        return this.model;
     }
 
     public void setModel(StepModel model) {
@@ -227,32 +225,32 @@ public class Step extends VBox {
     }
 
     private String getTooltipString() {
-        var = "";
-        if (model.getPhaseName().equals("Start") || model.getPhaseName().equals("End")) {
-            var += "Phase name = " + model.getPhaseName() + "\n";
-        } else {
-            var += "Phase type = " + model.getPhaseType() + "\n";
-            var += "Phase name = " + model.getPhaseName() + "\n";
-            model.getParametersType().forEach(parameter -> {
+        this.var = "";
+        if (!this.model.getPhaseName().equals("Start") && !this.model.getPhaseName().equals("End")) {
+            String var1 = this.var;
+            this.var = var1 + "Phase type = " + this.model.getPhaseType() + "\n";
+            var1 = this.var;
+            this.var = var1 + "Phase name = " + this.model.getPhaseName() + "\n";
+            this.model.getParametersType().forEach((parameter) -> {
                 if (parameter.getType().equals(PhaseParameterType.Check.name())) {
-                    var += parameter.getName() + " = " + model.getCheckParametersData().get(parameter.getName()) + "\n";
+                    this.var = this.var + parameter.getName() + " = " + this.model.getCheckParametersData().get(parameter.getName()) + "\n";
                 } else if (parameter.getType().equals(PhaseParameterType.Value.name())) {
-                    var += parameter.getName() + " = " + model.getValueParametersData().get(parameter.getName()) + "\n";
+                    this.var = this.var + parameter.getName() + " = " + this.model.getValueParametersData().get(parameter.getName()) + "\n";
                 }
+
             });
-            if (phaseTypeLabel.getText().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
-                controller.getMaterialById(model.getMaterialID()).ifPresentOrElse(material -> {
-                    var += "Material = " + material + "\n";
-                }, () -> {
-                    var += "Material = Material not found";
-                });
+            if (this.phaseTypeLabel.getText().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
+                this.controller.getMaterialById(this.model.getMaterialID()).ifPresentOrElse((material) -> this.var = this.var + "Material = " + material + "\n", () -> this.var = this.var + "Material = Material not found");
             }
+        } else {
+            String var10001 = this.var;
+            this.var = var10001 + "Phase name = " + this.model.getPhaseName() + "\n";
         }
-        return var;
+
+        return this.var;
     }
 
-    @Override
     public String toString() {
-        return getStepName();
+        return this.getStepName();
     }
 }

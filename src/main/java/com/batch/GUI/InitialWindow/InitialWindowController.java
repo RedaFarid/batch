@@ -1,3 +1,5 @@
+
+
 package com.batch.GUI.InitialWindow;
 
 import com.batch.ApplicationContext;
@@ -9,32 +11,44 @@ import com.batch.Database.Repositories.UnitsRepository;
 import com.batch.Database.Services.BatchControllerDataService;
 import com.batch.Database.Services.BatchesService;
 import com.batch.PLCDataSource.ModBus.ModBusService;
-import com.batch.PLCDataSource.PLC.ComplexDataType.*;
+import com.batch.PLCDataSource.PLC.ComplexDataType.GeneralInput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.GeneralOutput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Mixer;
+import com.batch.PLCDataSource.PLC.ComplexDataType.MixerOutput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Pump;
+import com.batch.PLCDataSource.PLC.ComplexDataType.PumpOutput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Valve;
+import com.batch.PLCDataSource.PLC.ComplexDataType.ValveOutput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Weight;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.batch.Services.LoggingService.LoggingService;
+import com.batch.Services.NotificationService.BackGroundServices;
+import com.batch.Services.NotificationService.ErrorObject;
+import com.batch.Services.NotificationService.NotificationService;
+import com.batch.Services.NotificationService.ServiceErrorsListener;
 import com.batch.Services.UserAdministration.UserAuthorizationService;
 import com.batch.Services.UserAdministration.WindowData;
 import com.batch.Utilities.LogIdentefires;
-import javafx.application.Platform;
-import javafx.scene.image.ImageView;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Controller;
-
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javafx.application.Platform;
+import javafx.scene.image.ImageView;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.ContextStoppedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Controller;
 
 @Controller
-@RequiredArgsConstructor
 public class InitialWindowController {
-
     private final InitialWindowModel model = new InitialWindowModel();
     private Map<String, RowDataDefinition> allDataDefinitions;
-
     private final ModBusService modBusService;
     private final UnitsRepository unitsRepository;
     private final BatchesService batchesService;
@@ -42,213 +56,269 @@ public class InitialWindowController {
     private final BatchControllerDataService batchControllerDataService;
     private final UserAuthorizationService userAuthorizationService;
     private final LoggingService loggingService;
+    private final InitialWindow initialWindow;
+    @Autowired
+    @BackGroundServices
+    private final NotificationService notificationService;
 
     public InitialWindowModel getModel() {
-        return model;
+        return this.model;
     }
 
-    //get Devices
     public Valve getValveByName(String name) {
-        return (Valve) allDataDefinitions.get(name);
-    }
-    public Pump getPumpByName(String name) {
-        return (Pump) allDataDefinitions.get(name);
-    }
-    public Mixer getMixerByName(String name) {
-        return (Mixer) allDataDefinitions.get(name);
-    }
-    public Weight getWeightByName(String name) {
-        return (Weight) allDataDefinitions.get(name);
+        return (Valve)this.allDataDefinitions.get(name);
     }
 
-    //Some controls
+    public Pump getPumpByName(String name) {
+        return (Pump)this.allDataDefinitions.get(name);
+    }
+
+    public Mixer getMixerByName(String name) {
+        return (Mixer)this.allDataDefinitions.get(name);
+    }
+
+    public Weight getWeightByName(String name) {
+        return (Weight)this.allDataDefinitions.get(name);
+    }
+
     public void atStartWaterFill(boolean val) {
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Start_WaterTank_Fill_To_HiAlarm)).setValue(val);
-        loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "Start water fill"));
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.Start_WaterTank_Fill_To_HiAlarm)).setValue(val);
+        this.loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "Start water fill"));
     }
+
     public synchronized void onSetAllInAutoPressed(Map<String, ImageView> mixers, Map<String, ImageView> pumps, Map<String, ImageView> valves) {
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Make_All_Devices_In_Automatic)).setValue(Boolean.TRUE);
-        mixers.forEach((name, mixer) -> {
-            ((BooleanDataType) allDataDefinitions.get(name).getAllValues().get(MixerOutput.Mode)).setValue(Boolean.TRUE);
-        });
-        pumps.forEach((name, mixer) -> {
-            ((BooleanDataType) allDataDefinitions.get(name).getAllValues().get(PumpOutput.Mode)).setValue(Boolean.TRUE);
-        });
-        valves.forEach((name, mixer) -> {
-            ((BooleanDataType) allDataDefinitions.get(name).getAllValues().get(ValveOutput.Mode)).setValue(Boolean.TRUE);
-        });
-        loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "Set all devices to auto"));
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.Make_All_Devices_In_Automatic)).setValue(Boolean.TRUE);
+        mixers.forEach((name, mixer) -> ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get(name)).getAllValues().get(MixerOutput.Mode)).setValue(Boolean.TRUE));
+        pumps.forEach((name, mixer) -> ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get(name)).getAllValues().get(PumpOutput.Mode)).setValue(Boolean.TRUE));
+        valves.forEach((name, mixer) -> ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get(name)).getAllValues().get(ValveOutput.Mode)).setValue(Boolean.TRUE));
+        this.loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "Set all devices to auto"));
     }
+
     public synchronized void onSetAllInAutoReleased() {
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Make_All_Devices_In_Automatic)).setValue(Boolean.FALSE);
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.Make_All_Devices_In_Automatic)).setValue(Boolean.FALSE);
     }
 
     public void onLogIn() {
-        userAuthorizationService.requestLogIn();
+        this.userAuthorizationService.requestLogIn();
     }
+
     public void onLogOut() {
-        userAuthorizationService.requestLogOff();
+        this.userAuthorizationService.requestLogOff();
     }
 
     @EventListener
-    public void afterRefreshed(ApplicationContext.GraphicsInitializerEvent event){
-        allDataDefinitions = plcDataDefinitionFactory.getAllDevicesDataModel();
+    public void afterRefreshed(ApplicationContext.GraphicsInitializerEvent event) {
+        this.allDataDefinitions = this.plcDataDefinitionFactory.getAllDevicesDataModel();
     }
 
     @EventListener
-    private void init(ContextStartedEvent event){
-        checkESDAlarms();
-        checkPLCConnection();
-        checkAirPressureAlarms();
-        checkOverUnderVoltageAlarms();
+    private void init(ContextStartedEvent event) {
+        this.checkESDAlarms();
+        this.checkPLCConnection();
+        this.checkAirPressureAlarms();
+        this.checkOverUnderVoltageAlarms();
+        this.listenToNotifications();
+        this.modBusService.getConnectionStatus().addListener((observable, oldValue, newValue) -> this.checkPLCConnection());
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.HI_Air_Pressure_Alarm)).addListener((observable, oldValue, newValue) -> this.checkAirPressureAlarms());
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Lo_Air_Pressure_Alarm)).addListener((observable, oldValue, newValue) -> this.checkAirPressureAlarms());
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Over_Under_Voltage_Alarm)).addListener((observable, oldValue, newValue) -> this.checkOverUnderVoltageAlarms());
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.ESD_Alarm)).addListener((observable, oldValue, newValue) -> this.checkESDAlarms());
+        ((RealDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Water_Pressure)).addListener((observable, oldValue, newValue) -> Platform.runLater(() -> this.model.getGauge1().setValue(newValue)));
+        ((RealDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Air_Pressure)).addListener((observable, oldValue, newValue) -> Platform.runLater(() -> this.model.getGauge2().setValue(newValue)));
+        if (!((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
+            ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.Mixer_1_Manual_Add_Confirmation)).setValue(false);
+        }
 
-        modBusService.getConnectionStatus().addListener((observable, oldValue, newValue) -> checkPLCConnection());
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.HI_Air_Pressure_Alarm)).addListener((observable, oldValue, newValue) -> checkAirPressureAlarms());
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.HI_Air_Pressure_Alarm)).addListener((observable, oldValue, newValue) -> checkAirPressureAlarms());
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Over_Under_Voltage_Alarm)).addListener((observable, oldValue, newValue) -> checkOverUnderVoltageAlarms());
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.ESD_Alarm)).addListener((observable, oldValue, newValue) -> checkESDAlarms());
+        if (!((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue()) {
+            ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.Mixer_2_Manual_Add_Confirmation)).setValue(false);
+        }
 
-        ((RealDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Water_Pressure)).addListener((observable, oldValue, newValue) -> Platform.runLater(() -> model.getGauge1().setValue(newValue)));
-        ((RealDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Air_Pressure)).addListener((observable, oldValue, newValue) -> Platform.runLater(() -> model.getGauge2().setValue(newValue)));
+        if (!((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue()) {
+            ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_1_Message_Confirmation)).setValue(false);
+        }
 
+        if (!((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue()) {
+            ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_2_Message_Confirmation)).setValue(false);
+        }
 
-        //Resetting window requests
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_1_Manual_Add_Confirmation)).setValue(false);
+        if (!((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue()) {
+            ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_1_Message_Confirmation)).setValue(false);
         }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_2_Manual_Add_Confirmation)).setValue(false);
+
+        if (!((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue()) {
+            ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_2_Message_Confirmation)).setValue(false);
         }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_1_Message_Confirmation)).setValue(false);
+
+        if (!((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue()) {
+            ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_3_Message_Confirmation)).setValue(false);
         }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_2_Message_Confirmation)).setValue(false);
-        }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_1_Message_Confirmation)).setValue(false);
-        }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_2_Message_Confirmation)).setValue(false);
-        }
-        if (!((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue()) {
-            ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_3_Message_Confirmation)).setValue(false);
-        }
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
-            if (!newValue){
-                ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_1_Manual_Add_Confirmation)).setValue(false);
+
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.Mixer_1_Manual_Add_Confirmation)).setValue(false);
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
-            if (!newValue){
-                ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_2_Manual_Add_Confirmation)).setValue(false);
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.Mixer_2_Manual_Add_Confirmation)).setValue(false);
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
-            if (!newValue){
-                ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_1_Message_Confirmation)).setValue(false);
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_1_Message_Confirmation)).setValue(false);
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
-            if (!newValue){
-                ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_2_Message_Confirmation)).setValue(false);
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Mixer_2_Message_Confirmation)).setValue(false);
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
-            if (!newValue){
-                ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_1_Message_Confirmation)).setValue(false);
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_1_Message_Confirmation)).setValue(false);
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
-            if (!newValue){
-                ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_2_Message_Confirmation)).setValue(false);
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_2_Message_Confirmation)).setValue(false);
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).addListener((observable, oldValue, newValue) -> {
-            if (!newValue){
-                ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_3_Message_Confirmation)).setValue(false);
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralOutput.IPC_Fill_From_Tank_3_Message_Confirmation)).setValue(false);
+            }
+
+        });
+    }
+
+    private void listenToNotifications() {
+        this.notificationService.getNotificationsDataStructure().addServicesListener(new ServiceErrorsListener() {
+            public void newServiceAdded(String serviceAdded) {
+            }
+
+            public void serviceRemoved(String service) {
+            }
+
+            public void newFamilyAdded(String service, String family, ErrorObject errorObject) {
+            }
+
+            public void familyRemoved(String service, String family) {
+            }
+
+            public void newErrorMessageAdded(String service, String family, String errorMessage, ErrorObject errorObject) {
+            }
+
+            public void atRegistering(List<String> services, Map<String, List<ErrorObject>> errors) {
+            }
+
+            public void newErrorMessagePopUpOnly(String service, String family, String errorMessage) {
+                InitialWindowController.this.initialWindow.showNotificationDownButton(service + " " + family, errorMessage, 60);
             }
         });
     }
 
     private void checkPLCConnection() {
-        if (modBusService.getConnectionStatus().getValue()){
+        if (this.modBusService.getConnectionStatus().getValue()) {
             Platform.runLater(() -> {
-                model.getConnectionInfo().setValue("Connection to PLC is successfully established ");
-                model.getConnectionStatus().setValue(true);
+                this.model.getConnectionInfo().setValue("Connection to PLC is successfully established ");
+                this.model.getConnectionStatus().setValue(true);
             });
-        }else {
+        } else {
             Platform.runLater(() -> {
-                model.getConnectionInfo().setValue("Connection to PLC has been lost ");
-                model.getConnectionStatus().setValue(false);
+                this.model.getConnectionInfo().setValue("Connection to PLC has been lost ");
+                this.model.getConnectionStatus().setValue(false);
             });
-        };
+        }
 
     }
+
     private void checkAirPressureAlarms() {
-        boolean hi = ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.HI_Air_Pressure_Alarm)).getValue();
-        boolean lo = ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Lo_Air_Pressure_Alarm)).getValue();
+        boolean hi = ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.HI_Air_Pressure_Alarm)).getValue();
+        boolean lo = ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Lo_Air_Pressure_Alarm)).getValue();
         Platform.runLater(() -> {
             if (hi) {
-                model.getAirPressureStatus().setValue(false);
-                model.getAirPressureInfo().setValue("Hi air pressure alarm");
+                this.model.getAirPressureStatus().setValue(false);
+                this.model.getAirPressureInfo().setValue("Hi air pressure alarm");
             } else if (lo) {
-                model.getAirPressureStatus().setValue(false);
-                model.getAirPressureInfo().setValue("Lo air pressure alarm");
+                this.model.getAirPressureStatus().setValue(false);
+                this.model.getAirPressureInfo().setValue("Lo air pressure alarm");
             } else {
-                model.getAirPressureStatus().setValue(true);
-                model.getAirPressureInfo().setValue("Normal air pressure");
+                this.model.getAirPressureStatus().setValue(true);
+                this.model.getAirPressureInfo().setValue("Normal air pressure");
             }
+
         });
     }
+
     private void checkOverUnderVoltageAlarms() {
-        boolean alarm = ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Over_Under_Voltage_Alarm)).getValue();
+        boolean alarm = ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Over_Under_Voltage_Alarm)).getValue();
         Platform.runLater(() -> {
             if (alarm) {
-                model.getOverUnderVoltageStatus().setValue(false);
-                model.getOverUnderVoltageInfo().setValue("Over/Under voltage alarm");
+                this.model.getOverUnderVoltageStatus().setValue(false);
+                this.model.getOverUnderVoltageInfo().setValue("Over/Under voltage alarm");
             } else {
-                model.getOverUnderVoltageStatus().setValue(true);
-                model.getOverUnderVoltageInfo().setValue("Normal supply voltage");
+                this.model.getOverUnderVoltageStatus().setValue(true);
+                this.model.getOverUnderVoltageInfo().setValue("Normal supply voltage");
             }
+
         });
     }
+
     private void checkESDAlarms() {
-        boolean alarm = ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.ESD_Alarm)).getValue();
+        boolean alarm = ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.ESD_Alarm)).getValue();
         Platform.runLater(() -> {
             if (alarm) {
-                model.getEsdStatus().setValue(false);
-                model.getEsdInfo().setValue("ESD activated");
+                this.model.getEsdStatus().setValue(false);
+                this.model.getEsdInfo().setValue("ESD activated");
             } else {
-                model.getEsdStatus().setValue(true);
-                model.getEsdInfo().setValue("ESD not activated");
+                this.model.getEsdStatus().setValue(true);
+                this.model.getEsdInfo().setValue("ESD not activated");
             }
+
         });
     }
 
     public List<String> getAllUnitsNames() {
-        return unitsRepository.findAll().stream().map(Unit::getName).collect(Collectors.toList());
+        return (List)Lists.newArrayList(this.unitsRepository.findAll()).stream().map(Unit::getName).collect(Collectors.toList());
     }
 
     public List<BatchControllerData> getAllBatchControllerData() {
-        return batchControllerDataService.findAll();
+        return this.batchControllerDataService.findAll();
     }
 
     public Optional<Batch> getBatchById(long runningBatchID) {
-        return batchesService.findById(runningBatchID);
+        return this.batchesService.findById(runningBatchID);
     }
 
     public void registerWindowToUserAuthorizationService(WindowData win) {
-        userAuthorizationService.registerWindow(win);
+        this.userAuthorizationService.registerWindow(win);
     }
 
     @EventListener
-    private void atAppStart(ContextStartedEvent event){
-        loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "System start"));
-    }
-    @EventListener
-    private void atAppClose(ContextStartedEvent event){
-        loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "System stop"));
+    private void atAppStart(ContextStartedEvent event) {
+        this.loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "System start"));
     }
 
+    @EventListener
+    private void atAppClose(ContextStoppedEvent event) {
+        this.loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "System stop"));
+    }
+
+    public InitialWindowController(final ModBusService modBusService, final UnitsRepository unitsRepository, final BatchesService batchesService, final PLCDataDefinitionFactory plcDataDefinitionFactory, final BatchControllerDataService batchControllerDataService, final UserAuthorizationService userAuthorizationService, final LoggingService loggingService, final InitialWindow initialWindow, final NotificationService notificationService) {
+        this.modBusService = modBusService;
+        this.unitsRepository = unitsRepository;
+        this.batchesService = batchesService;
+        this.plcDataDefinitionFactory = plcDataDefinitionFactory;
+        this.batchControllerDataService = batchControllerDataService;
+        this.userAuthorizationService = userAuthorizationService;
+        this.loggingService = loggingService;
+        this.initialWindow = initialWindow;
+        this.notificationService = notificationService;
+    }
 }

@@ -1,86 +1,78 @@
+
 package com.batch.Database.Services;
 
 import com.batch.DTO.RecipeSystemDataDefinitions.RecipeModel;
 import com.batch.Database.Entities.Recipe;
 import com.batch.Database.Repositories.RecipesRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import com.google.common.collect.Lists;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.List;
-import java.util.Optional;
-
-@Log4j2
 @Service
-@RequiredArgsConstructor
 public class RecipeService {
-
+    private static final Logger log = LogManager.getLogger(RecipeService.class);
     private final RecipesRepository recipesRepository;
 
-    @CacheEvict("recipes")
-    public Recipe save(Recipe selectedRecipe) {
-        final String rowModel = toRowModel(selectedRecipe.getModel());
-        selectedRecipe.setRowModel(rowModel);
-        return recipesRepository.save(selectedRecipe);
+    @CacheEvict({"recipes"})
+    public Optional<Recipe> save(Recipe selectedRecipe) {
+        return this.startMarshalling(selectedRecipe.getModel()).map((rowModel) -> {
+            selectedRecipe.setRowModel(rowModel);
+            return (Recipe)this.recipesRepository.save(selectedRecipe);
+        });
     }
 
-    @Cacheable("recipes")
+    @Cacheable({"recipes"})
     public Optional<Recipe> findById(Long id) {
-        return recipesRepository
-                .findById(id)
-                .map(recipe -> {
-                    final RecipeModel recipeModel = toModel(recipe.getRowModel());
-                    recipe.setModel(recipeModel);
-                    return recipe;
-                });
+        return this.recipesRepository.findById(id).flatMap((recipe) -> this.startUnMarshalling(recipe.getRowModel()).map((recipeModel) -> {
+            recipe.setModel(recipeModel);
+            return recipe;
+        }));
     }
 
-    @Cacheable("recipes")
+    @Cacheable({"recipes"})
     public List<Recipe> findAll() {
-        return recipesRepository.findAll();
+        return (List)Lists.newArrayList(this.recipesRepository.findAll()).stream().flatMap((recipe) -> this.startUnMarshalling(recipe.getRowModel()).map((batchModel) -> {
+            recipe.setModel(batchModel);
+            return recipe;
+        }).stream()).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
-
-
-    //Managing XML
-    public RecipeModel toModel(String rowModel) {
-        RecipeModel recipeModel = new RecipeModel();
+    private Optional<String> startMarshalling(RecipeModel model) {
         try {
-            recipeModel = startUnMarshalling(rowModel);
-        } catch (Exception ignored) {
-
+            StringWriter sw = new StringWriter();
+            JAXBContext jaxbcontext = JAXBContext.newInstance(new Class[]{RecipeModel.class});
+            Marshaller marshaller = jaxbcontext.createMarshaller();
+            marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
+            marshaller.marshal(model, sw);
+            return Optional.ofNullable(sw.toString());
+        } catch (Exception var5) {
+            return Optional.empty();
         }
-        return recipeModel;
     }
-    public String toRowModel(RecipeModel model) {
-        String s = "";
+
+    private Optional<RecipeModel> startUnMarshalling(String model) {
         try {
-            s = startMarshalling(model);
-        } catch (Exception ignored) {
+            JAXBContext jaxbcontext = JAXBContext.newInstance(new Class[]{RecipeModel.class});
+            Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
+            return Optional.ofNullable((RecipeModel)unMarshaller.unmarshal(new StringReader(model)));
+        } catch (Exception var4) {
+            return Optional.empty();
         }
-        return s;
     }
 
-    private String startMarshalling(RecipeModel model) throws Exception {
-        StringWriter sw = new StringWriter();
-        JAXBContext jaxbcontext = JAXBContext.newInstance(RecipeModel.class);
-        Marshaller marshaller = jaxbcontext.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-        marshaller.marshal(model, sw);
-        return sw.toString();
+    public RecipeService(final RecipesRepository recipesRepository) {
+        this.recipesRepository = recipesRepository;
     }
-    private RecipeModel startUnMarshalling(String model) throws Exception {
-        JAXBContext jaxbcontext = JAXBContext.newInstance(RecipeModel.class);
-        Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
-        return ((RecipeModel) unMarshaller.unmarshal(new StringReader(model)));
-    }
-
-
 }

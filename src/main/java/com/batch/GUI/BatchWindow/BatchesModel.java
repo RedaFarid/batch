@@ -1,7 +1,28 @@
+
 package com.batch.GUI.BatchWindow;
 
-import lombok.Data;
-
-@Data
 public class BatchesModel {
+    public boolean equals(final Object o) {
+        if (o == this) {
+            return true;
+        } else if (!(o instanceof BatchesModel)) {
+            return false;
+        } else {
+            BatchesModel other = (BatchesModel)o;
+            return other.canEqual(this);
+        }
+    }
+
+    protected boolean canEqual(final Object other) {
+        return other instanceof BatchesModel;
+    }
+
+    public int hashCode() {
+        int result = 1;
+        return 1;
+    }
+
+    public String toString() {
+        return "BatchesModel()";
+    }
 }

@@ -1,37 +1,38 @@
+
+
 package com.batch.PLCDataSource.ModBus;
 
-import com.batch.Services.LoggingService.LoggingService;
-import javafx.beans.property.BooleanProperty;
-
+import com.batch.Services.NotificationService.NotificationService;
+import com.batch.Utilities.StringUtilsL;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import javafx.beans.property.BooleanProperty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ModbusConnectionMonitor {
-
+    private static final Logger log = LogManager.getLogger(ModbusConnectionMonitor.class);
     private static volatile ModbusConnectionMonitor singleton = null;
-
     private final BooleanProperty connectionStatus;
     private final BooleanProperty bufferSynchronized;
-
     private final AtomicInteger life = new AtomicInteger(1);
+    private final NotificationService loggingService;
 
-    private final LoggingService loggingService;
-
-    private ModbusConnectionMonitor(BooleanProperty connectionStatus, BooleanProperty bufferSynchronized, LoggingService loggingService) {
+    private ModbusConnectionMonitor(BooleanProperty connectionStatus, BooleanProperty bufferSynchronized, NotificationService loggingService) {
         this.connectionStatus = connectionStatus;
         this.bufferSynchronized = bufferSynchronized;
         this.loggingService = loggingService;
     }
 
-    public static ModbusConnectionMonitor getService(String IP, BooleanProperty connectionStatus, BooleanProperty bufferSynchronized, LoggingService loggingService) {
-        synchronized (ModbusConnectionMonitor.class) {
+    public static ModbusConnectionMonitor getService(String IP, BooleanProperty connectionStatus, BooleanProperty bufferSynchronized, NotificationService loggingService) {
+        synchronized(ModbusConnectionMonitor.class) {
             if (singleton == null) {
                 singleton = new ModbusConnectionMonitor(connectionStatus, bufferSynchronized, loggingService);
             }
         }
+
         return singleton;
     }
 
@@ -40,23 +41,25 @@ public class ModbusConnectionMonitor {
             if (InetAddress.getByName(IP).isReachable(1000)) {
                 if (!connection.isConnected()) {
                     connection.Connect();
-                    connectionStatus.setValue(Boolean.FALSE);
-                    bufferSynchronized.setValue(Boolean.FALSE);
+                    this.connectionStatus.setValue(Boolean.FALSE);
+                    this.bufferSynchronized.setValue(Boolean.FALSE);
                 } else {
-                    writeToLifeSignalOnPLC(connection, life.getAndAdd(1));
-                    connectionStatus.setValue(Boolean.TRUE);
+                    this.writeToLifeSignalOnPLC(connection, this.life.getAndAdd(1));
+                    this.connectionStatus.setValue(Boolean.TRUE);
                 }
             } else {
                 connection.Disconnect();
-                connectionStatus.setValue(Boolean.FALSE);
-                bufferSynchronized.setValue(Boolean.FALSE);
+                this.connectionStatus.setValue(Boolean.FALSE);
+                this.bufferSynchronized.setValue(Boolean.FALSE);
+                this.loggingService.newErrorMessage("Modbus connection monitor", "Check connection", "Can not ping the contgroller\nCheck the ip of the controlller, the ip of the server, cables, plug, controller is Up and the port configurations");
             }
         } catch (Exception e) {
-            connectionStatus.setValue(Boolean.FALSE);
-            bufferSynchronized.setValue(Boolean.FALSE);
-            DisconnectConnection(connection);
-            loggingService.LogRecordForException("Modbus Connection monitor", e);
+            this.connectionStatus.setValue(Boolean.FALSE);
+            this.bufferSynchronized.setValue(Boolean.FALSE);
+            this.DisconnectConnection(connection);
+            this.loggingService.newErrorMessage("Modbus connection monitor", "Check connection", StringUtilsL.textLimiter(e.getMessage(), 40));
         }
+
     }
 
     private void writeToLifeSignalOnPLC(ModbusClientUpdated connection, int var) throws Exception {
@@ -67,7 +70,8 @@ public class ModbusConnectionMonitor {
         try {
             connection.Disconnect();
         } catch (IOException ex) {
-            Logger.getLogger(ModbusConnectionMonitor.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ModbusConnectionMonitor.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
+
     }
 }

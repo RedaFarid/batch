@@ -1,3 +1,5 @@
+
+
 package com.batch.GUI.InitialWindow;
 
 import com.batch.ApplicationContext;
@@ -12,14 +14,33 @@ import com.batch.GUI.FacePlates.MixerFacePlate;
 import com.batch.GUI.FacePlates.PumpFacePlate;
 import com.batch.GUI.FacePlates.ValveFacePlate;
 import com.batch.GUI.FacePlates.WeightFacePlate;
-import com.batch.GUI.InitialWindow.SubWindows.*;
+import com.batch.GUI.InitialWindow.SubWindows.HelpWindow;
+import com.batch.GUI.InitialWindow.SubWindows.IPC_Fill_From_Mixer_1_Message;
+import com.batch.GUI.InitialWindow.SubWindows.IPC_Fill_From_Mixer_2_Message;
+import com.batch.GUI.InitialWindow.SubWindows.IPC_Fill_From_Tank_1_Message;
+import com.batch.GUI.InitialWindow.SubWindows.IPC_Fill_From_Tank_2_Message;
+import com.batch.GUI.InitialWindow.SubWindows.IPC_Fill_From_Tank_3_Message;
+import com.batch.GUI.InitialWindow.SubWindows.Mixer_1_Manual_Add_Message;
+import com.batch.GUI.InitialWindow.SubWindows.Mixer_2_Manual_Add_Message;
 import com.batch.GUI.MaterialsWindow.MaterialsWindow;
+import com.batch.GUI.NotificationCenter.NCServicesView;
 import com.batch.GUI.PhasesWindow.PhasesWindow;
 import com.batch.GUI.RecipeEditor.WindowComponents.RecipeEditor;
 import com.batch.GUI.Reporting.BatchArchiveWindow;
 import com.batch.GUI.UnitsWindow.UnitsWindow;
 import com.batch.GUI.UserAdministration.UserAdministrationWindow;
-import com.batch.PLCDataSource.PLC.ComplexDataType.*;
+import com.batch.PLCDataSource.PLC.ComplexDataType.GeneralInput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Mixer;
+import com.batch.PLCDataSource.PLC.ComplexDataType.MixerInput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Pump;
+import com.batch.PLCDataSource.PLC.ComplexDataType.PumpInput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Valve;
+import com.batch.PLCDataSource.PLC.ComplexDataType.ValveInput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Weight;
+import com.batch.PLCDataSource.PLC.ComplexDataType.WeightInput;
+import com.batch.PLCDataSource.PLC.ComplexDataType.WeightOutput;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.batch.Services.LoggingService.LoggingService;
@@ -29,41 +50,26 @@ import com.batch.Services.UserAdministration.WindowData;
 import com.batch.Utilities.LogIdentefires;
 import com.batch.Utilities.Round;
 import com.google.common.io.Resources;
-import eu.hansolo.medusa.*;
+import eu.hansolo.medusa.Clock;
+import eu.hansolo.medusa.ClockBuilder;
+import eu.hansolo.medusa.Gauge;
+import eu.hansolo.medusa.GaugeBuilder;
+import eu.hansolo.medusa.LcdDesign;
+import eu.hansolo.medusa.LcdFont;
+import eu.hansolo.medusa.TickLabelLocation;
+import eu.hansolo.medusa.TickLabelOrientation;
+import eu.hansolo.medusa.TickMarkType;
+import eu.hansolo.medusa.Clock.ClockSkinType;
+import eu.hansolo.medusa.Gauge.KnobType;
+import eu.hansolo.medusa.Gauge.NeedleShape;
+import eu.hansolo.medusa.Gauge.NeedleSize;
+import eu.hansolo.medusa.Gauge.ScaleDirection;
 import eu.hansolo.medusa.skins.QuarterSkin;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.FloatProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Cursor;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.effect.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Stop;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
+import io.github.palexdev.materialfx.controls.MFXNotification;
+import io.github.palexdev.materialfx.controls.SimpleMFXNotificationPane;
+import io.github.palexdev.materialfx.notifications.NotificationPos;
+import io.github.palexdev.materialfx.notifications.NotificationsManager;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -71,1143 +77,1170 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.FloatProperty;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Separator;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Glow;
+import javafx.scene.effect.Light;
+import javafx.scene.effect.Lighting;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Stop;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.controlsfx.dialog.ExceptionDialog;
+import org.kordamp.ikonli.entypo.Entypo;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
-@Log4j2
 @Component
 public class InitialWindow implements ApplicationListener<ApplicationContext.GraphicsInitializerEvent> {
-
-    //Stages
+    private static final Logger log = LogManager.getLogger(InitialWindow.class);
     private Stage initialStage;
-
-    //Scene
     private final BorderPane root = new BorderPane();
-    private final Scene scene = new Scene(root);
-
-    private final TabPane containerPane = new TabPane();
-
-    private final Tab SCADATab = new Tab("    OverView    ");
-
-    private final VBox batches = new VBox();
-    private Parent scada = null;
-    private final VBox topBars = new VBox();
-
-    private final ToolBar toolBar = new ToolBar();
-    private final MenuBar menuBar = new MenuBar();
-
-    private final Menu view = new Menu("View");
-    private final Menu Users = new Menu("Users");
-    private final Menu RecipesSettings = new Menu("Recipes");
-    private final Menu operations = new Menu("Operations");
-    private final Menu alarms = new Menu("Alarms");
-    private final Menu SystemMenu = new Menu("System");
-    private final Menu Help = new Menu("Help");
-
-    private final MenuItem enterFullScreenItem = new MenuItem("Enter full screen");
-    private final MenuItem exitFullScreenItem = new MenuItem("Exit full screen");
-    private final MenuItem closeAppItem = new MenuItem("Shutdown");
-    private final MenuItem UserAdministrationMenuItem = new MenuItem("UserAdministration");
-    private final MenuItem LoginItem = new MenuItem("Log in");
-    private final MenuItem LogOutItem = new MenuItem("Log out");
-    private final MenuItem Units = new MenuItem("Units");
-    private final MenuItem Phases = new MenuItem("Phases");
-    private final MenuItem materialItem = new MenuItem("Materials manager");
-    private final MenuItem recipeEditorItem = new MenuItem("Recipe Editor");
-    private final MenuItem batchCreatorItem = new MenuItem("Batch Creator");
-    private final MenuItem reportingSystem = new MenuItem("Reporting System");
-    private final MenuItem configurations = new MenuItem("Configurations");
-    private final MenuItem journalAlarms = new MenuItem("Journal Alarms");
-    private final MenuItem airPressureSettings = new MenuItem("Air-Pressure Alarms");
-
-    private final Button logIn = new Button("Log In");
-    private final Button logOut = new Button("Log Out");
-    private final Button shutDown = new Button("ShutDown");
-    private final Button startWaterFill = new Button("Start water fill to HI_Alarm");
-    private final Button changeAllDevicesToAutomatic = new Button("Auto all");
-
-    private final Label connectionStatus = new Label("Starting connection with PLC system ...");
-    private final Label airPressureStatus = new Label("Checking air pressure");
-    private final Label overUnderVoltageStatus = new Label("Checking supply voltage");
-    private final Label ESDStatus = new Label("Checking ESD status");
-
-    private Map<String, ImageView> valves = new LinkedHashMap<>();
-    private Map<String, ImageView> pumps = new LinkedHashMap<>();
-    private Map<String, ImageView> mixers = new LinkedHashMap<>();
-    private Map<String, Pane> levelBars = new LinkedHashMap<>();
-    private Map<String, Label> levelLabels = new LinkedHashMap<>();
-    private Map<String, Label> weightLabels = new LinkedHashMap<>();
+    private final Scene scene;
+    private final TabPane containerPane;
+    private final Tab SCADATab;
+    private final VBox batches;
+    private Parent scada;
+    private final VBox topBars;
+    private final ToolBar toolBar;
+    private final MenuBar menuBar;
+    private final Menu view;
+    private final Menu Users;
+    private final Menu RecipesSettings;
+    private final Menu operations;
+    private final Menu alarms;
+    private final Menu SystemMenu;
+    private final Menu Help;
+    private final MenuItem enterFullScreenItem;
+    private final MenuItem exitFullScreenItem;
+    private final MenuItem closeAppItem;
+    private final MenuItem UserAdministrationMenuItem;
+    private final MenuItem LoginItem;
+    private final MenuItem LogOutItem;
+    private final MenuItem Units;
+    private final MenuItem Phases;
+    private final MenuItem materialItem;
+    private final MenuItem recipeEditorItem;
+    private final MenuItem batchCreatorItem;
+    private final MenuItem reportingSystem;
+    private final MenuItem configurations;
+    private final MenuItem journalAlarms;
+    private final MenuItem airPressureSettings;
+    private final MenuItem notificationsCenter;
+    private final MenuItem about;
+    private final Button logIn;
+    private final Button logOut;
+    private final Button shutDown;
+    private final Button startWaterFill;
+    private final Button changeAllDevicesToAutomatic;
+    private final Label connectionStatus;
+    private final Label airPressureStatus;
+    private final Label overUnderVoltageStatus;
+    private final Label ESDStatus;
+    private Map<String, ImageView> valves;
+    private Map<String, ImageView> pumps;
+    private Map<String, ImageView> mixers;
+    private Map<String, Pane> levelBars;
+    private Map<String, Label> levelLabels;
+    private Map<String, Label> weightLabels;
     private AnchorPane SCADAPane;
     private Pane waterLevel;
     private Pane waterPress;
     private Pane airPress;
-
-    private final Label lastAlarmField = new Label();
-
+    private final Label lastAlarmField;
     private RecipeEditor recipeEditor;
     private BatchCreator batchCreator;
-    private final Map<Long, BatchObserver> batchObservers = new ConcurrentHashMap<>();
+    private final Map<Long, BatchObserver> batchObservers;
     private AllAlarmsWindow allAlarmsWindow;
-
     private String returnData;
-
-
-    private final Background HEALTHY_BACKGROUND = new Background(new BackgroundFill(Color.LIGHTGREEN,  new CornerRadii(5), Insets.EMPTY));
-    private final Background FAULTY_BACKGROUND = new Background(new BackgroundFill(Color.RED.brighter(),  new CornerRadii(5), Insets.EMPTY));
-    private final Background CONNECTION_LOSS_BACKGROUND = new Background(new BackgroundFill(Color.ORANGE,  new CornerRadii(5), Insets.EMPTY));
-
-
+    private final Background HEALTHY_BACKGROUND;
+    private final Background FAULTY_BACKGROUND;
+    private final Background CONNECTION_LOSS_BACKGROUND;
     private InitialWindowModel model;
-
-    //Injected Beans
-    @Autowired(required = false)
+    @Autowired(
+            required = false
+    )
     private LoggingService loggingService;
-    @Autowired(required = false)
+    @Autowired(
+            required = false
+    )
     private InitialWindowController controller;
-    @Autowired(required = false)
+    @Autowired(
+            required = false
+    )
     private UserAdministrationWindow userAdministrationWindow;
     @Autowired
     private PLCDataDefinitionFactory plcDataDefinitionFactory;
-
+    private NCServicesView ncServicesView;
     private Map<String, RowDataDefinition> allDataDefinitions;
 
+    public InitialWindow() {
+        this.scene = new Scene(this.root);
+        this.containerPane = new TabPane();
+        this.SCADATab = new Tab("    OverView    ");
+        this.batches = new VBox();
+        this.scada = null;
+        this.topBars = new VBox();
+        this.toolBar = new ToolBar();
+        this.menuBar = new MenuBar();
+        this.view = new Menu("View");
+        this.Users = new Menu("Users");
+        this.RecipesSettings = new Menu("Recipes");
+        this.operations = new Menu("Operations");
+        this.alarms = new Menu("Alarms");
+        this.SystemMenu = new Menu("System");
+        this.Help = new Menu("Help");
+        this.enterFullScreenItem = new MenuItem("Enter full screen");
+        this.exitFullScreenItem = new MenuItem("Exit full screen");
+        this.closeAppItem = new MenuItem("Shutdown");
+        this.UserAdministrationMenuItem = new MenuItem("UserAdministration");
+        this.LoginItem = new MenuItem("Log in");
+        this.LogOutItem = new MenuItem("Log out");
+        this.Units = new MenuItem("Units");
+        this.Phases = new MenuItem("Phases");
+        this.materialItem = new MenuItem("Materials manager");
+        this.recipeEditorItem = new MenuItem("Recipe Editor");
+        this.batchCreatorItem = new MenuItem("Batch Creator");
+        this.reportingSystem = new MenuItem("Reporting System");
+        this.configurations = new MenuItem("Configurations");
+        this.journalAlarms = new MenuItem("Journal Alarms");
+        this.airPressureSettings = new MenuItem("Air-Pressure Alarms");
+        this.notificationsCenter = new MenuItem("Notification center");
+        this.about = new MenuItem("About");
+        this.logIn = new Button("Log In");
+        this.logOut = new Button("Log Out");
+        this.shutDown = new Button("ShutDown");
+        this.startWaterFill = new Button("Start water fill to HI-Alarm");
+        this.changeAllDevicesToAutomatic = new Button("Auto all");
+        this.connectionStatus = new Label("Starting connection with PLC system ...");
+        this.airPressureStatus = new Label("Checking air pressure");
+        this.overUnderVoltageStatus = new Label("Checking supply voltage");
+        this.ESDStatus = new Label("Checking ESD status");
+        this.valves = new LinkedHashMap();
+        this.pumps = new LinkedHashMap();
+        this.mixers = new LinkedHashMap();
+        this.levelBars = new LinkedHashMap();
+        this.levelLabels = new LinkedHashMap();
+        this.weightLabels = new LinkedHashMap();
+        this.lastAlarmField = new Label();
+        this.batchObservers = new ConcurrentHashMap();
+        this.HEALTHY_BACKGROUND = new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, new CornerRadii((double)5.0F), Insets.EMPTY)});
+        this.FAULTY_BACKGROUND = new Background(new BackgroundFill[]{new BackgroundFill(Color.RED.brighter(), new CornerRadii((double)5.0F), Insets.EMPTY)});
+        this.CONNECTION_LOSS_BACKGROUND = new Background(new BackgroundFill[]{new BackgroundFill(Color.ORANGERED, new CornerRadii((double)5.0F), Insets.EMPTY)});
+    }
 
-    @Override
     public void onApplicationEvent(ApplicationContext.GraphicsInitializerEvent listener) {
         try {
-            initialStage = listener.getStage();
-            model = controller.getModel();
-            allAlarmsWindow = AllAlarmsWindow.getWindow(initialStage);
-            recipeEditor = RecipeEditor.getWindow(initialStage);
-            batchCreator = BatchCreator.getWindow(initialStage);
-
-            recipeEditor.setHeight(900);
-            recipeEditor.setWidth(1500);
-            recipeEditor.initOwner(initialStage);
-
-            batchCreator.setHeight(600);
-            batchCreator.setWidth(1100);
-            batchCreator.setMinHeight(600);
-            batchCreator.setMinWidth(800);
-            batchCreator.setResizable(false);
-            batchCreator.initOwner(initialStage);
-
-            graphicsBuilder();
-        }catch (Exception e){
+            this.initialStage = listener.getStage();
+            this.model = this.controller.getModel();
+            this.allAlarmsWindow = AllAlarmsWindow.getWindow(this.initialStage);
+            this.recipeEditor = RecipeEditor.getWindow(this.initialStage);
+            this.batchCreator = BatchCreator.getWindow(this.initialStage);
+            this.ncServicesView = new NCServicesView(this.initialStage);
+            this.recipeEditor.setHeight((double)900.0F);
+            this.recipeEditor.setWidth((double)1500.0F);
+            this.recipeEditor.initOwner(this.initialStage);
+            this.batchCreator.setHeight((double)600.0F);
+            this.batchCreator.setWidth((double)1100.0F);
+            this.batchCreator.setMinHeight((double)600.0F);
+            this.batchCreator.setMinWidth((double)800.0F);
+            this.batchCreator.setResizable(false);
+            this.batchCreator.initOwner(this.initialStage);
+            this.graphicsBuilder();
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private void graphicsBuilder() {
-
-        lastAlarmField.prefWidthProperty().bind(topBars.widthProperty());
-        lastAlarmField.setPadding(new Insets(3));
-        lastAlarmField.setPrefHeight(30);
-        lastAlarmField.setBackground(new Background(new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)));
-
-
-        connectionStatus.setPadding(new Insets(5, 10, 5, 10));
-        connectionStatus.setPrefSize(400, 30);
-        connectionStatus.setAlignment(Pos.CENTER);
-
-        airPressureStatus.setPadding(new Insets(5, 10, 5, 10));
-        airPressureStatus.setPrefSize(180, 30);
-        airPressureStatus.setAlignment(Pos.CENTER);
-
-        overUnderVoltageStatus.setPadding(new Insets(5, 10, 5, 10));
-        overUnderVoltageStatus.setPrefSize(180, 30);
-        overUnderVoltageStatus.setAlignment(Pos.CENTER);
-
-        ESDStatus.setPadding(new Insets(5, 10, 5, 10));
-        ESDStatus.setPrefSize(180, 30);
-        ESDStatus.setAlignment(Pos.CENTER);
-
-        batches.setPrefWidth(500);
-
+        this.lastAlarmField.prefWidthProperty().bind(this.topBars.widthProperty());
+        this.lastAlarmField.setPadding(new Insets((double)3.0F));
+        this.lastAlarmField.setPrefHeight((double)30.0F);
+        this.lastAlarmField.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.GREEN, CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.connectionStatus.setPadding(new Insets((double)5.0F, (double)10.0F, (double)5.0F, (double)10.0F));
+        this.connectionStatus.setPrefSize((double)400.0F, (double)30.0F);
+        this.connectionStatus.setAlignment(Pos.CENTER);
+        this.airPressureStatus.setPadding(new Insets((double)5.0F, (double)10.0F, (double)5.0F, (double)10.0F));
+        this.airPressureStatus.setPrefSize((double)180.0F, (double)30.0F);
+        this.airPressureStatus.setAlignment(Pos.CENTER);
+        this.overUnderVoltageStatus.setPadding(new Insets((double)5.0F, (double)10.0F, (double)5.0F, (double)10.0F));
+        this.overUnderVoltageStatus.setPrefSize((double)180.0F, (double)30.0F);
+        this.overUnderVoltageStatus.setAlignment(Pos.CENTER);
+        this.ESDStatus.setPadding(new Insets((double)5.0F, (double)10.0F, (double)5.0F, (double)10.0F));
+        this.ESDStatus.setPrefSize((double)180.0F, (double)30.0F);
+        this.ESDStatus.setAlignment(Pos.CENTER);
+        this.batches.setPrefWidth((double)500.0F);
         Pane spacePane = new Pane();
-        spacePane.setPrefWidth(160);
-
-        shutDown.setPrefWidth(100);
-        startWaterFill.setPrefWidth(200);
-        changeAllDevicesToAutomatic.setPrefWidth(200);
-
-        toolBar.getItems().addAll(logIn, logOut, new Separator(), changeAllDevicesToAutomatic, startWaterFill, new Separator(), shutDown, spacePane, new Separator(), ESDStatus, overUnderVoltageStatus, airPressureStatus, new Separator(), connectionStatus, new Separator(), getClock());
-
-        menuBar.getMenus().addAll(view, Users, RecipesSettings, operations, alarms, SystemMenu, Help);
-        view.getItems().addAll(enterFullScreenItem, exitFullScreenItem, new SeparatorMenuItem(), closeAppItem);
-        Users.getItems().addAll(LoginItem, LogOutItem, new SeparatorMenuItem(), UserAdministrationMenuItem);
-        RecipesSettings.getItems().addAll(Units, Phases);
-        alarms.getItems().addAll(journalAlarms, airPressureSettings);
-        SystemMenu.getItems().addAll(configurations, new SeparatorMenuItem());
-        operations.getItems().addAll(materialItem, new SeparatorMenuItem(), recipeEditorItem, batchCreatorItem, new SeparatorMenuItem(), reportingSystem);
+        spacePane.setPrefWidth((double)110.0F);
+        this.shutDown.setPrefWidth((double)100.0F);
+        this.startWaterFill.setPrefWidth((double)200.0F);
+        this.changeAllDevicesToAutomatic.setPrefWidth((double)200.0F);
+        this.toolBar.getItems().addAll(new Node[]{this.logIn, this.logOut, new Separator(), this.shutDown, new Separator(), this.changeAllDevicesToAutomatic, this.startWaterFill, new Separator(), this.ESDStatus, this.overUnderVoltageStatus, this.airPressureStatus, new Separator(), this.connectionStatus, new Separator(), this.getClock()});
+        this.menuBar.getMenus().addAll(new Menu[]{this.view, this.Users, this.RecipesSettings, this.operations, this.alarms, this.Help});
+        this.view.getItems().addAll(new MenuItem[]{this.enterFullScreenItem, this.exitFullScreenItem, new SeparatorMenuItem(), this.closeAppItem});
+        this.Users.getItems().addAll(new MenuItem[]{this.LoginItem, this.LogOutItem, new SeparatorMenuItem(), this.UserAdministrationMenuItem});
+        this.RecipesSettings.getItems().addAll(new MenuItem[]{this.Units, this.Phases});
+        this.alarms.getItems().addAll(new MenuItem[]{this.journalAlarms, new SeparatorMenuItem(), this.notificationsCenter, new SeparatorMenuItem(), this.airPressureSettings});
+        this.SystemMenu.getItems().addAll(new MenuItem[]{this.configurations, new SeparatorMenuItem()});
+        this.operations.getItems().addAll(new MenuItem[]{this.materialItem, new SeparatorMenuItem(), this.recipeEditorItem, this.batchCreatorItem, new SeparatorMenuItem(), this.reportingSystem});
+        this.Help.getItems().add(this.about);
 
         try {
-            scada = FXMLLoader.load(Resources.getResource("Views/SCADA.fxml"));
-            SCADAPane = SCADAController.getParent();
-            valves = SCADAController.getValves();
-            pumps = SCADAController.getPumps();
-            mixers = SCADAController.getMixers();
-            levelBars = SCADAController.getLevelBars();
-            levelLabels = SCADAController.getLevelLabels();
-            weightLabels = SCADAController.getWeightLabels();
-            waterLevel = SCADAController.getWaterLevel();
-            waterPress = SCADAController.getWaterPress();
-            airPress = SCADAController.getAirPress();
-
-            scada.setScaleY(0.92);
-
+            this.scada = (Parent)FXMLLoader.load(Resources.getResource("Views/SCADA.fxml"));
+            this.SCADAPane = SCADAController.getParent();
+            this.valves = SCADAController.getValves();
+            this.pumps = SCADAController.getPumps();
+            this.mixers = SCADAController.getMixers();
+            this.levelBars = SCADAController.getLevelBars();
+            this.levelLabels = SCADAController.getLevelLabels();
+            this.weightLabels = SCADAController.getWeightLabels();
+            this.waterLevel = SCADAController.getWaterLevel();
+            this.waterPress = SCADAController.getWaterPress();
+            this.airPress = SCADAController.getAirPress();
+            this.scada.setScaleY(0.92);
         } catch (IOException ex) {
-            Logger.getLogger(InitialWindow.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(InitialWindow.class.getName()).log(Level.SEVERE, (String)null, ex);
             log.fatal(ex, ex);
         }
 
-        adjustGauges();
-        topBars.getChildren().addAll(menuBar, toolBar, lastAlarmField);
-        topBars.setAlignment(Pos.CENTER);
+        this.adjustGauges();
+        this.topBars.getChildren().addAll(new Node[]{this.menuBar, this.toolBar, this.lastAlarmField});
+        this.topBars.setAlignment(Pos.CENTER);
+        this.containerPane.getTabs().addAll(new Tab[]{this.SCADATab});
+        this.containerPane.setStyle("-fx-open-tab-animation: NONE; -fx-close-tab-animation: NONE;");
+        this.SCADATab.setContent(this.scada);
+        this.SCADATab.setClosable(false);
+        this.SCADATab.setStyle("-fx-border-color: darkblue; -fx-border-width:0.1;");
+        this.connectionStatus.textProperty().bind(this.model.getConnectionInfo());
+        this.connectionStatus.backgroundProperty().bind(Bindings.when(this.model.getConnectionStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.CONNECTION_LOSS_BACKGROUND));
+        this.connectionStatus.textFillProperty().bind(Bindings.when(this.model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+        this.airPressureStatus.textProperty().bind(this.model.getAirPressureInfo());
+        this.airPressureStatus.backgroundProperty().bind(Bindings.when(this.model.getAirPressureStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
+        this.airPressureStatus.textFillProperty().bind(Bindings.when(this.model.getAirPressureStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+        this.overUnderVoltageStatus.textProperty().bind(this.model.getOverUnderVoltageInfo());
+        this.overUnderVoltageStatus.backgroundProperty().bind(Bindings.when(this.model.getOverUnderVoltageStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
+        this.overUnderVoltageStatus.textFillProperty().bind(Bindings.when(this.model.getOverUnderVoltageStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+        this.ESDStatus.textProperty().bind(this.model.getEsdInfo());
+        this.ESDStatus.backgroundProperty().bind(Bindings.when(this.model.getEsdStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
+        this.ESDStatus.textFillProperty().bind(Bindings.when(this.model.getEsdStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+        FontIcon loginFontIcon = new FontIcon(Entypo.LOGIN);
+        FontIcon logoutFontIcon = new FontIcon(Entypo.LOG_OUT);
+        FontIcon loginFontIconItem = new FontIcon(Entypo.LOGIN);
+        FontIcon logoutFontIconItem = new FontIcon(Entypo.LOG_OUT);
+        this.logIn.setGraphic(loginFontIcon);
+        this.logOut.setGraphic(logoutFontIcon);
+        this.LoginItem.setGraphic(loginFontIconItem);
+        this.LogOutItem.setGraphic(logoutFontIconItem);
+        this.root.setCenter(this.containerPane);
+        this.root.setTop(this.topBars);
+        this.scene.getStylesheets().add(Resources.getResource("Styles/scada.css").toString());
+        this.initialStage.setScene(this.scene);
+        this.initialStage.setTitle("Mixing Platform");
+        this.initialStage.setMaximized(true);
 
+        try {
+            this.initialStage.getIcons().add(new Image(ResourceUtils.getURL("classpath:Icons/splash.png").toString()));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-        containerPane.getTabs().addAll(SCADATab);
-        containerPane.setStyle("-fx-open-tab-animation: NONE; -fx-close-tab-animation: NONE;");
-
-        SCADATab.setContent(scada);
-        SCADATab.setClosable(false);
-        SCADATab.setStyle("-fx-border-color: darkblue; -fx-border-width:0.1;");
-
-
-        //----------------------------------------------------------------------------------------------------------------------------------
-        //Binding data
-        connectionStatus.textProperty().bind(model.getConnectionInfo());
-        connectionStatus.backgroundProperty().bind(Bindings.when(model.getConnectionStatus()).then(HEALTHY_BACKGROUND).otherwise(CONNECTION_LOSS_BACKGROUND));
-        connectionStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.BLACK));
-
-        airPressureStatus.textProperty().bind(model.getAirPressureInfo());
-        airPressureStatus.backgroundProperty().bind(Bindings.when(model.getAirPressureStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
-        airPressureStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
-
-        overUnderVoltageStatus.textProperty().bind(model.getOverUnderVoltageInfo());
-        overUnderVoltageStatus.backgroundProperty().bind(Bindings.when(model.getOverUnderVoltageStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
-        overUnderVoltageStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
-
-        ESDStatus.textProperty().bind(model.getEsdInfo());
-        ESDStatus.backgroundProperty().bind(Bindings.when(model.getEsdStatus()).then(HEALTHY_BACKGROUND).otherwise(FAULTY_BACKGROUND));
-        ESDStatus.textFillProperty().bind(Bindings.when(model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
-
-        //----------------------------------------------------------------------------------------------------------------------------------
-
-        root.setCenter(containerPane);
-        root.setTop(topBars);
-
-        scene.getStylesheets().add(Resources.getResource("Styles/scada.css").toString());
-
-        initialStage.setScene(scene);
-        initialStage.setTitle("Mixing Platform");
-        initialStage.setMaximized(true);
-        initialStage.show();
+        this.initialStage.show();
     }
 
     @EventListener
     public void actionHandler(ContextStartedEvent event) {
         try {
-            Units.setOnAction(action -> UnitsWindow.getWindow(initialStage).show());
-            Phases.setOnAction(action -> PhasesWindow.getWindow(initialStage).show());
-            materialItem.setOnAction(action -> MaterialsWindow.getMaterialsWindow(initialStage).show());
-            batchCreatorItem.setOnAction(this::onBatchCreatorRequest);
-            recipeEditorItem.setOnAction(this::onRecipeEditorRequest);
-            reportingSystem.setOnAction(action -> BatchArchiveWindow.getWindow(initialStage).show());
-            configurations.setOnAction(action -> {
-//                ConfigurationsWindow.getConfigurationWindow(mainWindow, logger, service).show();
+            this.Units.setOnAction((action) -> UnitsWindow.getWindow(this.initialStage).show());
+            this.Phases.setOnAction((action) -> PhasesWindow.getWindow(this.initialStage).show());
+            this.materialItem.setOnAction((action) -> MaterialsWindow.getMaterialsWindow(this.initialStage).show());
+            this.batchCreatorItem.setOnAction(this::onBatchCreatorRequest);
+            this.recipeEditorItem.setOnAction(this::onRecipeEditorRequest);
+            this.reportingSystem.setOnAction((action) -> BatchArchiveWindow.getWindow(this.initialStage).show());
+            this.configurations.setOnAction((action) -> {
             });
-            journalAlarms.setOnAction(this::onJournalAlarmsPressed);
-            airPressureSettings.setOnAction(action -> Utilities.getUtilitiesWindow(initialStage).show());
-
-            enterFullScreenItem.setOnAction(action -> {
-                initialStage.hide();
-                initialStage.setFullScreen(true);
-                initialStage.show();
+            this.journalAlarms.setOnAction(this::onJournalAlarmsPressed);
+            this.airPressureSettings.setOnAction((action) -> Utilities.getUtilitiesWindow(this.initialStage).show());
+            this.notificationsCenter.setOnAction((action) -> this.showNotificationCenter());
+            this.enterFullScreenItem.setOnAction((action) -> {
+                this.initialStage.hide();
+                this.initialStage.setFullScreen(true);
+                this.initialStage.show();
             });
-            exitFullScreenItem.setOnAction(action -> {
-                initialStage.hide();
-                initialStage.setFullScreen(false);
-                initialStage.show();
+            this.exitFullScreenItem.setOnAction((action) -> {
+                this.initialStage.hide();
+                this.initialStage.setFullScreen(false);
+                this.initialStage.show();
             });
-
-            closeAppItem.setOnAction(action -> {
-                initialStage.close();
-            });
-            shutDown.setOnMouseClicked(action -> {
-                initialStage.close();
-            });
-
-            startWaterFill.setOnMousePressed(action -> controller.atStartWaterFill(Boolean.TRUE));
-            startWaterFill.setOnMouseReleased(action -> controller.atStartWaterFill(Boolean.FALSE));
-
-            changeAllDevicesToAutomatic.setOnMousePressed(action -> controller.onSetAllInAutoPressed(mixers, pumps, valves));
-            changeAllDevicesToAutomatic.setOnMouseReleased(action -> controller.onSetAllInAutoReleased());
-
-            UserAdministrationMenuItem.setOnAction(action -> {
+            this.closeAppItem.setOnAction((action) -> this.initialStage.close());
+            this.shutDown.setOnMouseClicked((action) -> this.initialStage.close());
+            this.startWaterFill.setOnMousePressed((action) -> this.controller.atStartWaterFill(Boolean.TRUE));
+            this.startWaterFill.setOnMouseReleased((action) -> this.controller.atStartWaterFill(Boolean.FALSE));
+            this.changeAllDevicesToAutomatic.setOnMousePressed((action) -> this.controller.onSetAllInAutoPressed(this.mixers, this.pumps, this.valves));
+            this.changeAllDevicesToAutomatic.setOnMouseReleased((action) -> this.controller.onSetAllInAutoReleased());
+            this.UserAdministrationMenuItem.setOnAction((action) -> {
                 Stage stage = new Stage();
-                Scene scene = new Scene(new BorderPane(userAdministrationWindow));
+                Scene scene = new Scene(new BorderPane(this.userAdministrationWindow));
                 stage.setScene(scene);
-                stage.initOwner(initialStage);
+                stage.initOwner(this.initialStage);
                 stage.initStyle(StageStyle.UTILITY);
-                stage.setMinWidth(1200);
-                stage.setMinHeight(900);
+                stage.setMinWidth((double)1200.0F);
+                stage.setMinHeight((double)900.0F);
                 stage.show();
             });
-            logIn.setOnMouseClicked(action -> controller.onLogIn());
-            logOut.setOnMouseClicked(action -> controller.onLogOut());
-            LoginItem.setOnAction(action -> controller.onLogIn());
-            LogOutItem.setOnAction(action -> controller.onLogOut());
-
-            valves.forEach(this::handleValveBlockIcon);
-            pumps.forEach(this::handlePumpBlockIcon);
-            mixers.forEach(this::handleMixerBlockIcon);
-            levelBars.forEach(this::handleLevelBlockIcon);
-
-
-            setWaterTankLevel();
-            confirmationMessageControl();
+            this.logIn.setOnMouseClicked((action) -> this.controller.onLogIn());
+            this.logOut.setOnMouseClicked((action) -> this.controller.onLogOut());
+            this.LoginItem.setOnAction((action) -> this.controller.onLogIn());
+            this.LogOutItem.setOnAction((action) -> this.controller.onLogOut());
+            this.about.setOnAction((actionEvent) -> (new HelpWindow()).show());
+            this.valves.forEach(this::handleValveBlockIcon);
+            this.pumps.forEach(this::handlePumpBlockIcon);
+            this.mixers.forEach(this::handleMixerBlockIcon);
+            this.levelBars.forEach(this::handleLevelBlockIcon);
+            this.setWaterTankLevel();
+            this.confirmationMessageControl();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private void handleLevelBlockIcon(String name, Pane bar) {
         try {
             Pane pane = new Pane();
-            SCADAPane.getChildren().add(pane);
+            this.SCADAPane.getChildren().add(pane);
             pane.setLayoutX(bar.getLayoutX());
             pane.setLayoutY(bar.getLayoutY());
             pane.setPrefWidth(bar.getWidth());
             pane.setPrefHeight(bar.getHeight());
             bar.toFront();
-
             bar.setOpacity(0.6);
-
-            Weight data = controller.getWeightByName(name);
-            Label label = levelLabels.get(name);
-            Label weightLabel = weightLabels.get(name);
-
+            Weight data = this.controller.getWeightByName(name);
+            Label label = (Label)this.levelLabels.get(name);
+            Label weightLabel = (Label)this.weightLabels.get(name);
             label.setText("0.0 %");
-
             double Height = bar.getHeight();
-
-            bindStatusToMWeight(data, pane, bar, label, weightLabel, Height);
-            ((FloatProperty) data.getAllValues().get(WeightInput.Weight)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.Zero)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.Span)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.Low_Warning_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.High_Warning_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.High_Alarm_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
-
+            this.bindStatusToMWeight(data, pane, bar, label, weightLabel, Height);
+            ((FloatProperty)data.getAllValues().get(WeightInput.Weight)).addListener((observable, oldValue, newValue) -> this.bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.Zero)).addListener((observable, oldValue, newValue) -> this.bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.Span)).addListener((observable, oldValue, newValue) -> this.bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.Low_Warning_SP)).addListener((observable, oldValue, newValue) -> this.bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).addListener((observable, oldValue, newValue) -> this.bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.High_Warning_SP)).addListener((observable, oldValue, newValue) -> this.bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.High_Alarm_SP)).addListener((observable, oldValue, newValue) -> this.bindStatusToMWeight(data, pane, bar, label, weightLabel, Height));
             Border back = pane.getBorder();
-            bar.setOnMouseEntered(action -> {
+            bar.setOnMouseEntered((action) -> {
                 bar.setCursor(Cursor.HAND);
-                bar.setBorder(new Border(new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
+                bar.setBorder(new Border(new BorderStroke[]{new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths((double)2.0F))}));
             });
-            bar.setOnMouseExited(action -> {
+            bar.setOnMouseExited((action) -> {
                 bar.setCursor(Cursor.DEFAULT);
                 bar.setBorder(back);
             });
-            bar.setOnMouseClicked(action -> {
+            bar.setOnMouseClicked((action) -> {
                 if (action.getButton().equals(MouseButton.PRIMARY)) {
                     try {
-                        WeightFacePlate facePlate = new WeightFacePlate(initialStage, data, "Kg");
-                        facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
-                        facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
+                        WeightFacePlate facePlate = new WeightFacePlate(this.initialStage, data, "Kg");
+                        facePlate.setX(action.getScreenX() > (double)1550.0F ? (double)1500.0F : action.getScreenX());
+                        facePlate.setY(action.getScreenY() > (double)600.0F ? (double)500.0F : action.getScreenY());
                         facePlate.show();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+
             });
-//                    bar.setOnContextMenuRequested(action -> {
-//                        MenuItem trend = new MenuItem("Show realtime trend");
-//                        MenuItem log = new MenuItem("Show Logged data");
-//                        ContextMenu menu = new ContextMenu(trend, log);
-//                        menu.show(initialStage, action.getScreenX(), action.getScreenY());
-//                        trend.setOnAction(event -> {
-//                            RealTimeTrend trenWindow = new RealTimeTrend(mainWindow, data.getAllValues().get(WeightInput.Weight), name);
-//                            trenWindow.startTrending(1, 150);
-//                            mainWindow.showingProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-//                                if (!newValue) {
-//                                    trenWindow.close();
-//                                }
-//                            });
-//                        });
-//                        log.setOnAction(event -> {
-//                            try {
-//                                LogTrend trenWindow = new LogTrend(mainWindow, data.getAllValues().get(WeightInput.Weight), name, WeightInput.Weight.toString());
-//                                trenWindow.startTrending();
-//                                mainWindow.showingProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-//                                    if (!newValue) {
-//                                        trenWindow.close();
-//                                    }
-//                                });
-//                            } catch (Exception e) {
-//
-//                            }
-//
-//                        });
-//                    });
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
+
     private void handleMixerBlockIcon(String name, ImageView mixer) {
         Pane pane = new Pane();
-        SCADAPane.getChildren().add(pane);
-        pane.setLayoutX(mixer.getLayoutX() + 5);
-        pane.setLayoutY(mixer.getLayoutY() - 20);
-        pane.setPrefWidth(mixer.getFitWidth() - 10);
-        pane.setPrefHeight(mixer.getFitHeight() - 20);
+        this.SCADAPane.getChildren().add(pane);
+        pane.setLayoutX(mixer.getLayoutX() + (double)5.0F);
+        pane.setLayoutY(mixer.getLayoutY() - (double)20.0F);
+        pane.setPrefWidth(mixer.getFitWidth() - (double)10.0F);
+        pane.setPrefHeight(mixer.getFitHeight() - (double)20.0F);
         mixer.toFront();
-
         Background back = pane.getBackground();
-        Mixer data = controller.getMixerByName(name);
-
-        bindStatusToMixer(data, mixer);
-        ((BooleanProperty) data.getAllValues().get(MixerInput.Running)).addListener((observable, oldValue, newValue) -> bindStatusToMixer(data, mixer));
-        ((BooleanProperty) data.getAllValues().get(MixerInput.Fault)).addListener((observable, oldValue, newValue) -> bindStatusToMixer(data, mixer));
-
-        mixer.setOnMouseEntered(action -> {
+        Mixer data = this.controller.getMixerByName(name);
+        this.bindStatusToMixer(data, mixer);
+        ((BooleanProperty)data.getAllValues().get(MixerInput.Running)).addListener((observable, oldValue, newValue) -> this.bindStatusToMixer(data, mixer));
+        ((BooleanProperty)data.getAllValues().get(MixerInput.Fault)).addListener((observable, oldValue, newValue) -> this.bindStatusToMixer(data, mixer));
+        mixer.setOnMouseEntered((action) -> {
             mixer.setCursor(Cursor.HAND);
-            pane.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+            pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)}));
             pane.setOpacity(0.6);
-            pane.setEffect(new DropShadow(BlurType.ONE_PASS_BOX, Color.GRAY, 2, 2, 2, 2));
+            pane.setEffect(new DropShadow(BlurType.ONE_PASS_BOX, Color.GRAY, (double)2.0F, (double)2.0F, (double)2.0F, (double)2.0F));
         });
-        mixer.setOnMouseExited(action -> {
+        mixer.setOnMouseExited((action) -> {
             mixer.setCursor(Cursor.DEFAULT);
             pane.setBackground(back);
         });
-        mixer.setOnMouseClicked(action -> {
+        mixer.setOnMouseClicked((action) -> {
             try {
-                MixerFacePlate facePlate = new MixerFacePlate(initialStage, data);
-                facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
-                facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
+                MixerFacePlate facePlate = new MixerFacePlate(this.initialStage, data);
+                facePlate.setX(action.getScreenX() > (double)1550.0F ? (double)1500.0F : action.getScreenX());
+                facePlate.setY(action.getScreenY() > (double)600.0F ? (double)500.0F : action.getScreenY());
                 facePlate.show();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
         });
     }
+
     private void handlePumpBlockIcon(String name, ImageView pump) {
         Pane pane = new Pane();
-        SCADAPane.getChildren().add(pane);
-        pane.setLayoutX(pump.getLayoutX() - 5);
-        pane.setLayoutY(pump.getLayoutY() - 5);
-        pane.setPrefWidth(pump.getFitWidth() + 10);
-        pane.setPrefHeight(pump.getFitHeight() - 10);
+        this.SCADAPane.getChildren().add(pane);
+        pane.setLayoutX(pump.getLayoutX() - (double)5.0F);
+        pane.setLayoutY(pump.getLayoutY() - (double)5.0F);
+        pane.setPrefWidth(pump.getFitWidth() + (double)10.0F);
+        pane.setPrefHeight(pump.getFitHeight() - (double)10.0F);
         pump.toFront();
-
         Background back = pane.getBackground();
-        Pump data = controller.getPumpByName(name);
-
-        bindStatusToPump(data, pump);
-        ((BooleanProperty) data.getAllValues().get(PumpInput.Running)).addListener((observable, oldValue, newValue) -> bindStatusToPump(data, pump));
-        ((BooleanProperty) data.getAllValues().get(PumpInput.Fault)).addListener((observable, oldValue, newValue) -> bindStatusToPump(data, pump));
-
-        pump.setOnMouseEntered(action -> {
+        Pump data = this.controller.getPumpByName(name);
+        this.bindStatusToPump(data, pump);
+        ((BooleanProperty)data.getAllValues().get(PumpInput.Running)).addListener((observable, oldValue, newValue) -> this.bindStatusToPump(data, pump));
+        ((BooleanProperty)data.getAllValues().get(PumpInput.Fault)).addListener((observable, oldValue, newValue) -> this.bindStatusToPump(data, pump));
+        pump.setOnMouseEntered((action) -> {
             pump.setCursor(Cursor.HAND);
-            pane.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+            pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)}));
             pane.setOpacity(0.6);
-            pane.setEffect(new DropShadow(BlurType.ONE_PASS_BOX, Color.GRAY, 2, 2, 2, 2));
+            pane.setEffect(new DropShadow(BlurType.ONE_PASS_BOX, Color.GRAY, (double)2.0F, (double)2.0F, (double)2.0F, (double)2.0F));
             Tooltip.install(pump, new Tooltip("Pump :\nName = " + name));
         });
-        pump.setOnMouseExited(action -> {
+        pump.setOnMouseExited((action) -> {
             pump.setCursor(Cursor.DEFAULT);
             pane.setBackground(back);
         });
-        pump.setOnMouseClicked(action -> {
+        pump.setOnMouseClicked((action) -> {
             try {
-                PumpFacePlate facePlate = new PumpFacePlate(initialStage, data);
-                facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
-                facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
+                PumpFacePlate facePlate = new PumpFacePlate(this.initialStage, data);
+                facePlate.setX(action.getScreenX() > (double)1550.0F ? (double)1500.0F : action.getScreenX());
+                facePlate.setY(action.getScreenY() > (double)600.0F ? (double)500.0F : action.getScreenY());
                 facePlate.show();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
         });
     }
+
     private void handleValveBlockIcon(String name, ImageView valve) {
         Pane pane = new Pane();
-        SCADAPane.getChildren().add(pane);
-        pane.setLayoutX(valve.getLayoutX() - 5);
-        pane.setLayoutY(valve.getLayoutY() - 5);
-        pane.setPrefWidth(valve.getFitWidth() - 10);
-        pane.setPrefHeight(valve.getFitHeight() + 10);
+        this.SCADAPane.getChildren().add(pane);
+        pane.setLayoutX(valve.getLayoutX() - (double)5.0F);
+        pane.setLayoutY(valve.getLayoutY() - (double)5.0F);
+        pane.setPrefWidth(valve.getFitWidth() - (double)10.0F);
+        pane.setPrefHeight(valve.getFitHeight() + (double)10.0F);
         valve.toFront();
-
         Background back = pane.getBackground();
-        Valve data = controller.getValveByName(name);
-
+        Valve data = this.controller.getValveByName(name);
         Label label = new Label("Valve :\nName = " + name);
-        label.setPadding(new Insets(10));
-        label.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
-
-        bindStatusToValve(data, valve);
-        ((BooleanProperty) data.getAllValues().get(ValveInput.Opened_Closed)).addListener((observable, oldValue, newValue) -> bindStatusToValve(data, valve));
-        ((BooleanProperty) data.getAllValues().get(ValveInput.Fault)).addListener((observable, oldValue, newValue) -> bindStatusToValve(data, valve));
-
-        valve.setOnMouseEntered(action -> {
+        label.setPadding(new Insets((double)10.0F));
+        label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.bindStatusToValve(data, valve);
+        ((BooleanProperty)data.getAllValues().get(ValveInput.Opened_Closed)).addListener((observable, oldValue, newValue) -> this.bindStatusToValve(data, valve));
+        ((BooleanProperty)data.getAllValues().get(ValveInput.Fault)).addListener((observable, oldValue, newValue) -> this.bindStatusToValve(data, valve));
+        valve.setOnMouseEntered((action) -> {
             valve.setCursor(Cursor.HAND);
-            pane.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+            pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)}));
             pane.setOpacity(0.6);
-            pane.setEffect(new DropShadow(BlurType.ONE_PASS_BOX, Color.GRAY, 2, 2, 2, 2));
-
+            pane.setEffect(new DropShadow(BlurType.ONE_PASS_BOX, Color.GRAY, (double)2.0F, (double)2.0F, (double)2.0F, (double)2.0F));
             Tooltip.install(valve, new Tooltip("Valve :\nName = " + name));
         });
-        valve.setOnMouseExited(action -> {
+        valve.setOnMouseExited((action) -> {
             valve.setCursor(Cursor.DEFAULT);
             pane.setBackground(back);
         });
-        valve.setOnMouseClicked(action -> {
+        valve.setOnMouseClicked((action) -> {
             try {
-                ValveFacePlate facePlate = new ValveFacePlate(initialStage, data);
-                facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
-                facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
+                ValveFacePlate facePlate = new ValveFacePlate(this.initialStage, data);
+                facePlate.setX(action.getScreenX() > (double)1550.0F ? (double)1500.0F : action.getScreenX());
+                facePlate.setY(action.getScreenY() > (double)600.0F ? (double)500.0F : action.getScreenY());
                 facePlate.show();
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+
         });
     }
 
     private void setWaterTankLevel() {
         try {
-            Pane bar = waterLevel;
-
+            Pane bar = this.waterLevel;
             Pane pane = new Pane();
-            SCADAPane.getChildren().add(pane);
+            this.SCADAPane.getChildren().add(pane);
             pane.setLayoutX(bar.getLayoutX());
             pane.setLayoutY(bar.getLayoutY());
             pane.setPrefWidth(bar.getWidth());
             pane.setPrefHeight(bar.getHeight());
             bar.toFront();
-
             bar.setOpacity(0.6);
-
             double Height = bar.getHeight();
-            Weight data = controller.getWeightByName("L01");
-
-            bindStatusToLevel(data, pane, bar, Height);
-            ((FloatProperty) data.getAllValues().get(WeightInput.Weight)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.Zero)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.Span)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.Low_Warning_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.High_Warning_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-            ((FloatProperty) data.getAllValues().get(WeightOutput.High_Alarm_SP)).addListener((ChangeListener<Object>) (observable, oldValue, newValue) -> bindStatusToLevel(data, pane, bar, Height));
-
+            Weight data = this.controller.getWeightByName("L01");
+            this.bindStatusToLevel(data, pane, bar, Height);
+            ((FloatProperty)data.getAllValues().get(WeightInput.Weight)).addListener((observable, oldValue, newValue) -> this.bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.Zero)).addListener((observable, oldValue, newValue) -> this.bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.Span)).addListener((observable, oldValue, newValue) -> this.bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.Low_Warning_SP)).addListener((observable, oldValue, newValue) -> this.bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).addListener((observable, oldValue, newValue) -> this.bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.High_Warning_SP)).addListener((observable, oldValue, newValue) -> this.bindStatusToLevel(data, pane, bar, Height));
+            ((FloatProperty)data.getAllValues().get(WeightOutput.High_Alarm_SP)).addListener((observable, oldValue, newValue) -> this.bindStatusToLevel(data, pane, bar, Height));
             Border back = pane.getBorder();
-            bar.setOnMouseEntered(action -> {
+            bar.setOnMouseEntered((action) -> {
                 bar.setCursor(Cursor.HAND);
-                bar.setBorder(new Border(new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(2))));
+                bar.setBorder(new Border(new BorderStroke[]{new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths((double)2.0F))}));
             });
-            bar.setOnMouseExited(action -> {
+            bar.setOnMouseExited((action) -> {
                 bar.setCursor(Cursor.DEFAULT);
                 bar.setBorder(back);
             });
-            bar.setOnMouseClicked(action -> {
+            bar.setOnMouseClicked((action) -> {
                 if (action.getButton().equals(MouseButton.PRIMARY)) {
                     try {
-                        WeightFacePlate facePlate = new WeightFacePlate(initialStage, data, "M");
-                        facePlate.setX(action.getScreenX() > 1550 ? 1500 : action.getScreenX());
-                        facePlate.setY(action.getScreenY() > 600 ? 500 : action.getScreenY());
+                        WeightFacePlate facePlate = new WeightFacePlate(this.initialStage, data, "M");
+                        facePlate.setX(action.getScreenX() > (double)1550.0F ? (double)1500.0F : action.getScreenX());
+                        facePlate.setY(action.getScreenY() > (double)600.0F ? (double)500.0F : action.getScreenY());
                         facePlate.show();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+
             });
-//                bar.setOnContextMenuRequested(action -> {
-//                    MenuItem trend = new MenuItem("Show realtime trend");
-//                    MenuItem log = new MenuItem("Show Logged data");
-//                    ContextMenu menu = new ContextMenu(trend);
-//                    menu.show(initialStage, action.getScreenX(), action.getScreenY());
-//                    trend.setOnAction(event -> {
-//                        RealTimeTrend trenWindow = new RealTimeTrend(mainWindow, data.getAllValues().get(WeightInput.Weight), "L01");
-//                        trenWindow.startTrending(1, 150);
-//                        mainWindow.showingProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-//                            if (!newValue) {
-//                                trenWindow.close();
-//                            }
-//                        });
-//                    });
-//                    log.setOnAction(event -> {
-//                        LogTrend trenWindow = new LogTrend(mainWindow, data.getAllValues().get(WeightInput.Weight), "L01", WeightInput.Weight.toString());
-//                        trenWindow.startTrending();
-//                        mainWindow.showingProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-//                            if (!newValue) {
-//                                trenWindow.close();
-//                            }
-//                        });
-//                    });
-//                });
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    private void showNotificationCenter() {
+        Stage stage = new Stage();
+        stage.setScene(new Scene(this.ncServicesView));
+        stage.initOwner(this.initialStage);
+        stage.initStyle(StageStyle.UTILITY);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Notification center");
+        stage.show();
     }
 
     private void bindStatusToValve(RowDataDefinition data, ImageView item) {
         Platform.runLater(() -> {
             try {
-                boolean opened_closed = ((BooleanDataType) data.getAllValues().get(ValveInput.Opened_Closed)).getValue();
-                boolean fault = ((BooleanDataType) data.getAllValues().get(ValveInput.Fault)).getValue();
-
+                boolean opened_closed = ((BooleanDataType)data.getAllValues().get(ValveInput.Opened_Closed)).getValue();
+                boolean fault = ((BooleanDataType)data.getAllValues().get(ValveInput.Fault)).getValue();
                 if (opened_closed) {
-                    changeColorOfImageView(Color.GREEN, item);
+                    this.changeColorOfImageView(Color.GREEN, item);
                 } else {
-                    changeColorOfImageView(Color.RED, item);
+                    this.changeColorOfImageView(Color.RED, item);
                 }
+
                 if (fault) {
-                    changeColorOfImageView(Color.YELLOW, item);
+                    this.changeColorOfImageView(Color.YELLOW, item);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
 
+        });
     }
+
     private void bindStatusToPump(RowDataDefinition data, ImageView item) {
         Platform.runLater(() -> {
             try {
-                boolean running = ((BooleanDataType) data.getAllValues().get(PumpInput.Running)).getValue();
-                boolean fault = ((BooleanDataType) data.getAllValues().get(PumpInput.Fault)).getValue();
+                boolean running = ((BooleanDataType)data.getAllValues().get(PumpInput.Running)).getValue();
+                boolean fault = ((BooleanDataType)data.getAllValues().get(PumpInput.Fault)).getValue();
                 if (running) {
-                    changeColorOfImageView(Color.GREEN, item);
+                    this.changeColorOfImageView(Color.GREEN, item);
                 } else {
-                    changeColorOfImageView(Color.RED, item);
+                    this.changeColorOfImageView(Color.RED, item);
                 }
+
                 if (fault) {
-                    changeColorOfImageView(Color.YELLOW, item);
+                    this.changeColorOfImageView(Color.YELLOW, item);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
 
+        });
     }
+
     private void bindStatusToMixer(Mixer data, ImageView item) {
         Platform.runLater(() -> {
             try {
-                boolean running = ((BooleanDataType) data.getAllValues().get(MixerInput.Running)).getValue();
-                boolean fault = ((BooleanDataType) data.getAllValues().get(MixerInput.Fault)).getValue();
+                boolean running = ((BooleanDataType)data.getAllValues().get(MixerInput.Running)).getValue();
+                boolean fault = ((BooleanDataType)data.getAllValues().get(MixerInput.Fault)).getValue();
                 if (running) {
-                    changeColorOfImageView(Color.GREEN, item);
+                    this.changeColorOfImageView(Color.GREEN, item);
                 } else {
-                    changeColorOfImageView(Color.RED, item);
+                    this.changeColorOfImageView(Color.RED, item);
                 }
+
                 if (fault) {
-                    changeColorOfImageView(Color.YELLOW, item);
+                    this.changeColorOfImageView(Color.YELLOW, item);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
         });
     }
+
     private void bindStatusToMWeight(Weight data, Pane pane, Pane backGroundBar, Label label, Label weightLabel, double Height) {
         Platform.runLater(() -> {
             try {
-                float qtyValue = ((RealDataType) data.getAllValues().get(WeightInput.Weight)).getValue();
-                float zeroValue = ((RealDataType) data.getAllValues().get(WeightOutput.Zero)).getValue();
-                float spanValue = ((RealDataType) data.getAllValues().get(WeightOutput.Span)).getValue();
-                float lowWarningValue = ((RealDataType) data.getAllValues().get(WeightOutput.Low_Warning_SP)).getValue();
-                float lowAlarmValue = ((RealDataType) data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).getValue();
-                float highWarningValue = ((RealDataType) data.getAllValues().get(WeightOutput.High_Warning_SP)).getValue();
-                float highAlarmValue = ((RealDataType) data.getAllValues().get(WeightOutput.High_Alarm_SP)).getValue();
-
+                float qtyValue = ((RealDataType)data.getAllValues().get(WeightInput.Weight)).getValue();
+                float zeroValue = ((RealDataType)data.getAllValues().get(WeightOutput.Zero)).getValue();
+                float spanValue = ((RealDataType)data.getAllValues().get(WeightOutput.Span)).getValue();
+                float lowWarningValue = ((RealDataType)data.getAllValues().get(WeightOutput.Low_Warning_SP)).getValue();
+                float lowAlarmValue = ((RealDataType)data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).getValue();
+                float highWarningValue = ((RealDataType)data.getAllValues().get(WeightOutput.High_Warning_SP)).getValue();
+                float highAlarmValue = ((RealDataType)data.getAllValues().get(WeightOutput.High_Alarm_SP)).getValue();
                 float delta = spanValue - zeroValue;
-                if (delta != 0) {
-                    double percentage = ((qtyValue - zeroValue) / delta) * 100;
-                    double calNewHeight = (qtyValue - zeroValue) / delta * Height;
-
+                if (delta != 0.0F) {
+                    double percentage = (double)((qtyValue - zeroValue) / delta * 100.0F);
+                    double calNewHeight = (double)((qtyValue - zeroValue) / delta) * Height;
                     if (Double.isNaN(percentage)) {
-                        percentage = 0.0;
+                        percentage = (double)0.0F;
                     }
+
                     if (Double.isNaN(calNewHeight)) {
-                        calNewHeight = 0.0;
+                        calNewHeight = (double)0.0F;
                     }
 
-                    backGroundBar.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
-                    pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-
+                    backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)}));
+                    pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)}));
                     label.setText(Round.RoundDouble(percentage, 1) + " %");
-
-                    if (((qtyValue - zeroValue) / delta * Height) < Height) {
+                    if ((double)((qtyValue - zeroValue) / delta) * Height < Height) {
                         pane.setPrefHeight(Height - calNewHeight);
                     } else {
                         pane.setPrefHeight(Height);
                     }
 
-                    if (qtyValue == 0.0) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.BLACK.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                    if ((double)qtyValue == (double)0.0F) {
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.BLACK.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else if (qtyValue < lowWarningValue && qtyValue > lowAlarmValue) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.YELLOW.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else if (qtyValue < lowWarningValue && qtyValue < lowAlarmValue) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.RED.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.RED.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else if (qtyValue > highWarningValue && qtyValue < highAlarmValue) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.YELLOW.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else if (qtyValue > highWarningValue && qtyValue > highAlarmValue) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.RED.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.RED.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.GREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.GREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     }
                 }
 
-                weightLabel.setText(BigDecimal.valueOf(qtyValue).longValue() + " Kg");
+                weightLabel.setText(BigDecimal.valueOf((double)qtyValue).longValue() + " Kg");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
 
+        });
     }
+
     private void bindStatusToLevel(Weight data, Pane pane, Pane backGroundBar, double Height) {
         Platform.runLater(() -> {
             try {
-                float qtyValue = ((RealDataType) data.getAllValues().get(WeightInput.Weight)).getValue();
-                float zeroValue = ((RealDataType) data.getAllValues().get(WeightOutput.Zero)).getValue();
-                float spanValue = ((RealDataType) data.getAllValues().get(WeightOutput.Span)).getValue();
-                float lowWarningValue = ((RealDataType) data.getAllValues().get(WeightOutput.Low_Warning_SP)).getValue();
-                float lowAlarmValue = ((RealDataType) data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).getValue();
-                float highWarningValue = ((RealDataType) data.getAllValues().get(WeightOutput.High_Warning_SP)).getValue();
-                float highAlarmValue = ((RealDataType) data.getAllValues().get(WeightOutput.High_Alarm_SP)).getValue();
-
+                float qtyValue = ((RealDataType)data.getAllValues().get(WeightInput.Weight)).getValue();
+                float zeroValue = ((RealDataType)data.getAllValues().get(WeightOutput.Zero)).getValue();
+                float spanValue = ((RealDataType)data.getAllValues().get(WeightOutput.Span)).getValue();
+                float lowWarningValue = ((RealDataType)data.getAllValues().get(WeightOutput.Low_Warning_SP)).getValue();
+                float lowAlarmValue = ((RealDataType)data.getAllValues().get(WeightOutput.Low_Alarm_Sp)).getValue();
+                float highWarningValue = ((RealDataType)data.getAllValues().get(WeightOutput.High_Warning_SP)).getValue();
+                float highAlarmValue = ((RealDataType)data.getAllValues().get(WeightOutput.High_Alarm_SP)).getValue();
                 float delta = spanValue - zeroValue;
-                if (delta != 0) {
-                    double percentage = ((qtyValue - zeroValue) / delta) * 100;
-                    double calNewHeight = (qtyValue - zeroValue) / delta * Height;
-
+                if (delta != 0.0F) {
+                    double percentage = (double)((qtyValue - zeroValue) / delta * 100.0F);
+                    double calNewHeight = (double)((qtyValue - zeroValue) / delta) * Height;
                     if (Double.isNaN(percentage)) {
-                        percentage = 0.0;
+                        percentage = (double)0.0F;
                     }
+
                     if (Double.isNaN(calNewHeight)) {
-                        calNewHeight = 0.0;
+                        calNewHeight = (double)0.0F;
                     }
 
-                    backGroundBar.setBackground(new Background(new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
-                    pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-
-                    if (((qtyValue - zeroValue) / delta * Height) < Height) {
+                    backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)}));
+                    pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)}));
+                    if ((double)((qtyValue - zeroValue) / delta) * Height < Height) {
                         pane.setPrefHeight(Height - calNewHeight);
                     } else {
                         pane.setPrefHeight(Height);
                     }
 
-                    if (qtyValue == 0.0) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.BLACK.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                    if ((double)qtyValue == (double)0.0F) {
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.BLACK.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else if (qtyValue < lowWarningValue && qtyValue > lowAlarmValue) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.YELLOW.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else if (qtyValue < lowWarningValue && qtyValue < lowAlarmValue) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.RED.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.RED.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else if (qtyValue > highWarningValue && qtyValue < highAlarmValue) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.YELLOW.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else if (qtyValue > highWarningValue && qtyValue > highAlarmValue) {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.RED.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.RED.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     } else {
-                        backGroundBar.setBackground(new Background(new BackgroundFill(Color.GREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+                        backGroundBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.GREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
 
+        });
     }
-    protected void changeColorOfImageView(Color color, ImageView imView){
+
+    protected void changeColorOfImageView(Color color, ImageView imView) {
         Glow glow = new Glow(0.2);
-        DropShadow shadow = new DropShadow(BlurType.GAUSSIAN, Color.GRAY, 1, 1, 1, 1);
-        Light.Distant light = new Light.Distant(100, 100, color.brighter().brighter().brighter());
+        DropShadow shadow = new DropShadow(BlurType.GAUSSIAN, Color.GRAY, (double)1.0F, (double)1.0F, (double)1.0F, (double)1.0F);
+        Light.Distant light = new Light.Distant((double)100.0F, (double)100.0F, color.brighter().brighter().brighter());
         Lighting lighting = new Lighting(light);
         Blend blend = new Blend(BlendMode.MULTIPLY, glow, shadow);
         Blend blend2 = new Blend(BlendMode.MULTIPLY, blend, lighting);
-
         imView.setEffect(blend2);
     }
 
     private void createBatchObserver(Batch batch) {
-        BatchObserver batchObserver = new BatchObserver(initialStage, batch);
-        if (!containerPane.getTabs().contains(batchObserver)) {
-            containerPane.getTabs().add(batchObserver);
-            batchObservers.put(batch.getId(), batchObserver);
-            batchObserver.setOnBatchClose((BatchObserver batchObserver1) -> {
-                containerPane.getTabs().remove(batchObserver1);
-                batchObservers.remove(batchObserver1.getBatchID());
-            });
-            batchObserver.update();
-            containerPane.getSelectionModel().select(batchObserver);
-        }
+        Platform.runLater(() -> {
+            BatchObserver batchObserver = new BatchObserver(this.initialStage, batch);
+            if (!this.containerPane.getTabs().contains(batchObserver)) {
+                this.containerPane.getTabs().add(batchObserver);
+                this.batchObservers.put(batch.getId(), batchObserver);
+                batchObserver.setOnBatchClose((batchObserver1) -> {
+                    this.containerPane.getTabs().remove(batchObserver1);
+                    this.batchObservers.remove(batchObserver1.getBatchID());
+                });
+                batchObserver.update();
+                this.containerPane.getSelectionModel().select(batchObserver);
+            }
+
+        });
     }
 
     private void adjustGauges() {
-        Gauge gauge1 = getGauge("Water level", "Meter");
-        Gauge gauge2 = getGauge("Air pressure", "Bar");
-
-        gauge1.valueProperty().bind(model.getGauge1());
-        gauge2.valueProperty().bind(model.getGauge2());
-
-        waterPress.getChildren().add(gauge1);
-        airPress.getChildren().add(gauge2);
+        Gauge gauge1 = this.getGauge("Water level", "Meter");
+        Gauge gauge2 = this.getGauge("Air pressure", "Bar");
+        gauge1.valueProperty().bind(this.model.getGauge1());
+        gauge2.valueProperty().bind(this.model.getGauge2());
+        this.waterPress.getChildren().add(gauge1);
+        this.airPress.getChildren().add(gauge2);
     }
+
     private Gauge getGauge(String label, String unit) {
-        Gauge gauge = GaugeBuilder.create()
-                .prefSize(160, 180) // Preferred size of control
-                .foregroundBaseColor(Color.BLACK) // Color for title, subtitle, unit, value, tick label, zeroColor, tick mark, major tick mark, medium tick mark and minor tick mark
-                .title(label) // Text for title
-                .titleColor(Color.BLACK) // Color for title text
-                .subTitle("") // Text for subtitle
-                .subTitleColor(Color.BLACK) // Color for subtitle text
-                .unit(unit) // Text for unit
-                .unitColor(Color.BLACK) // Color for unit text
-                .valueColor(Color.BLACK) // Color for value text
-                .decimals(5) // Number of decimals for the value/lcd text
-                .lcdVisible(true) // LCD instead of the plain value text
-                .lcdDesign(LcdDesign.STANDARD) // Design for LCD
-                .lcdFont(LcdFont.DIGITAL_BOLD) // Font for LCD (STANDARD, LCD, DIGITAL, DIGITAL_BOLD, ELEKTRA)
-                .scaleDirection(Gauge.ScaleDirection.CLOCKWISE) // Direction of Scale (CLOCKWISE, COUNTER_CLOCKWISE)
-                .minValue(0) // Start value of Scale
-                .maxValue(8) // End value of Scale
-                .tickLabelDecimals(0) // Number of decimals for tick labels
-                .tickLabelLocation(TickLabelLocation.INSIDE) // Should tick labels be inside or outside Scale (INSIDE, OUTSIDE)
-                .tickLabelOrientation(TickLabelOrientation.HORIZONTAL) // Orientation of tick labels (ORTHOGONAL,  HORIZONTAL, TANGENT)
-                .onlyFirstAndLastTickLabelVisible(false) // Should only the first and last tick label be visible
-                .tickLabelSectionsVisible(false) // Should sections for tick labels be visible
-                .tickLabelColor(Color.BLACK) // Color for tick labels (overriden by tick label sections)
-                .tickMarkSectionsVisible(false) // Should sections for tick marks be visible
-                .majorTickMarksVisible(true) // Should major tick marks be visible
-                .majorTickMarkType(TickMarkType.LINE) // Tick mark type for major tick marks (LINE, DOT, TRIANGLE, TICK_LABEL)
-                .majorTickMarkColor(Color.BLACK) // Color for major tick marks (overriden by tick mark sections)
-                .mediumTickMarksVisible(true) // Should medium tick marks be visible
-                .mediumTickMarkType(TickMarkType.LINE) // Tick mark type for medium tick marks (LINE, DOT, TRIANGLE)
-                .mediumTickMarkColor(Color.BLACK) // Color for medium tick marks (overriden by tick mark sections)
-                .minorTickMarksVisible(true) // Should minor tick marks be visible
-                .minorTickMarkType(TickMarkType.LINE) // Tick mark type for minor tick marks (LINE, DOT, TRIANGLE)
-                .minorTickMarkColor(Color.BLACK) // Color for minor tick marks (override by tick mark sections)
-                .needleShape(Gauge.NeedleShape.ANGLED) // Shape of needle (ANGLED, ROUND, FLAT)
-                .needleSize(Gauge.NeedleSize.STANDARD) // Size of needle (THIN, STANDARD, THICK)
-                .needleColor(Color.CRIMSON) // Color of needle
-                .startFromZero(false) // Should needle start from the 0 value
-                .returnToZero(false) // Should needle return to the 0 value (only makes sense when animated==true)
-                .knobType(Gauge.KnobType.STANDARD) // Type for center knob (STANDARD, PLAIN, METAL, FLAT)
-                .knobColor(Color.LIGHTGRAY) // Color of center knob
-                .interactive(false) // Should center knob be act as button
-                .checkThreshold(false) // Should each value be checked against threshold
-                .onThresholdExceeded(thresholdEvent -> System.out.println("Threshold exceeded")) // Handler (triggered if checkThreshold==true and the threshold is exceeded)
-                .onThresholdUnderrun(thresholdEvent -> System.out.println("Threshold underrun")) // Handler (triggered if checkThreshold==true and the threshold is underrun)
-                .gradientBarEnabled(true) // Should gradient filled bar be visible to visualize a range
-                .gradientBarStops(new Stop(0.0, Color.RED), // Color gradient that will be use to color fill bar
-                        new Stop(5, Color.YELLOW),
-                        new Stop(15.0, Color.LIGHTGREEN))
-                .sectionsVisible(true) // Should sections be visible
-                .checkSectionsForValue(true) // Should each section be checked against current value (if true section events will be fired)
-                .areasVisible(true) // Should areas be visible
-                .markersVisible(true) // Should markers be visible
-                .animated(true) // Should needle be animated
-                .animationDuration(500) // Speed of needle in milliseconds (10 - 10000 ms)
-                .build();
-
+        Gauge gauge = GaugeBuilder.create().prefSize((double)160.0F, (double)180.0F).foregroundBaseColor(Color.BLACK).title(label).titleColor(Color.BLACK).subTitle("").subTitleColor(Color.BLACK).unit(unit).unitColor(Color.BLACK).valueColor(Color.BLACK).decimals(5).lcdVisible(true).lcdDesign(LcdDesign.STANDARD).lcdFont(LcdFont.DIGITAL_BOLD).scaleDirection(ScaleDirection.CLOCKWISE).minValue((double)0.0F).maxValue((double)8.0F).tickLabelDecimals(0).tickLabelLocation(TickLabelLocation.INSIDE).tickLabelOrientation(TickLabelOrientation.HORIZONTAL).onlyFirstAndLastTickLabelVisible(false).tickLabelSectionsVisible(false).tickLabelColor(Color.BLACK).tickMarkSectionsVisible(false).majorTickMarksVisible(true).majorTickMarkType(TickMarkType.LINE).majorTickMarkColor(Color.BLACK).mediumTickMarksVisible(true).mediumTickMarkType(TickMarkType.LINE).mediumTickMarkColor(Color.BLACK).minorTickMarksVisible(true).minorTickMarkType(TickMarkType.LINE).minorTickMarkColor(Color.BLACK).needleShape(NeedleShape.ANGLED).needleSize(NeedleSize.STANDARD).needleColor(Color.CRIMSON).startFromZero(false).returnToZero(false).knobType(KnobType.STANDARD).knobColor(Color.LIGHTGRAY).interactive(false).checkThreshold(false).onThresholdExceeded((thresholdEvent) -> System.out.println("Threshold exceeded")).onThresholdUnderrun((thresholdEvent) -> System.out.println("Threshold underrun")).gradientBarEnabled(true).gradientBarStops(new Stop[]{new Stop((double)0.0F, Color.RED), new Stop((double)5.0F, Color.YELLOW), new Stop((double)15.0F, Color.LIGHTGREEN)}).sectionsVisible(true).checkSectionsForValue(true).areasVisible(true).markersVisible(true).animated(true).animationDuration(500L).build();
         gauge.setSkin(new QuarterSkin(gauge));
-
         return gauge;
     }
+
     private Clock getClock() {
-        return ClockBuilder.create()
-                .skinType(Clock.ClockSkinType.TEXT)
-                .prefSize(100, 30)
-                .running(true)
-                .build();
+        return ClockBuilder.create().skinType(ClockSkinType.TEXT).prefSize((double)100.0F, (double)30.0F).running(true).build();
     }
 
     private synchronized void onBatchCreatorRequest(ActionEvent event) {
         try {
-            batchCreator.showAndReturnBatch().ifPresent(this::createBatchObserver);
+            this.batchCreator.showAndReturnBatch().ifPresent(this::createBatchObserver);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     private void onRecipeEditorRequest(ActionEvent event) {
         try {
-            String retVal = selectUnitWindow();
+            String retVal = this.selectUnitWindow();
             if (!retVal.equals("Cancel")) {
-                recipeEditor.hide();
-                recipeEditor.refreshAndUpdateAndShow(retVal);
+                this.recipeEditor.hide();
+                this.recipeEditor.refreshAndUpdateAndShow(retVal);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
+
     private void onJournalAlarmsPressed(ActionEvent event) {
         try {
-            if (!containerPane.getTabs().contains(allAlarmsWindow)) {
-                containerPane.getTabs().add(allAlarmsWindow);
+            if (!this.containerPane.getTabs().contains(this.allAlarmsWindow)) {
+                this.containerPane.getTabs().add(this.allAlarmsWindow);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
+
     private String selectUnitWindow() {
-
         Label label = new Label("Please select unit to create recipe");
-        ComboBox<String> field = new ComboBox<>();
+        ComboBox<String> field = new ComboBox();
         field.setPromptText("Please enter the unit ");
-        field.setPrefWidth(350);
-        field.getItems().addAll(controller.getAllUnitsNames());
-
+        field.setPrefWidth((double)350.0F);
+        field.getItems().addAll(this.controller.getAllUnitsNames());
         Button Cancel = new Button("Cancel");
         Button Ok = new Button("Ok");
-
-        Cancel.setPrefWidth(150);
-        Ok.setPrefWidth(150);
-
+        Cancel.setPrefWidth((double)150.0F);
+        Ok.setPrefWidth((double)150.0F);
         HBox buttonsContainer = new HBox();
-        buttonsContainer.getChildren().addAll(Ok, Cancel);
-        buttonsContainer.setSpacing(10);
-        buttonsContainer.setPadding(new Insets(5));
-
+        buttonsContainer.getChildren().addAll(new Node[]{Ok, Cancel});
+        buttonsContainer.setSpacing((double)10.0F);
+        buttonsContainer.setPadding(new Insets((double)5.0F));
         GridPane container = new GridPane();
         container.add(field, 0, 0);
-        container.setPadding(new Insets(5));
-        container.setVgap(5);
-        container.setHgap(5);
-
+        container.setPadding(new Insets((double)5.0F));
+        container.setVgap((double)5.0F);
+        container.setHgap((double)5.0F);
         BorderPane root = new BorderPane();
         root.setBottom(buttonsContainer);
         root.setCenter(container);
         root.setTop(label);
-        root.setPadding(new Insets(15));
-
+        root.setPadding(new Insets((double)15.0F));
         Scene scene = new Scene(root);
-
         Stage stage = new Stage();
         stage.setTitle("Please enter name ");
         stage.initStyle(StageStyle.UTILITY);
-        stage.initOwner(initialStage);
+        stage.initOwner(this.initialStage);
         stage.initModality(Modality.NONE);
         stage.setScene(scene);
-
-        Cancel.setOnMouseClicked(event -> {
-            returnData = "Cancel";
+        Cancel.setOnMouseClicked((event) -> {
+            this.returnData = "Cancel";
             stage.close();
         });
-        Ok.setOnMouseClicked(event -> {
-            if (!field.getValue().isEmpty()) {
-                returnData = field.getValue();
+        Ok.setOnMouseClicked((event) -> {
+            if (!((String)field.getValue()).isEmpty()) {
+                this.returnData = (String)field.getValue();
             } else {
-                returnData = "Cancel";
+                this.returnData = "Cancel";
             }
 
             stage.close();
         });
-        field.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+        field.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
             if (event.getCode().equals(KeyCode.ENTER)) {
-                if (!field.getValue().isEmpty()) {
-                    returnData = field.getValue();
+                if (!((String)field.getValue()).isEmpty()) {
+                    this.returnData = (String)field.getValue();
                 } else {
-                    returnData = "Cancel";
+                    this.returnData = "Cancel";
                 }
 
                 stage.close();
             }
+
         });
-        stage.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
             if (event.getCode().equals(KeyCode.ESCAPE)) {
-                returnData = "Cancel";
+                this.returnData = "Cancel";
                 stage.close();
             }
-        });
-        stage.setOnCloseRequest(action -> returnData = "Cancel");
 
+        });
+        stage.setOnCloseRequest((action) -> this.returnData = "Cancel");
         field.requestFocus();
         stage.showAndWait();
-
-        return returnData;
+        return this.returnData;
     }
 
     private void confirmationMessageControl() {
-        //Check for start
-        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue()) {
-            if (!Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
-            }
-        }
-        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue()) {
-            if (!Mixer_2_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                Mixer_2_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
-            }
-        }
-        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue()) {
-            if (!IPC_Fill_From_Mixer_1_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                IPC_Fill_From_Mixer_1_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
-            }
-        }
-        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue()) {
-            if (!IPC_Fill_From_Mixer_2_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                IPC_Fill_From_Mixer_2_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
-            }
-        }
-        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue()) {
-            if (!IPC_Fill_From_Tank_1_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                IPC_Fill_From_Tank_1_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
-            }
-        }
-        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue()) {
-            if (!IPC_Fill_From_Tank_2_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                IPC_Fill_From_Tank_2_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
-            }
-        }
-        if (((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue()) {
-            if (!IPC_Fill_From_Tank_3_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                IPC_Fill_From_Tank_3_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
-            }
+        if (((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).getValue() && !Mixer_1_Manual_Add_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+            Mixer_1_Manual_Add_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
         }
 
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
+        if (((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).getValue() && !Mixer_2_Manual_Add_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+            Mixer_2_Manual_Add_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
+        }
+
+        if (((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).getValue() && !IPC_Fill_From_Mixer_1_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+            IPC_Fill_From_Mixer_1_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
+        }
+
+        if (((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).getValue() && !IPC_Fill_From_Mixer_2_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+            IPC_Fill_From_Mixer_2_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
+        }
+
+        if (((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).getValue() && !IPC_Fill_From_Tank_1_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+            IPC_Fill_From_Tank_1_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
+        }
+
+        if (((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).getValue() && !IPC_Fill_From_Tank_2_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+            IPC_Fill_From_Tank_2_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
+        }
+
+        if (((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).getValue() && !IPC_Fill_From_Tank_3_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+            IPC_Fill_From_Tank_3_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
+        }
+
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Mixer_1_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(() -> {
-                    if (!Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                        Mixer_1_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    if (!Mixer_1_Manual_Add_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+                        Mixer_1_Manual_Add_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
                     }
+
                 });
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(() -> {
-                    if (!Mixer_2_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                        Mixer_2_Manual_Add_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    if (!Mixer_2_Manual_Add_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+                        Mixer_2_Manual_Add_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
                     }
+
                 });
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(() -> {
-                    if (!IPC_Fill_From_Mixer_1_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                        IPC_Fill_From_Mixer_1_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    if (!IPC_Fill_From_Mixer_1_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Mixer_1_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
                     }
+
                 });
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Mixer_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(() -> {
-                    if (!IPC_Fill_From_Mixer_2_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                        IPC_Fill_From_Mixer_2_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    if (!IPC_Fill_From_Mixer_2_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Mixer_2_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
                     }
+
                 });
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_1_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(() -> {
-                    if (!IPC_Fill_From_Tank_1_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                        IPC_Fill_From_Tank_1_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    if (!IPC_Fill_From_Tank_1_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Tank_1_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
                     }
+
                 });
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_2_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(() -> {
-                    if (!IPC_Fill_From_Tank_2_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                        IPC_Fill_From_Tank_2_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    if (!IPC_Fill_From_Tank_2_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Tank_2_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
                     }
+
                 });
             }
+
         });
-        ((BooleanDataType) allDataDefinitions.get("General").getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).addListener((observable, oldValue, newValue) -> {
+        ((BooleanDataType)((RowDataDefinition)this.allDataDefinitions.get("General")).getAllValues().get(GeneralInput.IPC_Fill_From_Tank_3_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(() -> {
-                    if (!IPC_Fill_From_Tank_3_Message.getWindow(initialStage, allDataDefinitions).isShowing()) {
-                        IPC_Fill_From_Tank_3_Message.getWindow(initialStage, allDataDefinitions).showAndWait();
+                    if (!IPC_Fill_From_Tank_3_Message.getWindow(this.initialStage, this.allDataDefinitions).isShowing()) {
+                        IPC_Fill_From_Tank_3_Message.getWindow(this.initialStage, this.allDataDefinitions).showAndWait();
                     }
+
                 });
             }
+
         });
     }
 
     @EventListener
-    public void atStartedToInitialize(ContextStartedEvent event){
-        controller.getAllBatchControllerData().stream().filter(data -> data.getRunningBatchID() > 0).forEach(item -> {
-            controller.getBatchById(item.getRunningBatchID()).ifPresentOrElse(this::createBatchObserver, () -> {
-                loggingService.LogRecord(new Log(LogIdentefires.System.name(), "error creating batch view as batch not found in database  \n" + item));
-            });
-        });
+    public void atStartedToInitialize(ContextStartedEvent event) {
+        this.controller.getAllBatchControllerData().stream().filter((data) -> data.getRunningBatchID() > 0L).forEach((item) -> this.controller.getBatchById(item.getRunningBatchID()).ifPresentOrElse(this::createBatchObserver, () -> this.loggingService.LogRecord(new Log(LogIdentefires.System.name(), "error creating batch view as batch not found in database  \n" + item))));
     }
 
     @EventListener
-    public void atRefreshed(ContextRefreshedEvent event){
-        allDataDefinitions = plcDataDefinitionFactory.getAllDevicesDataModel();
-
-        //Registering window to userAuthorizationService
-        controller.registerWindowToUserAuthorizationService(new WindowData("Recipe window"));
-        controller.registerWindowToUserAuthorizationService(new WindowData("Batch window"));
-        controller.registerWindowToUserAuthorizationService(new WindowData("Users window"));
-        controller.registerWindowToUserAuthorizationService(new WindowData("Phases window"));
-        controller.registerWindowToUserAuthorizationService(new WindowData("Units window"));
-        controller.registerWindowToUserAuthorizationService(new WindowData("Reporting window"));
-        controller.registerWindowToUserAuthorizationService(new WindowData("Material window"));
+    public void atRefreshed(ContextRefreshedEvent event) {
+        this.allDataDefinitions = this.plcDataDefinitionFactory.getAllDevicesDataModel();
+        this.controller.registerWindowToUserAuthorizationService(new WindowData("Recipe window"));
+        this.controller.registerWindowToUserAuthorizationService(new WindowData("Batch window"));
+        this.controller.registerWindowToUserAuthorizationService(new WindowData("Users window"));
+        this.controller.registerWindowToUserAuthorizationService(new WindowData("Phases window"));
+        this.controller.registerWindowToUserAuthorizationService(new WindowData("Units window"));
+        this.controller.registerWindowToUserAuthorizationService(new WindowData("Reporting window"));
+        this.controller.registerWindowToUserAuthorizationService(new WindowData("Material window"));
     }
 
-    @Scheduled(fixedDelay = 500, initialDelay = 2000)
+    @Scheduled(
+            fixedDelay = 500L,
+            initialDelay = 2000L
+    )
     public void run() {
         try {
-            batchObservers.forEach((id, batchObserver) -> batchObserver.update());
+            this.batchObservers.forEach((id, batchObserver) -> batchObserver.update());
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
-    @Scheduled(fixedDelay = 1000)
-    public void updateAlarms(){
+    @Scheduled(
+            fixedDelay = 1000L
+    )
+    public void updateAlarms() {
         try {
-            final Log lastEnteredLog = loggingService.getLastEnteredLog();
+            Log lastEnteredLog = this.loggingService.getLastEnteredLog();
             Platform.runLater(() -> {
-                if (!lastAlarmField.getText().equals(lastEnteredLog.toString())) {
-                    lastAlarmField.setText(lastEnteredLog.toString());
+                if (!this.lastAlarmField.getText().equals(lastEnteredLog.toString())) {
+                    this.lastAlarmField.setText(lastEnteredLog.toString());
                     if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Error.name())) {
-                        lastAlarmField.setStyle("-fx-background-color: red; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                        this.lastAlarmField.setStyle("-fx-background-color: red; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
                     } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Warning.name())) {
-                        lastAlarmField.setStyle("-fx-background-color: yellow; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                        this.lastAlarmField.setStyle("-fx-background-color: yellow; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
                     } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Info.name())) {
-                        lastAlarmField.setStyle("-fx-background-color: wheat; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                        this.lastAlarmField.setStyle("-fx-background-color: wheat; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
                     } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.System.name())) {
-                        lastAlarmField.setStyle("-fx-background-color: black; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                        this.lastAlarmField.setStyle("-fx-background-color: black; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
                     }
                 }
+
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     @EventListener
-    public void newUserLogIn(UserEvent event){
-        final UserEventMessage message = event.getMessage();
-        if (message.isLoggedOn()){
-            if (message.getUser().getUserName().equals("Administrator")){
-                recipeEditorItem.setDisable(false);
-                batchCreatorItem.setDisable(false);
-                Phases.setDisable(false);
-                UserAdministrationMenuItem.setDisable(false);
-                Units.setDisable(false);
-                reportingSystem.setDisable(false);
-                materialItem.setDisable(false);
+    public void newUserLogIn(UserEvent event) {
+        UserEventMessage message = event.getMessage();
+        if (message.isLoggedOn()) {
+            if (message.getUser().getUserName().equals("Administrator")) {
+                this.recipeEditorItem.setDisable(false);
+                this.batchCreatorItem.setDisable(false);
+                this.Phases.setDisable(false);
+                this.UserAdministrationMenuItem.setDisable(false);
+                this.Units.setDisable(false);
+                this.reportingSystem.setDisable(false);
+                this.materialItem.setDisable(false);
             }
-            message.getAllGroupsDTO().getList().forEach(windowGroupsDTO -> {
-                final LinkedHashMap<String, List<Group>> rowGroup = windowGroupsDTO.getRowGroup();
+
+            message.getAllGroupsDTO().getList().forEach((windowGroupsDTO) -> {
+                LinkedHashMap<String, List<Group>> rowGroup = windowGroupsDTO.getRowGroup();
             });
-        }else {
+        } else {
             Platform.runLater(() -> {
-                recipeEditorItem.setDisable(true);
-                batchCreatorItem.setDisable(true);
-                Phases.setDisable(true);
-                UserAdministrationMenuItem.setDisable(true);
-                Units.setDisable(true);
-                reportingSystem.setDisable(true);
-                materialItem.setDisable(true);
+                this.recipeEditorItem.setDisable(true);
+                this.batchCreatorItem.setDisable(true);
+                this.Phases.setDisable(true);
+                this.UserAdministrationMenuItem.setDisable(true);
+                this.Units.setDisable(true);
+                this.reportingSystem.setDisable(true);
+                this.materialItem.setDisable(true);
             });
+        }
+
+    }
+
+    public void showNotificationDownButton(String title, String content, int duration) {
+        FontIcon icon1 = new FontIcon("fas-info-circle");
+        icon1.setIconColor(Color.BLUE);
+        icon1.setIconSize(15);
+        SimpleMFXNotificationPane notificationPane = new SimpleMFXNotificationPane(icon1, "System notification", title, content);
+        notificationPane.setPrefWidth((double)500.0F);
+        MFXNotification notification = new MFXNotification(notificationPane, false, true);
+        notification.setHideAfterDuration(Duration.seconds((double)duration));
+        notificationPane.setCloseHandler((closeEvent) -> notification.hideNotification());
+        notificationPane.getOkButton().setOnMouseClicked((action) -> notification.hideNotification());
+        Platform.runLater(() -> {
+            NotificationsManager.send(NotificationPos.BOTTOM_RIGHT, notification, (double)5.0F, 5);
+            notification.setAutoFix(true);
+            notification.show(this.initialStage);
+        });
+    }
+
+    public Stage getInitialStage() {
+        return this.initialStage;
+    }
+
+    @EventListener
+    public void atException(ExceptionWindowRequestEvent event) {
+        ExceptionData exception = event.getException();
+        Platform.runLater(() -> {
+            ExceptionDialog exceptionDialog = new ExceptionDialog(exception.e);
+            exceptionDialog.setHeaderText(exception.header);
+            exceptionDialog.getDialogPane().setMaxWidth((double)500.0F);
+            exceptionDialog.initOwner(this.initialStage);
+            exceptionDialog.initModality(Modality.WINDOW_MODAL);
+            exceptionDialog.initStyle(StageStyle.UTILITY);
+            exceptionDialog.show();
+        });
+    }
+
+    public static record ExceptionData(Exception e, String header) {
+    }
+
+    public static class ExceptionWindowRequestEvent extends ApplicationEvent {
+        public ExceptionWindowRequestEvent(ExceptionData exceptionData) {
+            super(exceptionData);
+        }
+
+        public ExceptionData getException() {
+            return (ExceptionData)this.getSource();
         }
     }
 }

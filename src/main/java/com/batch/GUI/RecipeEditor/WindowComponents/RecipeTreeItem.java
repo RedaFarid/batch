@@ -6,37 +6,36 @@ import com.google.common.io.Resources;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class RecipeTreeItem extends TreeItemIdentity{
+public class RecipeTreeItem extends TreeItemIdentity {
     private Recipe recipe;
     private TreeItemType itemType;
     private String itemValue;
 
-
     public RecipeTreeItem(String value, TreeItemType type) {
-        itemType = type;
+        this.itemType = type;
         this.itemValue = value;
         ImageView view = null;
-        Image image;
         switch (type) {
             case Folder:
-                image = new Image(Resources.getResource("Icons/Folder.png").toString());
+                Image image = new Image(Resources.getResource("Icons/Folder.png").toString());
                 view = new ImageView(image);
                 break;
             case Recipe:
-                image = new Image(Resources.getResource("Icons/Recipe.png").toString());
+                Image image = new Image(Resources.getResource("Icons/Recipe.png").toString());
                 view = new ImageView(image);
-                view.setFitHeight(20);
-                view.setFitWidth(20);
+                view.setFitHeight((double)20.0F);
+                view.setFitWidth((double)20.0F);
                 break;
             default:
                 return;
         }
+
         super.setValue(value);
         super.setGraphic(view);
     }
 
     public Recipe getRecipe() {
-        return recipe;
+        return this.recipe;
     }
 
     public void setRecipe(Recipe recipe) {
@@ -44,7 +43,7 @@ public class RecipeTreeItem extends TreeItemIdentity{
     }
 
     public TreeItemType getItemType() {
-        return itemType;
+        return this.itemType;
     }
 
     public void setItemType(TreeItemType itemType) {
@@ -52,11 +51,10 @@ public class RecipeTreeItem extends TreeItemIdentity{
     }
 
     public String getItemValue() {
-        return itemValue;
+        return this.itemValue;
     }
 
     public void setItemValue(String itemValue) {
         this.itemValue = itemValue;
     }
-
 }

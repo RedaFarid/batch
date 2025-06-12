@@ -1,7 +1,8 @@
+
 package com.batch.Database.Repositories;
 
 import com.batch.Database.Entities.RecipeConf;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface RecipeConfRepository extends JpaRepository<RecipeConf, Long> {
+public interface RecipeConfRepository extends PagingAndSortingRepository<RecipeConf, Long> {
 }

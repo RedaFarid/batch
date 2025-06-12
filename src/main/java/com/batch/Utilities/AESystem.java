@@ -1,12 +1,16 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package com.batch.Utilities;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.util.Base64;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 public class AESystem {
-
     private static String ALGO = "AES";
     private static byte[] KeyValue = "aaaaaaaaaaaaaaaa".getBytes();
 
@@ -17,18 +21,16 @@ public class AESystem {
     public static String encrypt(String Data) throws Exception {
         Key key = generateKey();
         Cipher cipher = Cipher.getInstance(ALGO);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
+        cipher.init(1, key);
         byte[] encval = cipher.doFinal(Data.getBytes());
         byte[] encryptedvalue = Base64.getEncoder().encode(encval);
-
         return new String(encryptedvalue);
     }
 
     public static String decrypt(String Data) throws Exception {
-
         Key key = generateKey();
         Cipher cipher = Cipher.getInstance(ALGO);
-        cipher.init(Cipher.DECRYPT_MODE, key);
+        cipher.init(2, key);
         byte[] decodedvalue = Base64.getDecoder().decode(Data);
         byte[] decryptedvalue = cipher.doFinal(decodedvalue);
         return new String(decryptedvalue);

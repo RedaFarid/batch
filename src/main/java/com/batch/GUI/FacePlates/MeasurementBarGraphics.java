@@ -1,15 +1,20 @@
 
-package com.batch.GUI.FacePlates;
 
+package com.batch.GUI.FacePlates;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
@@ -17,37 +22,43 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
-
+import javafx.scene.transform.Transform;
 
 public class MeasurementBarGraphics extends HBox {
     private VBox paneContainer = new VBox();
-    private Cylinder pane = new Cylinder(25, 150);
+    private Cylinder pane = new Cylinder((double)25.0F, (double)150.0F);
     private StackPane indecators = new StackPane();
-
-    private FloatProperty value, zero, span, lowWarning, lowAlarm, highWarning, highAlarm;
-
-    private HBox spanLimit = spanLimit();
-    private HBox szeroLimit = zeroLimit();
-
-    private HBox LA = lowAlarm();
-    private HBox LW = lowWarning();
-    private HBox HA = highAlarm();
-    private HBox HW = highWarning();
-
-    private PhongMaterial normal = new PhongMaterial(Color.LIGHTGREEN);
-    private PhongMaterial warning = new PhongMaterial(Color.YELLOW);
-    private PhongMaterial alarm = new PhongMaterial(Color.RED);
-
-
-    private double anchorX, anchorY;
+    private FloatProperty value;
+    private FloatProperty zero;
+    private FloatProperty span;
+    private FloatProperty lowWarning;
+    private FloatProperty lowAlarm;
+    private FloatProperty highWarning;
+    private FloatProperty highAlarm;
+    private HBox spanLimit = this.spanLimit();
+    private HBox szeroLimit = this.zeroLimit();
+    private HBox LA = this.lowAlarm();
+    private HBox LW = this.lowWarning();
+    private HBox HA = this.highAlarm();
+    private HBox HW = this.highWarning();
+    private PhongMaterial normal;
+    private PhongMaterial warning;
+    private PhongMaterial alarm;
+    private double anchorX;
+    private double anchorY;
     private double anchorAngleX;
     private double anchorAngleY;
-    private DoubleProperty angleX = new SimpleDoubleProperty();
-    private DoubleProperty angleY = new SimpleDoubleProperty();
-
-    private final double Height = 265;
+    private DoubleProperty angleX;
+    private DoubleProperty angleY;
+    private final double Height;
 
     public MeasurementBarGraphics(FloatProperty value, FloatProperty zero, FloatProperty span, FloatProperty lowWarning, FloatProperty lowAlarm, FloatProperty highWarning, FloatProperty highAlarm) {
+        this.normal = new PhongMaterial(Color.LIGHTGREEN);
+        this.warning = new PhongMaterial(Color.YELLOW);
+        this.alarm = new PhongMaterial(Color.RED);
+        this.angleX = new SimpleDoubleProperty();
+        this.angleY = new SimpleDoubleProperty();
+        this.Height = (double)265.0F;
         this.value = value;
         this.zero = zero;
         this.span = span;
@@ -55,279 +66,203 @@ public class MeasurementBarGraphics extends HBox {
         this.lowAlarm = lowAlarm;
         this.highWarning = highWarning;
         this.highAlarm = highAlarm;
-        initialization();
-        animation();
+        this.initialization();
+        this.animation();
     }
 
-
-    private void initialization(){
-
-
-        pane.setMaterial(normal);
-
-        indecators.getChildren().addAll(spanLimit, LA, LW, HA, HW, szeroLimit);
-        indecators.prefHeightProperty().bind(pane.heightProperty());
-
-        LA.toFront();
-        HA.toFront();
-        paneContainer.toFront();
-
-        paneContainer.setPrefHeight(Height);
-        paneContainer.getChildren().add(pane);
-        paneContainer.setAlignment(Pos.BOTTOM_CENTER);
-
-        moveIndecators();
-
-        getChildren().addAll(paneContainer, indecators);
-        initMouseControl(this, this);
-        setSpacing(1);
-        getTransforms().add(new Rotate(30, Rotate.X_AXIS));
-        getTransforms().add(new Rotate(-15, Rotate.Y_AXIS));
-
+    private void initialization() {
+        this.pane.setMaterial(this.normal);
+        this.indecators.getChildren().addAll(new Node[]{this.spanLimit, this.LA, this.LW, this.HA, this.HW, this.szeroLimit});
+        this.indecators.prefHeightProperty().bind(this.pane.heightProperty());
+        this.LA.toFront();
+        this.HA.toFront();
+        this.paneContainer.toFront();
+        this.paneContainer.setPrefHeight((double)265.0F);
+        this.paneContainer.getChildren().add(this.pane);
+        this.paneContainer.setAlignment(Pos.BOTTOM_CENTER);
+        this.moveIndecators();
+        this.getChildren().addAll(new Node[]{this.paneContainer, this.indecators});
+        this.initMouseControl(this, this);
+        this.setSpacing((double)1.0F);
+        this.getTransforms().add(new Rotate((double)30.0F, Rotate.X_AXIS));
+        this.getTransforms().add(new Rotate((double)-15.0F, Rotate.Y_AXIS));
     }
+
     private void animation() {
-        value.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> moveIndecators());
-
-        zero.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> moveIndecators());
-        span.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> moveIndecators());
-        lowWarning.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> moveIndecators());
-        lowAlarm.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> moveIndecators());
-        highWarning.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> moveIndecators());
-        highAlarm.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> moveIndecators());
+        this.value.addListener((observable, oldValue, newValue) -> this.moveIndecators());
+        this.zero.addListener((observable, oldValue, newValue) -> this.moveIndecators());
+        this.span.addListener((observable, oldValue, newValue) -> this.moveIndecators());
+        this.lowWarning.addListener((observable, oldValue, newValue) -> this.moveIndecators());
+        this.lowAlarm.addListener((observable, oldValue, newValue) -> this.moveIndecators());
+        this.highWarning.addListener((observable, oldValue, newValue) -> this.moveIndecators());
+        this.highAlarm.addListener((observable, oldValue, newValue) -> this.moveIndecators());
     }
 
-    private HBox spanLimit(){
+    private HBox spanLimit() {
         HBox box = new HBox();
-        box.setSpacing(2);
-
+        box.setSpacing((double)2.0F);
         Polygon triangle = new Polygon();
-        triangle.getPoints().addAll(new Double []{
-                0.0, 10.0,
-                10.0, 15.0,
-                10.0, 5.0
-        });
+        triangle.getPoints().addAll(new Double[]{(double)0.0F, (double)10.0F, (double)10.0F, (double)15.0F, (double)10.0F, (double)5.0F});
         triangle.setFill(Color.BLACK);
         triangle.setStroke(Color.BLACK);
         triangle.setStrokeType(StrokeType.OUTSIDE);
-        triangle.setStrokeWidth(1);
-
-
+        triangle.setStrokeWidth((double)1.0F);
         Label label = new Label(" Span");
-        label.setFont(Font.font(11));
-        label.setBackground(new Background(new BackgroundFill(Color.BLACK.brighter(), CornerRadii.EMPTY, Insets.EMPTY)));
+        label.setFont(Font.font((double)11.0F));
+        label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.BLACK.brighter(), CornerRadii.EMPTY, Insets.EMPTY)}));
         label.setStyle("-fx-text-fill :white;");
-        label.setPrefWidth(50);
-
-        box.getChildren().addAll(triangle, label);
-
+        label.setPrefWidth((double)50.0F);
+        box.getChildren().addAll(new Node[]{triangle, label});
         return box;
     }
-    private HBox zeroLimit(){
-        HBox box = new HBox();
-        box.setSpacing(2);
 
+    private HBox zeroLimit() {
+        HBox box = new HBox();
+        box.setSpacing((double)2.0F);
         Polygon triangle = new Polygon();
-        triangle.getPoints().addAll(new Double []{
-                0.0, 10.0,
-                10.0, 15.0,
-                10.0, 5.0
-        });
+        triangle.getPoints().addAll(new Double[]{(double)0.0F, (double)10.0F, (double)10.0F, (double)15.0F, (double)10.0F, (double)5.0F});
         triangle.setFill(Color.BLACK);
         triangle.setStroke(Color.BLACK);
         triangle.setStrokeType(StrokeType.OUTSIDE);
-        triangle.setStrokeWidth(1);
-
-
+        triangle.setStrokeWidth((double)1.0F);
         Label label = new Label(" Zero");
-        label.setFont(Font.font(11));
-        label.setBackground(new Background(new BackgroundFill(Color.BLACK.brighter(), CornerRadii.EMPTY, Insets.EMPTY)));
+        label.setFont(Font.font((double)11.0F));
+        label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.BLACK.brighter(), CornerRadii.EMPTY, Insets.EMPTY)}));
         label.setStyle("-fx-text-fill :white;");
-        label.setPrefWidth(50);
-
-        box.getChildren().addAll(triangle, label);
-
+        label.setPrefWidth((double)50.0F);
+        box.getChildren().addAll(new Node[]{triangle, label});
         return box;
     }
 
-    private HBox lowAlarm(){
+    private HBox lowAlarm() {
         HBox box = new HBox();
-        box.setSpacing(2);
-
+        box.setSpacing((double)2.0F);
         Polygon triangle = new Polygon();
-        triangle.getPoints().addAll(new Double []{
-                0.0, 10.0,
-                10.0, 15.0,
-                10.0, 5.0
-        });
+        triangle.getPoints().addAll(new Double[]{(double)0.0F, (double)10.0F, (double)10.0F, (double)15.0F, (double)10.0F, (double)5.0F});
         triangle.setFill(Color.RED);
         triangle.setStroke(Color.BLACK);
         triangle.setStrokeType(StrokeType.OUTSIDE);
-        triangle.setStrokeWidth(1);
-
-
+        triangle.setStrokeWidth((double)1.0F);
         Label label = new Label(" L - A");
-        label.setFont(Font.font(11));
-        label.setBackground(new Background(new BackgroundFill(Color.RED.brighter(), CornerRadii.EMPTY, Insets.EMPTY)));
-        label.setPrefWidth(50);
-
-        box.getChildren().addAll(triangle, label);
-
+        label.setFont(Font.font((double)11.0F));
+        label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.RED.brighter(), CornerRadii.EMPTY, Insets.EMPTY)}));
+        label.setPrefWidth((double)50.0F);
+        box.getChildren().addAll(new Node[]{triangle, label});
         return box;
     }
-    private HBox lowWarning(){
-        HBox box = new HBox();
-        box.setSpacing(2);
 
+    private HBox lowWarning() {
+        HBox box = new HBox();
+        box.setSpacing((double)2.0F);
         Polygon triangle = new Polygon();
-        triangle.getPoints().addAll(new Double []{
-                0.0, 10.0,
-                10.0, 15.0,
-                10.0, 5.0
-        });
+        triangle.getPoints().addAll(new Double[]{(double)0.0F, (double)10.0F, (double)10.0F, (double)15.0F, (double)10.0F, (double)5.0F});
         triangle.setFill(Color.YELLOW);
         triangle.setStroke(Color.BLACK);
         triangle.setStrokeType(StrokeType.OUTSIDE);
-        triangle.setStrokeWidth(1);
-
+        triangle.setStrokeWidth((double)1.0F);
         Label label = new Label(" L - W");
-        label.setFont(Font.font(11));
-        label.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
-        label.setPrefWidth(50);
-
-        box.getChildren().addAll(triangle, label);
-//        box.setAlignment(Pos.BASELINE_LEFT);
-
+        label.setFont(Font.font((double)11.0F));
+        label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)}));
+        label.setPrefWidth((double)50.0F);
+        box.getChildren().addAll(new Node[]{triangle, label});
         return box;
     }
-    private HBox highAlarm(){
-        HBox box = new HBox();
-        box.setSpacing(2);
 
+    private HBox highAlarm() {
+        HBox box = new HBox();
+        box.setSpacing((double)2.0F);
         Polygon triangle = new Polygon();
-        triangle.getPoints().addAll(new Double []{
-                0.0, 10.0,
-                10.0, 15.0,
-                10.0, 5.0
-        });
+        triangle.getPoints().addAll(new Double[]{(double)0.0F, (double)10.0F, (double)10.0F, (double)15.0F, (double)10.0F, (double)5.0F});
         triangle.setFill(Color.RED);
         triangle.setStroke(Color.BLACK);
         triangle.setStrokeType(StrokeType.OUTSIDE);
-        triangle.setStrokeWidth(1);
-
+        triangle.setStrokeWidth((double)1.0F);
         Label label = new Label(" H - A");
-        label.setFont(Font.font(11));
-        label.setBackground(new Background(new BackgroundFill(Color.RED.brighter(), CornerRadii.EMPTY, Insets.EMPTY)));
-        label.setPrefWidth(50);
-
-        box.getChildren().addAll(triangle, label);
-//        box.setAlignment(Pos.BASELINE_LEFT);
-
+        label.setFont(Font.font((double)11.0F));
+        label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.RED.brighter(), CornerRadii.EMPTY, Insets.EMPTY)}));
+        label.setPrefWidth((double)50.0F);
+        box.getChildren().addAll(new Node[]{triangle, label});
         return box;
     }
-    private HBox highWarning(){
-        HBox box = new HBox();
-        box.setSpacing(2);
 
+    private HBox highWarning() {
+        HBox box = new HBox();
+        box.setSpacing((double)2.0F);
         Polygon triangle = new Polygon();
-        triangle.getPoints().addAll(new Double []{
-                0.0, 10.0,
-                10.0, 15.0,
-                10.0, 5.0
-        });
+        triangle.getPoints().addAll(new Double[]{(double)0.0F, (double)10.0F, (double)10.0F, (double)15.0F, (double)10.0F, (double)5.0F});
         triangle.setFill(Color.YELLOW);
         triangle.setStroke(Color.BLACK);
         triangle.setStrokeType(StrokeType.OUTSIDE);
-        triangle.setStrokeWidth(1);
-
+        triangle.setStrokeWidth((double)1.0F);
         Label label = new Label(" H - W");
-        label.setFont(Font.font(11));
-        label.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
-        label.setPrefWidth(50);
-
-        box.getChildren().addAll(triangle, label);
-//        box.setAlignment(Pos.BASELINE_LEFT);
-
+        label.setFont(Font.font((double)11.0F));
+        label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)}));
+        label.setPrefWidth((double)50.0F);
+        box.getChildren().addAll(new Node[]{triangle, label});
         return box;
     }
 
     private void moveIndecators() {
-        float qtyValue = value.getValue();
-
-        float zeroValue = zero.getValue();
-        float spanValue = span.getValue();
-
-        float lowWarningValue = lowWarning.getValue();
-        float lowAlarmValue = lowAlarm.getValue();
-        float highWarningValue = highWarning.getValue();
-        float highAlarmValue = highAlarm.getValue();
-
+        float qtyValue = this.value.getValue();
+        float zeroValue = this.zero.getValue();
+        float spanValue = this.span.getValue();
+        float lowWarningValue = this.lowWarning.getValue();
+        float lowAlarmValue = this.lowAlarm.getValue();
+        float highWarningValue = this.highWarning.getValue();
+        float highAlarmValue = this.highAlarm.getValue();
         float delta = spanValue - zeroValue;
-
         float lowWarningOffset = (lowWarningValue - zeroValue) / delta;
         float lowAlarmOffset = (lowAlarmValue - zeroValue) / delta;
         float highWarningOffset = (highWarningValue - zeroValue) / delta;
         float highAlarmOffset = (highAlarmValue - zeroValue) / delta;
-
-        float moveLA = (float) ((1 - lowAlarmOffset) * Height);
-        float moveLW = (float) ((1 - lowWarningOffset) * Height);
-        float moveHA = (float) ((1 - highAlarmOffset) * Height);
-        float moveHW = (float) ((1 - highWarningOffset) * Height);
-        if (moveHA > Height || moveHA < 0
-                || moveLW > Height || moveLW < 0
-                || moveHA > Height || moveHA < 0
-                || moveHW > Height || moveHW < 0) {
-
-        }else{
-            LA.setTranslateY(moveLA - 7.5);
-            LW.setTranslateY(moveLW - 7.5);
-            HA.setTranslateY(moveHA - 7.5);
-            HW.setTranslateY(moveHW - 7.5);
+        float moveLA = (float)((double)(1.0F - lowAlarmOffset) * (double)265.0F);
+        float moveLW = (float)((double)(1.0F - lowWarningOffset) * (double)265.0F);
+        float moveHA = (float)((double)(1.0F - highAlarmOffset) * (double)265.0F);
+        float moveHW = (float)((double)(1.0F - highWarningOffset) * (double)265.0F);
+        if (!((double)moveHA > (double)265.0F) && !(moveHA < 0.0F) && !((double)moveLW > (double)265.0F) && !(moveLW < 0.0F) && !((double)moveHA > (double)265.0F) && !(moveHA < 0.0F) && !((double)moveHW > (double)265.0F) && !(moveHW < 0.0F)) {
+            this.LA.setTranslateY((double)moveLA - (double)7.5F);
+            this.LW.setTranslateY((double)moveLW - (double)7.5F);
+            this.HA.setTranslateY((double)moveHA - (double)7.5F);
+            this.HW.setTranslateY((double)moveHW - (double)7.5F);
         }
-        if (((qtyValue - zeroValue) / delta * Height) < Height) {
-            pane.setHeight((qtyValue - zeroValue) / delta * Height);
-        }else{
-            pane.setHeight(Height);
+
+        if ((double)((qtyValue - zeroValue) / delta) * (double)265.0F < (double)265.0F) {
+            this.pane.setHeight((double)((qtyValue - zeroValue) / delta) * (double)265.0F);
+        } else {
+            this.pane.setHeight((double)265.0F);
         }
 
         if (qtyValue < lowWarningValue && qtyValue > lowAlarmValue) {
-            pane.setMaterial(warning);
+            this.pane.setMaterial(this.warning);
         } else if (qtyValue < lowWarningValue && qtyValue < lowAlarmValue) {
-            pane.setMaterial(alarm);
+            this.pane.setMaterial(this.alarm);
         } else if (qtyValue > highWarningValue && qtyValue < highAlarmValue) {
-            pane.setMaterial(warning);
+            this.pane.setMaterial(this.warning);
         } else if (qtyValue > highWarningValue && qtyValue > highAlarmValue) {
-            pane.setMaterial(alarm);
+            this.pane.setMaterial(this.alarm);
         } else {
-            pane.setMaterial(normal);
+            this.pane.setMaterial(this.normal);
         }
 
-        szeroLimit.setTranslateY(Height);
-        spanLimit.setTranslateY(0.0);
-
+        this.szeroLimit.setTranslateY((double)265.0F);
+        this.spanLimit.setTranslateY((double)0.0F);
     }
 
     private void initMouseControl(HBox g, HBox scene) {
         Rotate rotateX;
         Rotate rotateY;
-
-        g.getTransforms().addAll(
-                rotateX = new Rotate(0.0, Rotate.X_AXIS),
-                rotateY = new Rotate(0.0, Rotate.Y_AXIS)
-        );
-        rotateX.angleProperty().bind(angleX);
-        rotateY.angleProperty().bind(angleY);
-
-        scene.setOnMousePressed(event -> {
-            anchorX = event.getSceneX();
-            anchorY = event.getSceneY();
-            anchorAngleX = angleX.get();
-            anchorAngleY = angleY.get();
+        g.getTransforms().addAll(new Transform[]{rotateX = new Rotate((double)0.0F, Rotate.X_AXIS), rotateY = new Rotate((double)0.0F, Rotate.Y_AXIS)});
+        rotateX.angleProperty().bind(this.angleX);
+        rotateY.angleProperty().bind(this.angleY);
+        scene.setOnMousePressed((event) -> {
+            this.anchorX = event.getSceneX();
+            this.anchorY = event.getSceneY();
+            this.anchorAngleX = this.angleX.get();
+            this.anchorAngleY = this.angleY.get();
         });
-        scene.setOnMouseDragged(event -> {
-            angleX.set(anchorAngleX - (anchorY - event.getSceneY()) * 0.1);
-            angleY.set(anchorAngleY - (anchorX + event.getSceneX()) * 0.1);
+        scene.setOnMouseDragged((event) -> {
+            this.angleX.set(this.anchorAngleX - (this.anchorY - event.getSceneY()) * 0.1);
+            this.angleY.set(this.anchorAngleY - (this.anchorX + event.getSceneX()) * 0.1);
         });
-
     }
-
 }

@@ -1,98 +1,95 @@
+
+
 package com.batch.Database.Services;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchModel;
 import com.batch.Database.Entities.Batch;
 import com.batch.Database.Repositories.BatchesRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-
+import com.google.common.collect.Lists;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-@Log4j2
 @Service
-@RequiredArgsConstructor
+@Transactional(
+        isolation = Isolation.SERIALIZABLE,
+        propagation = Propagation.REQUIRES_NEW
+)
 public class BatchesService {
-
+    private static final Logger log = LogManager.getLogger(BatchesService.class);
     private final BatchesRepository batchesRepository;
 
-    @CacheEvict(value = "batches", cacheManager = "cacheManagerForBatches")
-    public Batch save(Batch batch) {
-        final String rowModel = toRowModel(batch.getModel());
-        batch.setRowModel(rowModel);
-        return batchesRepository.save(batch);
+    public Optional<Batch> save(Batch batch) {
+        return this.startMarshalling(batch.getModel()).map((rowModel) -> {
+            batch.setRowModel(rowModel);
+            return (Batch)this.batchesRepository.save(batch);
+        });
     }
 
-    @Cacheable(value = "batches", cacheManager = "cacheManagerForBatches")
     public Optional<Batch> findById(Long id) {
-        return batchesRepository
-                .findById(id)
-                .map(batch -> {
-                    final BatchModel batchModel = toModel(batch.getRowModel());
-                    batch.setModel(batchModel);
-                    return batch;
-                });
-    }
-
-    @Cacheable(value = "batches", cacheManager = "cacheManagerForBatches")
-    public List<Batch> findAll(){
-        return batchesRepository.findAll().stream().peek(batch -> {
-            final BatchModel batchModel = toModel(batch.getRowModel());
+        return this.batchesRepository.findById(id).flatMap((batch) -> this.startUnMarshalling(batch.getRowModel()).map((batchModel) -> {
             batch.setModel(batchModel);
-        }).collect(Collectors.toList());
+            return batch;
+        }));
     }
-
-    @Cacheable(value = "batches", cacheManager = "cacheManagerForBatches")
-    public Optional<Batch> findByName(String batchName) {
-        return batchesRepository.findByBatchName(batchName);
-    }
-
-
-
-    //Managing XML
-    public BatchModel toModel(String rowModel) {
-        BatchModel batchModel = new BatchModel();
-        try {
-            batchModel = startUnMarshalling(rowModel);
-        } catch (Exception ignored) {
-
-        }
-        return batchModel;
-    }
-    public String toRowModel(BatchModel model) {
-        String s = "";
-        try {
-            s = startMarshalling(model);
-        } catch (Exception ignored) {
-        }
-        return s;
-    }
-
-    private String startMarshalling(BatchModel model) throws Exception {
-        StringWriter sw = new StringWriter();
-        JAXBContext jaxbcontext = JAXBContext.newInstance(BatchModel.class);
-        Marshaller marshaller = jaxbcontext.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-        marshaller.marshal(model, sw);
-        return sw.toString();
-    }
-    private BatchModel startUnMarshalling(String model) throws Exception {
-        JAXBContext jaxbcontext = JAXBContext.newInstance(BatchModel.class);
-        Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
-        return ((BatchModel) unMarshaller.unmarshal(new StringReader(model)));
-    }
-
 
     public void updateBatchControlOrder(long batchId, String order) {
-        batchesRepository.updateBatchControlOrder(batchId, order);
+        this.batchesRepository.updateBatchControlOrder(batchId, order);
+    }
+
+    public List<Batch> findAll() {
+        return (List)Lists.newArrayList(this.batchesRepository.findAll()).stream().flatMap((batch) -> this.startUnMarshalling(batch.getRowModel()).map((batchModel) -> {
+            batch.setModel(batchModel);
+            return batch;
+        }).stream()).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    public Optional<Batch> findByName(String batchName) {
+        return this.batchesRepository.findByBatchName(batchName);
+    }
+
+    private Optional<String> startMarshalling(BatchModel model) {
+        try {
+            StringWriter sw = new StringWriter();
+            JAXBContext jaxbcontext = JAXBContext.newInstance(new Class[]{BatchModel.class});
+            Marshaller marshaller = jaxbcontext.createMarshaller();
+            marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
+            marshaller.marshal(model, sw);
+            return Optional.ofNullable(sw.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    private Optional<BatchModel> startUnMarshalling(String model) {
+        try {
+            JAXBContext jaxbcontext = JAXBContext.newInstance(new Class[]{BatchModel.class});
+            Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
+            return Optional.ofNullable((BatchModel)unMarshaller.unmarshal(new StringReader(model)));
+        } catch (Exception var4) {
+            return Optional.empty();
+        }
+    }
+
+    public void updateEndTime(Long id, LocalDateTime now) {
+        this.batchesRepository.updateEndTime(id, now);
+    }
+
+    public BatchesService(final BatchesRepository batchesRepository) {
+        this.batchesRepository = batchesRepository;
     }
 }

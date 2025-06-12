@@ -1,24 +1,21 @@
+
 package com.batch.Database.Repositories;
 
 import com.batch.Database.Entities.BatchControllerData;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
+import org.springframework.data.jdbc.repository.query.Modifying;
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-@Transactional
-public interface BatchControllerDataRepository extends JpaRepository<BatchControllerData, Long> {
-
+public interface BatchControllerDataRepository extends PagingAndSortingRepository<BatchControllerData, Long> {
     @Modifying
-    @Query(value = "Update BatchControllerData SET LockGeneralControl = ?1 WHERE Unit like ?2", nativeQuery = true)
+    @Query("Update BatchControllerData SET LockGeneralControl = :b WHERE Unit like :unitName")
     void updateLockGeneralControl(boolean b, String unitName);
 
     @Modifying
-    @Query(value = "Update BatchControllerData SET LockGeneralControl = ?1, ControlBit = ?2  WHERE Unit like ?3", nativeQuery = true)
+    @Query("Update BatchControllerData SET CurrentParallelStepsNo = :currentParallelStepsNo, ControlBit = :controlBit  WHERE Unit like :unit")
     void updateForBatchController(int currentParallelStepsNo, boolean controlBit, String unit);
 
-    @Query(value = "SELECT * FROM BatchControllerData where Unit like ?1 ", nativeQuery = true)
+    @Query("SELECT * FROM BatchControllerData where Unit like :unitName ")
     Optional<BatchControllerData> findByUnitName(String unitName);
 }

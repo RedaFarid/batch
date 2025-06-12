@@ -1,61 +1,62 @@
+
+
 package com.batch.PLCDataSource.ModBus;
 
-import com.batch.Services.LoggingService.LoggingService;
-import javafx.beans.property.BooleanProperty;
-
+import com.batch.Services.NotificationService.NotificationService;
+import com.batch.Utilities.StringUtilsL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javafx.beans.property.BooleanProperty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ModbusSender extends ModbusSystem {
-
-    private BooleanProperty bufferSunchronized;
-    private BooleanProperty connectionStatus;
-    private Runnable dataMapperTask;
-    private ModbusConnectionMonitor connectionMonitorTask;
-
-    private final LoggingService loggingService;
-
+    private static final Logger log = LogManager.getLogger(ModbusSender.class);
+    private final BooleanProperty bufferSynchronized;
+    private final BooleanProperty connectionStatus;
+    private final Runnable dataMapperTask;
+    private final ModbusConnectionMonitor connectionMonitorTask;
+    private final NotificationService loggingService;
     private byte blank = 0;
 
-    public ModbusSender(Map<Integer, Byte> buffer, String connectionName, String IP, int Port, byte Identifier, BooleanProperty bufferSunchronized, BooleanProperty connectionStatus, Runnable dataMapperTask, ModbusConnectionMonitor connectionMonitorTask, LoggingService loggingService) {
+    public ModbusSender(Map<Integer, Byte> buffer, String connectionName, String IP, int Port, byte Identifier, BooleanProperty bufferSynchronized, BooleanProperty connectionStatus, Runnable dataMapperTask, ModbusConnectionMonitor connectionMonitorTask, NotificationService loggingService) {
         super(buffer, connectionName, IP, Port, Identifier);
-        this.bufferSunchronized = bufferSunchronized;
+        this.bufferSynchronized = bufferSynchronized;
         this.connectionStatus = connectionStatus;
         this.dataMapperTask = dataMapperTask;
         this.connectionMonitorTask = connectionMonitorTask;
         this.loggingService = loggingService;
     }
 
-    @Override
     public void run() {
         try {
-            connectionMonitorTask.checkConnection(modbusClient, IP);
-            if (connectionStatus.getValue() && bufferSunchronized.getValue()) {
-                dataMapperTask.run();
-                for (j = 0; j < swap; j++) {
-                    taskProcedure(j * uniteDataAddress, uniteDataAddress);
+            this.connectionMonitorTask.checkConnection(this.modbusClient, this.IP);
+            if (this.connectionStatus.getValue() && this.bufferSynchronized.getValue()) {
+                this.dataMapperTask.run();
+
+                for(this.j = 0; this.j < 4; ++this.j) {
+                    this.taskProcedure(this.j * 120, 120);
                 }
             }
         } catch (Exception e) {
-            loggingService.LogRecordForException("Modbus Sender 1", e);
+            this.loggingService.newErrorMessage("Modbus Sender 1", "Main run", StringUtilsL.textLimiter(e.getMessage(), 40));
         }
+
     }
 
-    @Override
     protected void taskProcedure(int start, int quantity) throws Exception {
-        List<Byte> tempBuffer = new ArrayList<>(super.buffer.values());
-        for (i = 0; i < quantity; i++) {
-            int address = ((j * uniteDataAddress * 2) + (i * 2));
-            intArray[i] = (bytesToInteger(tempBuffer.get(address), tempBuffer.get(address + 1), blank, blank));
+        List<Byte> tempBuffer = new ArrayList(super.buffer.values());
+
+        for(this.i = 0; this.i < quantity; ++this.i) {
+            int address = this.j * 120 * 2 + this.i * 2;
+            this.intArray[this.i] = this.bytesToInteger((Byte)tempBuffer.get(address), (Byte)tempBuffer.get(address + 1), this.blank, this.blank);
         }
-        modbusClient.WriteMultipleRegisters(start, intArray);
+
+        this.modbusClient.WriteMultipleRegisters(start, this.intArray);
     }
 
     private int bytesToInteger(byte data1, byte data2, byte data3, byte data4) {
-        return ((data4 & 0xFF) << 24)
-                | ((data3 & 0xFF) << 16)
-                | ((data1 & 0xFF) << 8)
-                | ((data2 & 0xFF));
+        return (data4 & 255) << 24 | (data3 & 255) << 16 | (data1 & 255) << 8 | data2 & 255;
     }
 }

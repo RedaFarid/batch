@@ -1,7 +1,6 @@
 
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
-
 public enum ValveOutput implements RowAttripute {
     Open,
     Close,

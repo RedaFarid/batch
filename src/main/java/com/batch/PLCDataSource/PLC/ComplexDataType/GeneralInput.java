@@ -1,8 +1,7 @@
 
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
-
-public enum GeneralInput implements RowAttripute{
+public enum GeneralInput implements RowAttripute {
     Water_Pressure,
     Air_Pressure,
     Mixer_1_Manual_Add_Message_Request,

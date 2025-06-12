@@ -1,31 +1,42 @@
+
 package com.batch.Services.UserAdministration;
 
 import com.google.common.base.Objects;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class WindowData {
     private String windowName;
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        WindowData that = (WindowData) o;
-        return Objects.equal(windowName, that.windowName);
+        if (this == o) {
+            return true;
+        } else if (o != null && this.getClass() == o.getClass()) {
+            WindowData that = (WindowData)o;
+            return Objects.equal(this.windowName, that.windowName);
+        } else {
+            return false;
+        }
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hashCode(windowName);
+        return Objects.hashCode(new Object[]{this.windowName});
     }
 
-    @Override
     public String toString() {
-        return windowName;
+        return this.windowName;
+    }
+
+    public String getWindowName() {
+        return this.windowName;
+    }
+
+    public void setWindowName(final String windowName) {
+        this.windowName = windowName;
+    }
+
+    public WindowData(final String windowName) {
+        this.windowName = windowName;
+    }
+
+    public WindowData() {
     }
 }

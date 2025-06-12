@@ -1,8 +1,10 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package com.batch.Utilities;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,9 +12,11 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 public class HashingAlgorithm {
-
     public static String MD5Hash(String Input) {
         byte[] digest = null;
 
@@ -21,8 +25,9 @@ public class HashingAlgorithm {
             md.update(Input.getBytes());
             digest = md.digest();
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(HashingAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(HashingAlgorithm.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
+
         return DatatypeConverter.printHexBinary(digest).toUpperCase();
     }
 
@@ -34,8 +39,9 @@ public class HashingAlgorithm {
             md.update(Input.getBytes());
             digest = md.digest();
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(HashingAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(HashingAlgorithm.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
+
         return DatatypeConverter.printHexBinary(digest).toUpperCase();
     }
 
@@ -43,8 +49,7 @@ public class HashingAlgorithm {
         int iterations = 1000;
         char[] chars = password.toCharArray();
         byte[] salt = getSalt();
-
-        PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, 64 * 8);
+        PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, 512);
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         byte[] hash = skf.generateSecret(spec).getEncoded();
         return iterations + ":" + toHex(salt) + ":" + toHex(hash);
@@ -55,14 +60,15 @@ public class HashingAlgorithm {
         int iterations = Integer.parseInt(parts[0]);
         byte[] salt = fromHex(parts[1]);
         byte[] hash = fromHex(parts[2]);
-
         PBEKeySpec spec = new PBEKeySpec(originalPassword.toCharArray(), salt, iterations, hash.length * 8);
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         byte[] testHash = skf.generateSecret(spec).getEncoded();
         int diff = hash.length ^ testHash.length;
-        for (int i = 0; i < hash.length && i < testHash.length; i++) {
+
+        for(int i = 0; i < hash.length && i < testHash.length; ++i) {
             diff |= hash[i] ^ testHash[i];
         }
+
         return diff == 0;
     }
 
@@ -75,21 +81,23 @@ public class HashingAlgorithm {
 
     private static byte[] fromHex(String hex) throws NoSuchAlgorithmException {
         byte[] bytes = new byte[hex.length() / 2];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
+
+        for(int i = 0; i < bytes.length; ++i) {
+            bytes[i] = (byte)Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
         }
+
         return bytes;
     }
 
     private static String toHex(byte[] array) throws NoSuchAlgorithmException {
         BigInteger bi = new BigInteger(1, array);
         String hex = bi.toString(16);
-        int paddingLength = (array.length * 2) - hex.length();
+        int paddingLength = array.length * 2 - hex.length();
         if (paddingLength > 0) {
-            return String.format("%0" + paddingLength + "d", 0) + hex;
+            String var10000 = String.format("%0" + paddingLength + "d", 0);
+            return var10000 + hex;
         } else {
             return hex;
         }
     }
-
 }

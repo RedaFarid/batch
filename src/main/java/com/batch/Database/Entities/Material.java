@@ -1,32 +1,16 @@
+
+
 package com.batch.Database.Entities;
 
 import com.google.common.base.Objects;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Data
-@Entity
-@Table(name = "Materials")
-@AllArgsConstructor
-@NoArgsConstructor
+@Table("Materials")
 public class Material {
-
     @Id
-//    @SequenceGenerator(
-//            name = "student_sequence",
-//            sequenceName = "student_sequence",
-//            allocationSize = 1
-//    )
-    @GeneratedValue(
-            strategy = GenerationType.IDENTITY
-//            , generator = "student_sequence"
-    )
     private Long id;
-    @Column(updatable = false, nullable = false, columnDefinition = "varchar(250)", unique = true)
     private String name;
-
     private String Comment;
 
     public Material(String name) {
@@ -35,19 +19,59 @@ public class Material {
 
     public Material(String name, String comment) {
         this.name = name;
-        Comment = comment;
+        this.Comment = comment;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Material material = (Material) o;
-        return Objects.equal(id, material.id);
+        if (this == o) {
+            return true;
+        } else if (o != null && this.getClass() == o.getClass()) {
+            Material material = (Material)o;
+            return Objects.equal(this.id, material.id);
+        } else {
+            return false;
+        }
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(new Object[]{this.id});
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getComment() {
+        return this.Comment;
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setComment(final String Comment) {
+        this.Comment = Comment;
+    }
+
+    public String toString() {
+        Long var10000 = this.getId();
+        return "Material(id=" + var10000 + ", name=" + this.getName() + ", Comment=" + this.getComment() + ")";
+    }
+
+    public Material(final Long id, final String name, final String Comment) {
+        this.id = id;
+        this.name = name;
+        this.Comment = Comment;
+    }
+
+    public Material() {
     }
 }

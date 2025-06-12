@@ -10,13 +10,12 @@ public class Address {
         this.bitNumber = bitNumber;
     }
 
-    @Override
     public String toString() {
-        return byteNumber + "." + bitNumber;
+        return this.byteNumber + "." + this.bitNumber;
     }
 
     public int getByteNumber() {
-        return byteNumber;
+        return this.byteNumber;
     }
 
     public void setByteNumber(int byteNumber) {
@@ -24,12 +23,10 @@ public class Address {
     }
 
     public int getBitNumber() {
-        return bitNumber;
+        return this.bitNumber;
     }
 
     public void setBitNumber(int bitNumber) {
         this.bitNumber = bitNumber;
     }
-
-
 }

@@ -1,46 +1,57 @@
 
+
 package com.batch.GUI.FacePlates;
 
 import com.batch.Utilities.RestrictiveTextField;
 import javafx.geometry.Insets;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
-
 public class FaceplateTextField extends RestrictiveTextField {
-
     private Background back;
-    private Callback<String, Double> callback = (String param) -> null;
+    private Callback<String, Double> callback = (param) -> null;
 
     public FaceplateTextField() {
-        back = new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY));
-        intialize();
+        this.back = new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)});
+        this.initialize();
     }
 
-    private void intialize(){
-        setBorder(new Border(new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(0.5))));
-        addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
-            if (isEditable()) {
+    private void initialize() {
+        this.setBorder(new Border(new BorderStroke[]{new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths((double)0.5F))}));
+        this.textProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                Float.parseFloat(newValue);
+            } catch (Exception var5) {
+                this.setText("0.0");
+            }
+
+        });
+        this.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
+            if (this.isEditable()) {
                 switch (event.getCode()) {
                     case ENTER:
-                        callback.call("");
-                        setBackground(back);
-                        break;
+                        this.callback.call("");
+                        this.setBackground(this.back);
                     case ESCAPE:
-                        break;
                     case TAB:
                         break;
                     default:
-                        setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-                        break;
+                        this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)}));
                 }
             }
+
         });
     }
 
-    public void onEneterKeyPressed(Callback<String, Double> callback){
+    public void onEneterKeyPressed(Callback<String, Double> callback) {
         this.callback = callback;
     }
 }

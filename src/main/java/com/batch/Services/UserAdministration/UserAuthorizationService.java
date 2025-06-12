@@ -1,3 +1,5 @@
+
+
 package com.batch.Services.UserAdministration;
 
 import com.batch.ApplicationContext;
@@ -7,284 +9,289 @@ import com.batch.Database.Services.UserDaoService;
 import com.batch.GUI.UserAdministration.LoginWindow;
 import com.batch.Utilities.HashingAlgorithm;
 import com.batch.Utilities.Roles;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.stage.Stage;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
-@Log4j2
 @Service
-@RequiredArgsConstructor
 public class UserAuthorizationService {
-
+    private static final Logger log = LogManager.getLogger(UserAuthorizationService.class);
     private static ConfigurableApplicationContext configurableApplicationContext;
-    private final List<WindowData> windows = new LinkedList<>();
-    private User currentUser = new User("", "", true, 0, "");
-
+    private final List<WindowData> windows = new LinkedList();
+    private User currentUser = new User("", "", true, 0L, "");
     private final BooleanProperty isThereUserLoggedIn = new SimpleBooleanProperty();
     private final BooleanProperty requestForLogin = new SimpleBooleanProperty();
     private final BooleanProperty requestForLogOff = new SimpleBooleanProperty();
     private final BooleanProperty userTimeOut = new SimpleBooleanProperty();
-
-    private long setPointDuration = 0;
-    private long elapsedTime = 0;
-
+    private long setPointDuration = 0L;
+    private long elapsedTime = 0L;
     private final UserDaoService userDaoService;
 
-
-
-
-    //main task
     public void runService() {
-        //Initialization program
-        requestForLogin.addListener((observable, oldValue, newValue) -> {
+        this.requestForLogin.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                isThereUserLoggedIn.setValue(false);
-                isThereUserLoggedIn.setValue(getReturnOfLoginWindow(5));
-                requestForLogin.setValue(false);
+                this.isThereUserLoggedIn.setValue(false);
+                this.isThereUserLoggedIn.setValue(this.getReturnOfLoginWindow(5));
+                this.requestForLogin.setValue(false);
             }
+
         });
-        requestForLogOff.addListener((observable, oldValue, newValue) -> {
+        this.requestForLogOff.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                isThereUserLoggedIn.setValue(false);
-                requestForLogOff.setValue(false);
+                this.isThereUserLoggedIn.setValue(false);
+                this.requestForLogOff.setValue(false);
             }
+
         });
-        isThereUserLoggedIn.addListener((observable, oldValue, newValue) -> {
+        this.isThereUserLoggedIn.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                startNotification(true);
-                if (currentUser.isAutoLogOff()) {
-                    timeOutCalculation(currentUser.getLogOffTime() * 1000);
+                this.startNotification(true);
+                if (this.currentUser.isAutoLogOff()) {
+                    this.timeOutCalculation(this.currentUser.getLogOffTime() * 1000L);
                 }
             } else {
-                currentUser.setUserName("");
-                currentUser.setGroup("");
-                startNotification(false);
+                this.currentUser.setUserName("");
+                this.currentUser.setGroup("");
+                this.startNotification(false);
             }
+
         });
-        userTimeOut.addListener((observable, oldValue, newValue) -> {
+        this.userTimeOut.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                isThereUserLoggedIn.setValue(false);
-                userTimeOut.setValue(false);
-            } else {
+                this.isThereUserLoggedIn.setValue(false);
+                this.userTimeOut.setValue(false);
             }
+
         });
     }
 
-    //request login window
     public void requestLogIn() {
-        requestForLogin.setValue(true);
+        this.requestForLogin.setValue(true);
     }
 
-    //request logoff 
     public void requestLogOff() {
-        requestForLogOff.setValue(true);
+        this.requestForLogOff.setValue(true);
     }
 
-    //visualize login for trial numbers
     private boolean getReturnOfLoginWindow(int trialNumber) {
         if (trialNumber > 0 && trialNumber < 10) {
-            LoginWindow.GetInstance().showAndReturnUser().ifPresent(user -> {
-                currentUser = user;
-            });
-            if (currentUser.getUserName().equals("")) {
+            LoginWindow.GetInstance().showAndReturnUser().ifPresent((user) -> this.currentUser = user);
+            if (this.currentUser.getUserName().equals("")) {
                 return false;
-            } else {
-                if (userDaoService.isUserExist(currentUser)) {
-                    try {
-                        User userDB = userDaoService.getUserByID(currentUser.getUserName());
-                        boolean x = HashingAlgorithm.validatePassword(currentUser.getPassword(), userDB.getPassword());
-                        if (x) {
-                            currentUser = userDB;
-                            return true;
-                        } else {
-                            return getReturnOfLoginWindow(trialNumber - 1);
-                        }
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        return getReturnOfLoginWindow(trialNumber - 1);
+            } else if (this.userDaoService.isUserExist(this.currentUser)) {
+                try {
+                    User userDB = this.userDaoService.getUserByID(this.currentUser.getUserName());
+                    boolean x = HashingAlgorithm.validatePassword(this.currentUser.getPassword(), userDB.getPassword());
+                    if (x) {
+                        this.currentUser = userDB;
+                        return true;
+                    } else {
+                        return this.getReturnOfLoginWindow(trialNumber - 1);
                     }
-                } else {
-                    return getReturnOfLoginWindow(trialNumber - 1);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    return this.getReturnOfLoginWindow(trialNumber - 1);
                 }
+            } else {
+                return this.getReturnOfLoginWindow(trialNumber - 1);
             }
         } else {
             return false;
         }
     }
 
-    //login time out calculations
     private void timeOutCalculation(long duration) {
-        userTimeOut.setValue(false);
-        setPointDuration = duration;
-        elapsedTime = 0;
+        this.userTimeOut.setValue(false);
+        this.setPointDuration = duration;
+        this.elapsedTime = 0L;
     }
 
-    //functions
     public AllGroupsDTO getAllGroupsInStructuredForm() {
         AllGroupsDTO allGroups = new AllGroupsDTO();
-
-        List<Group> list = userDaoService.GetAllGroups();
-
-        List<String> distinctWindows = list.stream().map(Group::getWindow).distinct().collect(Collectors.toList());
-        distinctWindows.forEach(window -> {
-            List<Group> groupListTemp = new ArrayList<>();
-            list.stream().filter(group -> group.getWindow().equals(window)).forEach(groupListTemp::add);
+        List<Group> list = this.userDaoService.GetAllGroups();
+        List<String> distinctWindows = (List)list.stream().map(Group::getWindow).distinct().collect(Collectors.toList());
+        distinctWindows.forEach((window) -> {
+            List<Group> groupListTemp = new ArrayList();
+            Stream var10000 = list.stream().filter((group) -> group.getWindow().equals(window));
+            Objects.requireNonNull(groupListTemp);
+            var10000.forEach(groupListTemp::add);
             WindowGroupsDTO windowGroup = new WindowGroupsDTO();
             windowGroup.getRowGroup().put(window, groupListTemp);
             allGroups.getList().add(windowGroup);
         });
         return allGroups;
     }
+
     public List<String> getAllGroups() {
-        List<Group> list = userDaoService.GetAllGroups();
-        return list.stream().map(Group::getGroup).distinct().collect(Collectors.toList());
+        List<Group> list = this.userDaoService.GetAllGroups();
+        return (List)list.stream().map(Group::getGroup).distinct().collect(Collectors.toList());
     }
+
     public List<User> getAllUsers() {
-        return userDaoService.GetAllUsers();
+        return this.userDaoService.GetAllUsers();
     }
+
     public void updateGroupRole(String group, String window, String role, boolean roleStatus) {
-        userDaoService.GetAllGroups().stream().filter(item -> item.getGroup().equals(group)).filter(item -> item.getWindow().equals(window))
-                .findAny().ifPresent(groupEntity -> {
-                    groupEntity.getRolesStatus().replace(Roles.valueOf(role), roleStatus);
-                    userDaoService.saveGroup(groupEntity);
-                });
+        this.userDaoService.GetAllGroups().stream().filter((item) -> item.getGroup().equals(group)).filter((item) -> item.getWindow().equals(window)).findAny().ifPresent((groupEntity) -> {
+            groupEntity.getRolesStatus().replace(Roles.valueOf(role), roleStatus);
+            this.userDaoService.saveGroup(groupEntity);
+        });
     }
+
     public void updateGroupDescription(String group, String desc) {
-        userDaoService.updateGroupDescByData(group, desc);
+        this.userDaoService.updateGroupDescByData(group, desc);
     }
+
     public void updateUser(User user) {
-
     }
+
     public void deleteGroup(String Group) {
-        if (! Group.equals("Administrators")) {
-            userDaoService.deleteGroup(Group);
+        if (!Group.equals("Administrators")) {
+            this.userDaoService.deleteGroup(Group);
         }
+
     }
+
     public void deleteUser(User user) {
-        if (! user.getUserName().equals("Administrator")) {
-            userDaoService.deleteUser(user.getUserName());
+        if (!user.getUserName().equals("Administrator")) {
+            this.userDaoService.deleteUser(user.getUserName());
         }
+
     }
+
     public boolean checkIfGroupExist(String Group) {
-        return userDaoService.isGroupExists(Group);
+        return this.userDaoService.isGroupExists(Group);
     }
+
     public boolean checkIfUserExist(String User) {
-        return userDaoService.isUserExist(new User(User, ""));
+        return this.userDaoService.isUserExist(new User(User, ""));
     }
+
     public void createGroup(String group, String Description) {
-        windows.forEach((WindowData window) -> {
+        this.windows.forEach((window) -> {
             try {
                 Group tempGroup = new Group();
-
                 tempGroup.setGroup(group);
                 tempGroup.setDescription(Description);
                 tempGroup.setWindow(window.toString());
-
-                HashMap<Roles, Boolean> map = new HashMap<>();
-                Stream.of(Roles.values()).forEach(role -> map.put(role, Boolean.FALSE));
+                HashMap<Roles, Boolean> map = new HashMap();
+                Stream.of(Roles.values()).forEach((role) -> map.put(role, Boolean.FALSE));
                 tempGroup.getRolesStatus().putAll(map);
-
-                userDaoService.saveGroup(tempGroup);
+                this.userDaoService.saveGroup(tempGroup);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
         });
     }
+
     public void createGroupForAdministrators(String group, String Description) {
-        windows.forEach((WindowData window) -> {
+        this.windows.forEach((window) -> {
             try {
                 Group tempGroup = new Group();
-
                 tempGroup.setGroup(group);
                 tempGroup.setDescription(Description);
                 tempGroup.setWindow(window.toString());
-
-                HashMap<Roles, Boolean> map = new HashMap<>();
-                Stream.of(Roles.values()).forEach(role -> map.put(role, Boolean.TRUE));
+                HashMap<Roles, Boolean> map = new HashMap();
+                Stream.of(Roles.values()).forEach((role) -> map.put(role, Boolean.TRUE));
                 tempGroup.getRolesStatus().putAll(map);
-
-                userDaoService.saveGroup(tempGroup);
+                this.userDaoService.saveGroup(tempGroup);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
         });
     }
+
     public void createUser(User user) {
         try {
             user.setPassword(HashingAlgorithm.StrongHash(user.getPassword()));
-            userDaoService.saveUser(user);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
-            Logger.getLogger(UserAuthorizationService.class.getName()).log(Level.SEVERE, null, ex);
+            this.userDaoService.saveUser(user);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
+            java.util.logging.Logger.getLogger(UserAuthorizationService.class.getName()).log(Level.SEVERE, (String)null, ex);
         }
+
     }
-    public void checkAdministratorUser(){
-        if (!checkIfUserExist("Administrator") || !checkIfGroupExist("Administrators")) {
-            deleteGroup("Administrators");
-            userDaoService.deleteUser("Administrator");
-            createGroupForAdministrators("Administrators", "Highest Authority");
-            createUser(new User("Administrator", "1", false, 0, "Administrators"));
+
+    public void checkAdministratorUser() {
+        if (!this.checkIfUserExist("Administrator") || !this.checkIfGroupExist("Administrators")) {
+            this.deleteGroup("Administrators");
+            this.userDaoService.deleteUser("Administrator");
+            this.createGroupForAdministrators("Administrators", "Highest Authority");
+            this.createUser(new User("Administrator", "1", false, 0L, "Administrators"));
         }
+
     }
+
     public void setMainWindow(Stage mainWindow) {
         LoginWindow.GetInstance().setMainWindow(mainWindow);
     }
 
-    @Scheduled(fixedDelay = 1000, initialDelay = 2000)
+    @Scheduled(
+            fixedDelay = 1000L,
+            initialDelay = 2000L
+    )
     public void run() {
-        if (!currentUser.isAutoLogOff()) {
-            setPointDuration = 0;
-            elapsedTime = 0;
+        if (!this.currentUser.isAutoLogOff()) {
+            this.setPointDuration = 0L;
+            this.elapsedTime = 0L;
         }
-        if (setPointDuration >= 10) {
-            elapsedTime += 1000;
-            if (elapsedTime > setPointDuration) {
+
+        if (this.setPointDuration >= 10L) {
+            this.elapsedTime += 1000L;
+            if (this.elapsedTime > this.setPointDuration) {
                 Platform.runLater(() -> {
-                    userTimeOut.setValue(true);
-                    setPointDuration = 0;
+                    this.userTimeOut.setValue(true);
+                    this.setPointDuration = 0L;
                 });
             }
         }
+
     }
 
     @EventListener
-    public void arRefreshed(ApplicationReadyEvent event){
+    public void arRefreshed(ApplicationReadyEvent event) {
     }
 
+    @Async
     @EventListener
     public void atStart(ContextStartedEvent event) {
         configurableApplicationContext = ApplicationContext.applicationContext;
-        startNotification(false);
-        checkAdministratorUser();
-        runService();
+        this.startNotification(false);
+        this.checkAdministratorUser();
+        this.runService();
     }
 
-    //start window notifications
     private void startNotification(boolean status) {
-        UserEventMessage message = new UserEventMessage(status, currentUser, getAllGroupsInStructuredForm());
+        UserEventMessage message = new UserEventMessage(status, this.currentUser, this.getAllGroupsInStructuredForm());
         configurableApplicationContext.publishEvent(new UserEvent(message));
     }
 
-    public void registerWindow(WindowData windowData){
-        windows.add(windowData);
+    public void registerWindow(WindowData windowData) {
+        this.windows.add(windowData);
+    }
+
+    public UserAuthorizationService(final UserDaoService userDaoService) {
+        this.userDaoService = userDaoService;
     }
 }

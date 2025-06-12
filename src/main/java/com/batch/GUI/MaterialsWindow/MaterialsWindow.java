@@ -1,13 +1,21 @@
-package com.batch.GUI.MaterialsWindow;
 
+
+package com.batch.GUI.MaterialsWindow;
 
 import com.batch.ApplicationContext;
 import com.batch.Database.Entities.Material;
 import com.batch.GUI.Controls.DataEntryPartition;
 import com.batch.Utilities.RestrictiveTextField;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -15,158 +23,125 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class MaterialsWindow extends Stage {
-
     private static volatile MaterialsWindow Singleton = null;
-
     private final DataEntryPartition dataEntryPartition = new DataEntryPartition("Material");
     private final VBox root = new VBox();
     private final VBox vbox = new VBox();
     private final ToolBar hbox = new ToolBar();
-
     private Stage mainWindow = null;
-
-
-    private TableView<Material> table = new TableView<>();
-    private TableColumn<Material, String> NameColumn = new TableColumn<>("ID");
-    private TableColumn<Material, String> LicenceNumberColumn = new TableColumn<>("Name");
-    private TableColumn<Material, String> LicenceExpirationDateColumn = new TableColumn<>("Comment");
-
+    private TableView<Material> table = new TableView();
+    private TableColumn<Material, String> NameColumn = new TableColumn("ID");
+    private TableColumn<Material, String> LicenceNumberColumn = new TableColumn("Name");
+    private TableColumn<Material, String> LicenceExpirationDateColumn = new TableColumn("Comment");
     private Button Insert = new Button("Create new material");
     private Button Delete = new Button("Delete selected material");
     private Button Update = new Button("Update selected material");
     private Label idLabel = new Label("ID");
     private Label nameLabel = new Label("Name");
     private Label commentLabel = new Label("Comment");
-
     private RestrictiveTextField idField = new RestrictiveTextField();
     private RestrictiveTextField nameField = new RestrictiveTextField();
     private RestrictiveTextField commentField = new RestrictiveTextField();
-
     private final MaterialsController controller;
     private final MaterialsModel model;
 
     private MaterialsWindow(Stage Window) {
-        mainWindow = Window;
-
-        controller = ApplicationContext.applicationContext.getBean(MaterialsController.class);
-        model = controller.getModel();
-
-        graphicsBuilder();
-        actionHandling();
+        this.mainWindow = Window;
+        this.controller = (MaterialsController)ApplicationContext.applicationContext.getBean(MaterialsController.class);
+        this.model = this.controller.getModel();
+        this.graphicsBuilder();
+        this.actionHandling();
     }
 
     public static MaterialsWindow getMaterialsWindow(Stage Window) {
-        synchronized (MaterialsWindow.class) {
+        synchronized(MaterialsWindow.class) {
             if (Singleton == null) {
                 Singleton = new MaterialsWindow(Window);
             }
         }
+
         return Singleton;
     }
 
     private void graphicsBuilder() {
-
-        //control buttons configuration
-        Insert.setPrefWidth(150);
-        Delete.setPrefWidth(150);
-        Update.setPrefWidth(150);
-
-        //dataentery region configuration
-        idLabel.setPrefWidth(150);
-        nameLabel.setPrefWidth(150);
-        commentLabel.setPrefWidth(150);
-
-        idField.setPrefWidth(250);
-        nameField.setPrefWidth(250);
-        commentField.setPrefWidth(250);
-
-        idField.setDisable(true);
-
-        dataEntryPartition.add(idLabel, 1, 2);
-        dataEntryPartition.add(nameLabel, 3, 2);
-        dataEntryPartition.add(commentLabel, 1, 3);
-
-        dataEntryPartition.add(idField, 2, 2);
-        dataEntryPartition.add(nameField, 4, 2);
-        dataEntryPartition.add(commentField, 2, 3);
-
-        //table configuration
-        NameColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        LicenceNumberColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        LicenceExpirationDateColumn.setCellValueFactory(new PropertyValueFactory<>("Comment"));
-
-        table.getColumns().addAll(NameColumn, LicenceNumberColumn, LicenceExpirationDateColumn);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.prefHeightProperty().bind(root.heightProperty().subtract(vbox.heightProperty()));
-        table.setItems(model.getList());
-
-        //stage configuration
-
-        hbox.getItems().addAll(Insert, Update, Delete);
-        hbox.setPadding(new Insets(10, 10, 10, 10));
-
-        vbox.getChildren().addAll(dataEntryPartition, hbox);
-        vbox.setPadding(new Insets(10, 10, 10, 10));
-        vbox.setSpacing(10);
-
-        root.getChildren().add(vbox);
-        root.getChildren().add(table);
-        root.setPadding(new Insets(10));
-
-        initOwner(mainWindow);
-        initModality(Modality.WINDOW_MODAL);
-        initStyle(StageStyle.UTILITY);
-        setScene(new Scene(root, 700, 800));
-        setTitle("Materials manager");
+        this.Insert.setPrefWidth((double)150.0F);
+        this.Delete.setPrefWidth((double)150.0F);
+        this.Update.setPrefWidth((double)150.0F);
+        this.idLabel.setPrefWidth((double)150.0F);
+        this.nameLabel.setPrefWidth((double)150.0F);
+        this.commentLabel.setPrefWidth((double)150.0F);
+        this.idField.setPrefWidth((double)250.0F);
+        this.nameField.setPrefWidth((double)250.0F);
+        this.commentField.setPrefWidth((double)250.0F);
+        this.idField.setDisable(true);
+        this.dataEntryPartition.add(this.idLabel, 1, 2);
+        this.dataEntryPartition.add(this.nameLabel, 3, 2);
+        this.dataEntryPartition.add(this.commentLabel, 1, 3);
+        this.dataEntryPartition.add(this.idField, 2, 2);
+        this.dataEntryPartition.add(this.nameField, 4, 2);
+        this.dataEntryPartition.add(this.commentField, 2, 3);
+        this.NameColumn.setCellValueFactory(new PropertyValueFactory("id"));
+        this.LicenceNumberColumn.setCellValueFactory(new PropertyValueFactory("name"));
+        this.LicenceExpirationDateColumn.setCellValueFactory(new PropertyValueFactory("Comment"));
+        this.table.getColumns().addAll(new TableColumn[]{this.NameColumn, this.LicenceNumberColumn, this.LicenceExpirationDateColumn});
+        this.table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        this.table.prefHeightProperty().bind(this.root.heightProperty().subtract(this.vbox.heightProperty()));
+        this.table.setItems(this.model.getList());
+        this.hbox.getItems().addAll(new Node[]{this.Insert, this.Update, this.Delete});
+        this.hbox.setPadding(new Insets((double)10.0F, (double)10.0F, (double)10.0F, (double)10.0F));
+        this.vbox.getChildren().addAll(new Node[]{this.dataEntryPartition, this.hbox});
+        this.vbox.setPadding(new Insets((double)10.0F, (double)10.0F, (double)10.0F, (double)10.0F));
+        this.vbox.setSpacing((double)10.0F);
+        this.root.getChildren().add(this.vbox);
+        this.root.getChildren().add(this.table);
+        this.root.setPadding(new Insets((double)10.0F));
+        this.initOwner(this.mainWindow);
+        this.initModality(Modality.WINDOW_MODAL);
+        this.initStyle(StageStyle.UTILITY);
+        this.setScene(new Scene(this.root, (double)700.0F, (double)800.0F));
+        this.setTitle("Materials manager");
     }
 
     private void actionHandling() {
-        model.getIsShown().bind(showingProperty());
-        Insert.setOnMouseClicked(action -> {
-            if ((nameField.getText().length() > 0) && (commentField.getText().length() > 0)) {
-                Material material = new Material(nameField.getText(), commentField.getText());
-                controller.save(material);
-
+        this.model.getIsShown().bind(this.showingProperty());
+        this.Insert.setOnMouseClicked((action) -> {
+            if (this.nameField.getText().length() > 0 && this.commentField.getText().length() > 0) {
+                Material material = new Material(this.nameField.getText(), this.commentField.getText());
+                this.controller.save(material);
             } else {
-                Alert Error = new Alert(Alert.AlertType.ERROR);
+                Alert Error = new Alert(AlertType.ERROR);
                 Error.setTitle("Error ");
                 Error.setHeaderText("Error Inserting data");
                 Error.setContentText("Material already exist , please check entered data ...");
                 Error.initOwner(this);
                 Error.showAndWait();
             }
-        });
-
-        Delete.setOnMouseClicked(action -> {
-            controller.delete(idField.getText());
 
         });
-
-        Update.setOnMouseClicked(action -> {
-            if ((idField.getText().length() > 0) && (nameField.getText().length() > 0)) {
-                Material material = new Material(nameField.getText(), commentField.getText());
-
-                controller.save(material);
-
+        this.Delete.setOnMouseClicked((action) -> this.controller.delete(this.idField.getText()));
+        this.Update.setOnMouseClicked((action) -> {
+            if (this.idField.getText().length() > 0 && this.nameField.getText().length() > 0) {
+                Material material = new Material(this.nameField.getText(), this.commentField.getText());
+                this.controller.save(material);
             } else {
-                Alert Error = new Alert(Alert.AlertType.ERROR);
+                Alert Error = new Alert(AlertType.ERROR);
                 Error.setTitle("Error ");
                 Error.setHeaderText("Error Inserting data");
                 Error.setContentText("Material not exist , please check entered data ...");
                 Error.initOwner(this);
                 Error.showAndWait();
             }
-        });
 
-        table.setOnMousePressed(action -> {
-            if (action.getClickCount() == 1 && table.getItems().size() > 0 && !table.getSelectionModel().isEmpty()) {
+        });
+        this.table.setOnMousePressed((action) -> {
+            if (action.getClickCount() == 1 && this.table.getItems().size() > 0 && !this.table.getSelectionModel().isEmpty()) {
                 try {
-                    Material selected = table.getSelectionModel().getSelectedItem();
-                    idField.setText(String.valueOf(selected.getId()));
-                    nameField.setText(selected.getName());
-                    commentField.setText(selected.getComment());
-                } catch (Exception e) {
-                    Alert Error = new Alert(Alert.AlertType.ERROR);
+                    Material selected = (Material)this.table.getSelectionModel().getSelectedItem();
+                    this.idField.setText(String.valueOf(selected.getId()));
+                    this.nameField.setText(selected.getName());
+                    this.commentField.setText(selected.getComment());
+                } catch (Exception var4) {
+                    Alert Error = new Alert(AlertType.ERROR);
                     Error.setTitle("Error ");
                     Error.setHeaderText("Error Importing data");
                     Error.setContentText("Please select Table row again");
@@ -174,12 +149,11 @@ public class MaterialsWindow extends Stage {
                     Error.showAndWait();
                 }
             }
+
         });
     }
 
-
-    @Override
     public void close() {
-        hide();
+        this.hide();
     }
 }

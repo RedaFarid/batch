@@ -1,5 +1,5 @@
-package com.batch.GUI.PhasesWindow;
 
+package com.batch.GUI.PhasesWindow;
 
 import com.batch.ApplicationContext;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhaseInformationDTO;
@@ -7,10 +7,25 @@ import com.batch.DTO.RecipeSystemDataDefinitions.PhaseParameterType;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
 import com.batch.Database.Entities.Parameter;
 import com.batch.Database.Entities.Phase;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -18,63 +33,47 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class PhasesWindow extends Stage {
-
     private static PhasesWindow singelton = null;
     private Stage mainWindow;
-
     private BorderPane root = new BorderPane();
     private GridPane controlContainer = new GridPane();
-
     private Label idLabel = new Label("ID number :");
     private TextField idField = new TextField();
-
     private Label phaseLabel = new Label("Phase name");
     private TextField phaseField = new TextField();
-
     private Label unitLabel = new Label("Unit name :");
-    private ComboBox<String> units = new ComboBox<>();
-
+    private ComboBox<String> units = new ComboBox();
     private Label parameterNameLabel = new Label("Parameter name ");
     private TextField ParameterNameField = new TextField();
-
     private Label parameterTypeLabel = new Label("Parameter Type ");
     private ComboBox<String> parameterTypeField = new ComboBox();
-
     private Label phaseTypeLabel = new Label("Phase Type ");
     private ComboBox<String> phaseTypeField = new ComboBox();
-
     private Button add = new Button("Add new phase");
     private Button clear = new Button("Delete all phases");
-
-    private TreeTableView<PhaseInformationDTO> table = new TreeTableView<>();
+    private TreeTableView<PhaseInformationDTO> table = new TreeTableView();
     private TreeItem rootItem = new TreeItem("Phases");
-    private TreeTableColumn<PhaseInformationDTO, String> id = new TreeTableColumn<>("ID");
-    private TreeTableColumn<PhaseInformationDTO, Double> name = new TreeTableColumn<>("Name");
-    private TreeTableColumn<PhaseInformationDTO, Double> unit = new TreeTableColumn<>("Unit");
-    private TreeTableColumn<PhaseInformationDTO, Double> phaseType = new TreeTableColumn<>("Phase Type");
-    private TreeTableColumn<PhaseInformationDTO, Double> parameterName = new TreeTableColumn<>("Parameter");
-    private TreeTableColumn<PhaseInformationDTO, Double> parameterType = new TreeTableColumn<>("Parameter Type");
-
+    private TreeTableColumn<PhaseInformationDTO, String> id = new TreeTableColumn("ID");
+    private TreeTableColumn<PhaseInformationDTO, Double> name = new TreeTableColumn("Name");
+    private TreeTableColumn<PhaseInformationDTO, Double> unit = new TreeTableColumn("Unit");
+    private TreeTableColumn<PhaseInformationDTO, Double> phaseType = new TreeTableColumn("Phase Type");
+    private TreeTableColumn<PhaseInformationDTO, Double> parameterName = new TreeTableColumn("Parameter");
+    private TreeTableColumn<PhaseInformationDTO, Double> parameterType = new TreeTableColumn("Parameter Type");
     private final PhasesController controller;
     private final PhasesModel model;
 
     private PhasesWindow(Stage mainWindow) {
         this.mainWindow = mainWindow;
-        this.controller = ApplicationContext.applicationContext.getBean(PhasesController.class);
-        this.model = controller.getModel();
-        model.setRootItem(rootItem);
-        graphicsBuilder();
-        actionHandler();
+        this.controller = (PhasesController)ApplicationContext.applicationContext.getBean(PhasesController.class);
+        this.model = this.controller.getModel();
+        this.model.setRootItem(this.rootItem);
+        this.graphicsBuilder();
+        this.actionHandler();
     }
 
     public static PhasesWindow getWindow(Stage stage) {
-        synchronized (PhasesWindow.class) {
+        synchronized(PhasesWindow.class) {
             if (singelton == null) {
                 singelton = new PhasesWindow(stage);
             }
@@ -84,211 +83,179 @@ public class PhasesWindow extends Stage {
     }
 
     private void graphicsBuilder() {
-        initOwner(mainWindow);
-        initModality(Modality.WINDOW_MODAL);
-        initStyle(StageStyle.UTILITY);
-        setScene(new Scene(root));
-        setHeight(800);
-        setResizable(false);
-        setTitle("Phases manager");
-
-        id.setCellValueFactory(new TreeItemPropertyValueFactory<>("id"));
-        name.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-        unit.setCellValueFactory(new TreeItemPropertyValueFactory<>("unit"));
-        phaseType.setCellValueFactory(new TreeItemPropertyValueFactory<>("phaseType"));
-        parameterName.setCellValueFactory(new TreeItemPropertyValueFactory<>("ParameterName"));
-        parameterType.setCellValueFactory(new TreeItemPropertyValueFactory<>("ParameterType"));
-
-        table.getColumns().addAll(id, name, unit, phaseType, parameterName, parameterType);
-        table.setRoot(rootItem);
-        table.setShowRoot(false);
-
-        id.prefWidthProperty().bind(table.widthProperty().divide(13));
-        name.prefWidthProperty().bind(table.widthProperty().divide(13).multiply(4));
-        unit.prefWidthProperty().bind(table.widthProperty().divide(13).multiply(2));
-        phaseType.prefWidthProperty().bind(table.widthProperty().divide(13).multiply(2));
-        parameterName.prefWidthProperty().bind(table.widthProperty().divide(13).multiply(2));
-        parameterType.prefWidthProperty().bind(table.widthProperty().divide(13).multiply(2));
-
-        idLabel.setPrefWidth(150);
-        phaseLabel.setPrefWidth(150);
-        unitLabel.setPrefWidth(150);
-        parameterNameLabel.setPrefWidth(150);
-        parameterTypeLabel.setPrefWidth(150);
-        phaseTypeLabel.setPrefWidth(150);
-
-        idField.setPrefWidth(250);
-        phaseField.setPrefWidth(670);
-        units.setPrefWidth(670);
-        ParameterNameField.setPrefWidth(250);
-        parameterTypeField.setPrefWidth(250);
-        phaseTypeField.setPrefWidth(670);
-
-        add.setPrefWidth(150);
-        clear.setPrefWidth(150);
-
-        parameterTypeField.setItems(FXCollections.observableArrayList(Arrays.stream(PhaseParameterType.values()).map(Enum::name).map(item -> item.replace("_", " ")).collect(Collectors.toList())));
-        phaseTypeField.setItems(FXCollections.observableArrayList(Arrays.stream(PhasesTypes.values()).map(Enum::name).map(item -> item.replace("_", " ")).collect(Collectors.toList())));
-
-        controlContainer.setPadding(new Insets(10));
-        controlContainer.setHgap(5);
-        controlContainer.setVgap(5);
-
-        controlContainer.add(idLabel, 1, 0);
-        controlContainer.add(idField, 2, 0);
-
-        controlContainer.add(phaseLabel, 1, 1);
-        controlContainer.add(phaseField, 2, 1, 5, 1);
-
-        controlContainer.add(parameterNameLabel, 1, 4);
-        controlContainer.add(ParameterNameField, 2, 4);
-
-        controlContainer.add(parameterTypeLabel, 5, 4);
-        controlContainer.add(parameterTypeField, 6, 4);
-
-        controlContainer.add(unitLabel, 1, 2, 5, 1);
-        controlContainer.add(units, 2, 2, 5, 1);
-
-        controlContainer.add(phaseTypeLabel, 1, 3, 5, 1);
-        controlContainer.add(phaseTypeField, 2, 3, 5, 1);
-
-        controlContainer.add(add, 1, 5);
-        controlContainer.add(clear, 2, 5);
-
-        root.setPadding(new Insets(10));
-        root.setTop(controlContainer);
-        root.setCenter(table);
+        this.initOwner(this.mainWindow);
+        this.initModality(Modality.WINDOW_MODAL);
+        this.initStyle(StageStyle.UTILITY);
+        this.setScene(new Scene(this.root));
+        this.setHeight((double)800.0F);
+        this.setResizable(false);
+        this.setTitle("Phases manager");
+        this.id.setCellValueFactory(new TreeItemPropertyValueFactory("id"));
+        this.name.setCellValueFactory(new TreeItemPropertyValueFactory("name"));
+        this.unit.setCellValueFactory(new TreeItemPropertyValueFactory("unit"));
+        this.phaseType.setCellValueFactory(new TreeItemPropertyValueFactory("phaseType"));
+        this.parameterName.setCellValueFactory(new TreeItemPropertyValueFactory("ParameterName"));
+        this.parameterType.setCellValueFactory(new TreeItemPropertyValueFactory("ParameterType"));
+        this.table.getColumns().addAll(new TreeTableColumn[]{this.id, this.name, this.unit, this.phaseType, this.parameterName, this.parameterType});
+        this.table.setRoot(this.rootItem);
+        this.table.setShowRoot(false);
+        this.id.prefWidthProperty().bind(this.table.widthProperty().divide(13));
+        this.name.prefWidthProperty().bind(this.table.widthProperty().divide(13).multiply(4));
+        this.unit.prefWidthProperty().bind(this.table.widthProperty().divide(13).multiply(2));
+        this.phaseType.prefWidthProperty().bind(this.table.widthProperty().divide(13).multiply(2));
+        this.parameterName.prefWidthProperty().bind(this.table.widthProperty().divide(13).multiply(2));
+        this.parameterType.prefWidthProperty().bind(this.table.widthProperty().divide(13).multiply(2));
+        this.idLabel.setPrefWidth((double)150.0F);
+        this.phaseLabel.setPrefWidth((double)150.0F);
+        this.unitLabel.setPrefWidth((double)150.0F);
+        this.parameterNameLabel.setPrefWidth((double)150.0F);
+        this.parameterTypeLabel.setPrefWidth((double)150.0F);
+        this.phaseTypeLabel.setPrefWidth((double)150.0F);
+        this.idField.setPrefWidth((double)250.0F);
+        this.phaseField.setPrefWidth((double)670.0F);
+        this.units.setPrefWidth((double)670.0F);
+        this.ParameterNameField.setPrefWidth((double)250.0F);
+        this.parameterTypeField.setPrefWidth((double)250.0F);
+        this.phaseTypeField.setPrefWidth((double)670.0F);
+        this.add.setPrefWidth((double)150.0F);
+        this.clear.setPrefWidth((double)150.0F);
+        this.parameterTypeField.setItems(FXCollections.observableArrayList((Collection)Arrays.stream(PhaseParameterType.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
+        this.phaseTypeField.setItems(FXCollections.observableArrayList((Collection)Arrays.stream(PhasesTypes.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
+        this.controlContainer.setPadding(new Insets((double)10.0F));
+        this.controlContainer.setHgap((double)5.0F);
+        this.controlContainer.setVgap((double)5.0F);
+        this.controlContainer.add(this.idLabel, 1, 0);
+        this.controlContainer.add(this.idField, 2, 0);
+        this.controlContainer.add(this.phaseLabel, 1, 1);
+        this.controlContainer.add(this.phaseField, 2, 1, 5, 1);
+        this.controlContainer.add(this.parameterNameLabel, 1, 4);
+        this.controlContainer.add(this.ParameterNameField, 2, 4);
+        this.controlContainer.add(this.parameterTypeLabel, 5, 4);
+        this.controlContainer.add(this.parameterTypeField, 6, 4);
+        this.controlContainer.add(this.unitLabel, 1, 2, 5, 1);
+        this.controlContainer.add(this.units, 2, 2, 5, 1);
+        this.controlContainer.add(this.phaseTypeLabel, 1, 3, 5, 1);
+        this.controlContainer.add(this.phaseTypeField, 2, 3, 5, 1);
+        this.controlContainer.add(this.add, 1, 5);
+        this.controlContainer.add(this.clear, 2, 5);
+        this.root.setPadding(new Insets((double)10.0F));
+        this.root.setTop(this.controlContainer);
+        this.root.setCenter(this.table);
     }
 
     private void actionHandler() {
-        controller.refresh();
-        onShowingProperty().addListener((observable, oldValue, newValue) -> controller.refresh());
-        units.setOnMouseClicked(action -> units.setItems(controller.getUnitsName()));
-        phaseTypeField.valueProperty().addListener((observable, oldValue, newValue) -> {
+        this.controller.refresh();
+        this.onShowingProperty().addListener((observable, oldValue, newValue) -> this.controller.refresh());
+        this.units.setOnMouseClicked((action) -> this.units.setItems(this.controller.getUnitsName()));
+        this.phaseTypeField.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.equals(PhasesTypes.Dose_phase.name().replace("_", " "))) {
-                ParameterNameField.setText("Percentage %");
-                parameterTypeField.setValue(PhaseParameterType.Value.name());
-
-                ParameterNameField.setEditable(false);
-                parameterTypeField.setDisable(true);
-
+                this.ParameterNameField.setText("Percentage %");
+                this.parameterTypeField.setValue(PhaseParameterType.Value.name());
+                this.ParameterNameField.setEditable(false);
+                this.parameterTypeField.setDisable(true);
             } else {
-                ParameterNameField.setText("");
-
-                ParameterNameField.setEditable(true);
-                parameterTypeField.setDisable(false);
+                this.ParameterNameField.setText("");
+                this.ParameterNameField.setEditable(true);
+                this.parameterTypeField.setDisable(false);
             }
+
         });
-        add.setOnMouseClicked(action -> {
+        this.add.setOnMouseClicked((action) -> {
             try {
-                if (!(units.getValue() == null || idField.getText() == null || phaseField.getText() == null || idField.getText().isEmpty() || phaseField.getText().isEmpty())) {
-                    controller.findPhaseById(idField.getText()).ifPresentOrElse(checkPhase -> {
-                        List<Parameter> parametersData = new LinkedList<>();
-                        parametersData.add(new Parameter(ParameterNameField.getText(), parameterTypeField.getValue()));
-                        Phase phase = new Phase(Long.parseLong(idField.getText()), phaseField.getText(), units.getValue(), phaseTypeField.getValue(), parametersData);
+                if (this.units.getValue() != null && this.idField.getText() != null && this.phaseField.getText() != null && !this.idField.getText().isEmpty() && !this.phaseField.getText().isEmpty()) {
+                    this.controller.findPhaseById(this.idField.getText()).ifPresentOrElse((checkPhase) -> {
+                        List<Parameter> parametersData = new LinkedList();
+                        parametersData.add(new Parameter(this.ParameterNameField.getText(), (String)this.parameterTypeField.getValue()));
+                        Phase phase = new Phase(Long.parseLong(this.idField.getText()), this.phaseField.getText(), (String)this.units.getValue(), (String)this.phaseTypeField.getValue(), parametersData);
+
                         try {
-                            controller.createNewPhase(phase);
-                        }catch (Exception e){
-                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            this.controller.createNewPhase(phase);
+                        } catch (Exception var6) {
+                            Alert alert = new Alert(AlertType.ERROR);
                             alert.setContentText("Error inserting in database or id format is not number");
                             alert.initOwner(this);
                             alert.show();
                         }
-                        controller.refresh();
+
+                        this.controller.refresh();
                     }, () -> {
-                        Alert alert = new Alert(Alert.AlertType.WARNING);
+                        Alert alert = new Alert(AlertType.WARNING);
                         alert.setContentText("Selected ID already inserted in the database.");
                         alert.initOwner(this);
                         alert.show();
                     });
                 } else {
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    Alert alert = new Alert(AlertType.WARNING);
                     alert.setContentText("Empty data . \nentered");
                     alert.initOwner(this);
                     alert.show();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
+                Alert alert = new Alert(AlertType.ERROR);
                 alert.setContentText("Error inserting in database or id format is not number");
                 alert.initOwner(this);
                 alert.show();
             }
-        });
 
-        clear.setOnMouseClicked(action -> controller.clearAllPhases());
-        table.setOnContextMenuRequested(action -> {
-            if (table.getSelectionModel().getSelectedItem() != null) {
+        });
+        this.clear.setOnMouseClicked((action) -> this.controller.clearAllPhases());
+        this.table.setOnContextMenuRequested((action) -> {
+            if (this.table.getSelectionModel().getSelectedItem() != null) {
                 ContextMenu menu = new ContextMenu();
                 MenuItem deletePhase = new MenuItem("Delete phase      ");
                 MenuItem addParameter = new MenuItem("Add parameter    ");
                 MenuItem deleteParameter = new MenuItem("Delete parameter    ");
-                if (table.getTreeItemLevel(table.getSelectionModel().getSelectedItem()) == 1) {
-                    menu.getItems().addAll(addParameter, deletePhase);
-                } else if (table.getTreeItemLevel(table.getSelectionModel().getSelectedItem()) == 2) {
-                    menu.getItems().addAll(deleteParameter);
+                if (this.table.getTreeItemLevel((TreeItem)this.table.getSelectionModel().getSelectedItem()) == 1) {
+                    menu.getItems().addAll(new MenuItem[]{addParameter, deletePhase});
+                } else if (this.table.getTreeItemLevel((TreeItem)this.table.getSelectionModel().getSelectedItem()) == 2) {
+                    menu.getItems().addAll(new MenuItem[]{deleteParameter});
                 }
+
                 menu.show(this, action.getScreenX(), action.getScreenY());
-                addParameter.setOnAction(event -> {
-                    newParameterWindow(table.getSelectionModel().getSelectedItem().getValue().getId());
-                });
-                deleteParameter.setOnAction(event -> controller.deleteParameterFromPhase(table.getSelectionModel().getSelectedItem().getParent().getValue().getId(), table.getSelectionModel().getSelectedItem().getValue().getParameterName()));
-                deletePhase.setOnAction(event -> controller.deletePhase(table.getSelectionModel().getSelectedItem().getValue().getId()));
+                addParameter.setOnAction((event) -> this.newParameterWindow(((PhaseInformationDTO)((TreeItem)this.table.getSelectionModel().getSelectedItem()).getValue()).getId()));
+                deleteParameter.setOnAction((event) -> this.controller.deleteParameterFromPhase(((PhaseInformationDTO)((TreeItem)this.table.getSelectionModel().getSelectedItem()).getParent().getValue()).getId(), ((PhaseInformationDTO)((TreeItem)this.table.getSelectionModel().getSelectedItem()).getValue()).getParameterName()));
+                deletePhase.setOnAction((event) -> this.controller.deletePhase(((PhaseInformationDTO)((TreeItem)this.table.getSelectionModel().getSelectedItem()).getValue()).getId()));
             }
+
         });
     }
 
-
-
     private void newParameterWindow(String id) {
         GridPane rootPane = new GridPane();
-
         Button addNewPara = new Button("Add new phase");
-
         Label parameterLabel = new Label("Parameter name ");
         TextField parameter = new TextField();
-
         Label typeLabel = new Label("Parameter Type ");
         ComboBox<String> type = new ComboBox();
-
-        parameterLabel.setPrefWidth(150);
-        typeLabel.setPrefWidth(150);
-
-        parameter.setPrefWidth(250);
-        type.setPrefWidth(250);
-
-        addNewPara.setPrefWidth(150);
-
+        parameterLabel.setPrefWidth((double)150.0F);
+        typeLabel.setPrefWidth((double)150.0F);
+        parameter.setPrefWidth((double)250.0F);
+        type.setPrefWidth((double)250.0F);
+        addNewPara.setPrefWidth((double)150.0F);
         rootPane.add(parameterLabel, 1, 1);
         rootPane.add(parameter, 2, 1);
-
         rootPane.add(typeLabel, 1, 2);
         rootPane.add(type, 2, 2);
-
         rootPane.add(addNewPara, 1, 5);
-
-        rootPane.setPadding(new Insets(10));
-        rootPane.setVgap(4);
-        rootPane.setHgap(10);
-
-        type.setItems(FXCollections.observableArrayList(Arrays.stream(PhaseParameterType.values()).map(Enum::name).map(item -> item.replace("_", " ")).collect(Collectors.toList())));
-
+        rootPane.setPadding(new Insets((double)10.0F));
+        rootPane.setVgap((double)4.0F);
+        rootPane.setHgap((double)10.0F);
+        type.setItems(FXCollections.observableArrayList((Collection)Arrays.stream(PhaseParameterType.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
         Scene scene = new Scene(rootPane);
-
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.initOwner(this);
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initStyle(StageStyle.UTILITY);
         stage.setResizable(false);
-
-        addNewPara.setOnMouseClicked(action -> {
-            if (!parameter.getText().isEmpty() && (type.getValue() != null)) {
-                controller.addParameterToPhase(id, parameter.getText(), type.getValue());
+        addNewPara.setOnMouseClicked((action) -> {
+            if (!parameter.getText().isEmpty() && type.getValue() != null) {
+                this.controller.addParameterToPhase(id, parameter.getText(), (String)type.getValue());
             }
+
             stage.hide();
         });
-
         stage.showAndWait();
     }
 }

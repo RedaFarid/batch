@@ -2,8 +2,7 @@
 package com.batch.Database.Repositories;
 
 import com.batch.Database.Entities.TreeViewItemsData;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface TreeViewItemsDataRepository extends JpaRepository<TreeViewItemsData, Long> {
-
+public interface TreeViewItemsDataRepository extends PagingAndSortingRepository<TreeViewItemsData, Long> {
 }

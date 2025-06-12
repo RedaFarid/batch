@@ -1,14 +1,12 @@
 
+
 package com.batch.DTO.RecipeSystemDataDefinitions;
 
-
 public class PhaseInformationDTO {
-
     private String id;
     private String name;
     private String unit;
     private String phaseType;
-
     private String ParameterName;
     private String ParameterType;
 
@@ -22,7 +20,7 @@ public class PhaseInformationDTO {
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -30,7 +28,7 @@ public class PhaseInformationDTO {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -38,7 +36,7 @@ public class PhaseInformationDTO {
     }
 
     public String getUnit() {
-        return unit;
+        return this.unit;
     }
 
     public void setUnit(String unit) {
@@ -46,7 +44,7 @@ public class PhaseInformationDTO {
     }
 
     public String getPhaseType() {
-        return phaseType;
+        return this.phaseType;
     }
 
     public void setPhaseType(String phaseType) {
@@ -54,7 +52,7 @@ public class PhaseInformationDTO {
     }
 
     public String getParameterName() {
-        return ParameterName;
+        return this.ParameterName;
     }
 
     public void setParameterName(String ParameterName) {
@@ -62,13 +60,10 @@ public class PhaseInformationDTO {
     }
 
     public String getParameterType() {
-        return ParameterType;
+        return this.ParameterType;
     }
 
     public void setParameterType(String ParameterType) {
         this.ParameterType = ParameterType;
     }
-
-
-
 }

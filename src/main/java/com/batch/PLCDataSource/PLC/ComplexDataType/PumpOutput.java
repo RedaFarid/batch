@@ -1,7 +1,6 @@
 
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
-
 public enum PumpOutput implements RowAttripute {
     Start,
     Stop,

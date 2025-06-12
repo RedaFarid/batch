@@ -1,7 +1,6 @@
 
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
-
 public enum WeightOutput implements RowAttripute {
     Latch_Alarms_Till_Reset,
     Enable_Simulation,

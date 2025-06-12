@@ -1,5 +1,6 @@
-package com.batch.GUI.FacePlates;
 
+
+package com.batch.GUI.FacePlates;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.PLCDataSource.PLC.ComplexDataType.WeightInput;
@@ -17,273 +18,241 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class WeightFacePlate extends MeasurementFacePlate {
-
-    private CheckBox lowWarningSignal, lowAlarmSignal, HighWarningSignal, HighAlarmSignal, latchAlarmsTillReset, enableLowPassFilter;
-    private FaceplateTextField Zero, Span, LowWarning, HighWarning, LowAlarm, HighAlam, coeffecient;
-
-    private Label ZeroLabel, SpanLabel, LowWarningLabel, HighWarningLabel, LowAlarmLabel, HighAlamLabel, coeffecientLabel;
-
+    private CheckBox lowWarningSignal;
+    private CheckBox lowAlarmSignal;
+    private CheckBox HighWarningSignal;
+    private CheckBox HighAlarmSignal;
+    private CheckBox latchAlarmsTillReset;
+    private CheckBox enableLowPassFilter;
+    private FaceplateTextField Zero;
+    private FaceplateTextField Span;
+    private FaceplateTextField LowWarning;
+    private FaceplateTextField HighWarning;
+    private FaceplateTextField LowAlarm;
+    private FaceplateTextField HighAlam;
+    private FaceplateTextField coeffecient;
+    private Label ZeroLabel;
+    private Label SpanLabel;
+    private Label LowWarningLabel;
+    private Label HighWarningLabel;
+    private Label LowAlarmLabel;
+    private Label HighAlamLabel;
+    private Label coeffecientLabel;
     private boolean faultCondition;
 
     public WeightFacePlate(Stage stage, RowDataDefinition dataModel, String unit) {
         super(stage, dataModel, unit);
     }
 
-    @Override
     protected void customizedGraphicsAndActions(BorderPane root, RowDataDefinition dataModel, GridPane configurationsContainer, GridPane alarmsSettingsContainer, GridPane statusContainer) {
-
-        //CheckBox
-        lowWarningSignal = new CheckBox("Low warning");
-        lowAlarmSignal = new CheckBox("Low alarm");
-        HighWarningSignal = new CheckBox("High warning");
-        HighAlarmSignal = new CheckBox("High alarm");
-
-        lowWarningSignal.setMouseTransparent(true);
-        lowAlarmSignal.setMouseTransparent(true);
-        HighWarningSignal.setMouseTransparent(true);
-        HighAlarmSignal.setMouseTransparent(true);
-
-        //Fields
-        Zero = new FaceplateTextField();
-        Zero.setPromptText("0.0");
-        Zero.setRestrict("[0-9].");
-        Zero.setMaxLength(10);
-        Zero.setPrefWidth(200);
-
-        Span = new FaceplateTextField();
-        Span.setPromptText("0.0");
-        Span.setRestrict("[0-9].");
-        Span.setMaxLength(10);
-        Span.setPrefWidth(200);
-
-        LowWarning = new FaceplateTextField();
-        LowWarning.setPromptText("0.0");
-        LowWarning.setRestrict("[0-9].");
-        LowWarning.setMaxLength(10);
-        LowWarning.setPrefWidth(200);
-
-        LowAlarm = new FaceplateTextField();
-        LowAlarm.setPromptText("0.0");
-        LowAlarm.setRestrict("[0-9].");
-        LowAlarm.setMaxLength(10);
-        LowAlarm.setPrefWidth(200);
-
-        HighWarning = new FaceplateTextField();
-        HighWarning.setPromptText("0.0");
-        HighWarning.setRestrict("[0-9].");
-        HighWarning.setMaxLength(10);
-        HighWarning.setPrefWidth(200);
-
-        HighAlam = new FaceplateTextField();
-        HighAlam.setPromptText("0.0");
-        HighAlam.setRestrict("[0-9].");
-        HighAlam.setMaxLength(10);
-        HighAlam.setPrefWidth(200);
-
-        coeffecient = new FaceplateTextField();
-        HighAlam.setPromptText("0.0");
-        HighAlam.setRestrict("[0-9].");
-        HighAlam.setMaxLength(10);
-        HighAlam.setPrefWidth(200);
-
-        //Labels
-
-        ZeroLabel = new Label("Zero ");
-        SpanLabel = new Label("Span ");
-        LowWarningLabel = new Label("Low warning ");
-        HighWarningLabel = new Label("High warning ");
-        LowAlarmLabel = new Label("Low alarm ");
-        HighAlamLabel = new Label("High alarm ");
-        coeffecientLabel = new Label("Coeffecient ");
-
-
-        ZeroLabel.setPrefWidth(100);
-        SpanLabel.setPrefWidth(100);
-        LowWarningLabel.setPrefWidth(100);
-        HighWarningLabel.setPrefWidth(100);
-        LowAlarmLabel.setPrefWidth(100);
-        HighAlamLabel.setPrefWidth(100);
-
-        Zero.setPrefWidth(150);
-        Span.setPrefWidth(150);
-        LowWarning.setPrefWidth(150);
-        HighWarning.setPrefWidth(150);
-        LowAlarm.setPrefWidth(150);
-        HighAlam.setPrefWidth(150);
-
-        latchAlarmsTillReset = new CheckBox("Latch alarms till reset");
-        enableLowPassFilter = new CheckBox("Enable low pass smoothing");
-
-        configurationsContainer.add(latchAlarmsTillReset, 1, 0, 2, 1);
-        configurationsContainer.add(enableLowPassFilter, 1, 1, 2, 1);
-        configurationsContainer.add(coeffecient, 2, 2);
-        configurationsContainer.add(coeffecientLabel, 1, 2);
-        configurationsContainer.add(Zero, 2, 5);
-        configurationsContainer.add(ZeroLabel, 1, 5);
-        configurationsContainer.add(Span, 2, 6);
-        configurationsContainer.add(SpanLabel, 1, 6);
-
-        alarmsSettingsContainer.add(HighAlam, 2, 1);
-        alarmsSettingsContainer.add(HighWarning, 2, 2);
-        alarmsSettingsContainer.add(LowWarning, 2, 3);
-        alarmsSettingsContainer.add(LowAlarm, 2, 4);
-        alarmsSettingsContainer.add(HighAlamLabel, 1, 1);
-        alarmsSettingsContainer.add(HighWarningLabel, 1, 2);
-        alarmsSettingsContainer.add(LowWarningLabel, 1, 3);
-        alarmsSettingsContainer.add(LowAlarmLabel, 1, 4);
-
-        statusContainer.add(lowWarningSignal, 1, 1);
-        statusContainer.add(lowAlarmSignal, 1, 2);
-        statusContainer.add(HighWarningSignal, 1, 3);
-        statusContainer.add(HighAlarmSignal, 1, 4);
-
-        checkDataForInitializingGraphics(dataModel);
-        actionHandler(dataModel);
+        this.lowWarningSignal = new CheckBox("Low warning");
+        this.lowAlarmSignal = new CheckBox("Low alarm");
+        this.HighWarningSignal = new CheckBox("High warning");
+        this.HighAlarmSignal = new CheckBox("High alarm");
+        this.lowWarningSignal.setMouseTransparent(true);
+        this.lowAlarmSignal.setMouseTransparent(true);
+        this.HighWarningSignal.setMouseTransparent(true);
+        this.HighAlarmSignal.setMouseTransparent(true);
+        this.Zero = new FaceplateTextField();
+        this.Zero.setPromptText("0.0");
+        this.Zero.setRestrict("[0-9].");
+        this.Zero.setMaxLength(10);
+        this.Zero.setPrefWidth((double)200.0F);
+        this.Span = new FaceplateTextField();
+        this.Span.setPromptText("0.0");
+        this.Span.setRestrict("[0-9].");
+        this.Span.setMaxLength(10);
+        this.Span.setPrefWidth((double)200.0F);
+        this.LowWarning = new FaceplateTextField();
+        this.LowWarning.setPromptText("0.0");
+        this.LowWarning.setRestrict("[0-9].");
+        this.LowWarning.setMaxLength(10);
+        this.LowWarning.setPrefWidth((double)200.0F);
+        this.LowAlarm = new FaceplateTextField();
+        this.LowAlarm.setPromptText("0.0");
+        this.LowAlarm.setRestrict("[0-9].");
+        this.LowAlarm.setMaxLength(10);
+        this.LowAlarm.setPrefWidth((double)200.0F);
+        this.HighWarning = new FaceplateTextField();
+        this.HighWarning.setPromptText("0.0");
+        this.HighWarning.setRestrict("[0-9].");
+        this.HighWarning.setMaxLength(10);
+        this.HighWarning.setPrefWidth((double)200.0F);
+        this.HighAlam = new FaceplateTextField();
+        this.HighAlam.setPromptText("0.0");
+        this.HighAlam.setRestrict("[0-9].");
+        this.HighAlam.setMaxLength(10);
+        this.HighAlam.setPrefWidth((double)200.0F);
+        this.coeffecient = new FaceplateTextField();
+        this.HighAlam.setPromptText("0.0");
+        this.HighAlam.setRestrict("[0-9].");
+        this.HighAlam.setMaxLength(10);
+        this.HighAlam.setPrefWidth((double)200.0F);
+        this.ZeroLabel = new Label("Zero ");
+        this.SpanLabel = new Label("Span ");
+        this.LowWarningLabel = new Label("Low warning ");
+        this.HighWarningLabel = new Label("High warning ");
+        this.LowAlarmLabel = new Label("Low alarm ");
+        this.HighAlamLabel = new Label("High alarm ");
+        this.coeffecientLabel = new Label("Coeffecient ");
+        this.ZeroLabel.setPrefWidth((double)100.0F);
+        this.SpanLabel.setPrefWidth((double)100.0F);
+        this.LowWarningLabel.setPrefWidth((double)100.0F);
+        this.HighWarningLabel.setPrefWidth((double)100.0F);
+        this.LowAlarmLabel.setPrefWidth((double)100.0F);
+        this.HighAlamLabel.setPrefWidth((double)100.0F);
+        this.Zero.setPrefWidth((double)150.0F);
+        this.Span.setPrefWidth((double)150.0F);
+        this.LowWarning.setPrefWidth((double)150.0F);
+        this.HighWarning.setPrefWidth((double)150.0F);
+        this.LowAlarm.setPrefWidth((double)150.0F);
+        this.HighAlam.setPrefWidth((double)150.0F);
+        this.latchAlarmsTillReset = new CheckBox("Latch alarms till reset");
+        this.enableLowPassFilter = new CheckBox("Enable low pass smoothing");
+        configurationsContainer.add(this.latchAlarmsTillReset, 1, 0, 2, 1);
+        configurationsContainer.add(this.enableLowPassFilter, 1, 1, 2, 1);
+        configurationsContainer.add(this.coeffecient, 2, 2);
+        configurationsContainer.add(this.coeffecientLabel, 1, 2);
+        configurationsContainer.add(this.Zero, 2, 5);
+        configurationsContainer.add(this.ZeroLabel, 1, 5);
+        configurationsContainer.add(this.Span, 2, 6);
+        configurationsContainer.add(this.SpanLabel, 1, 6);
+        alarmsSettingsContainer.add(this.HighAlam, 2, 1);
+        alarmsSettingsContainer.add(this.HighWarning, 2, 2);
+        alarmsSettingsContainer.add(this.LowWarning, 2, 3);
+        alarmsSettingsContainer.add(this.LowAlarm, 2, 4);
+        alarmsSettingsContainer.add(this.HighAlamLabel, 1, 1);
+        alarmsSettingsContainer.add(this.HighWarningLabel, 1, 2);
+        alarmsSettingsContainer.add(this.LowWarningLabel, 1, 3);
+        alarmsSettingsContainer.add(this.LowAlarmLabel, 1, 4);
+        statusContainer.add(this.lowWarningSignal, 1, 1);
+        statusContainer.add(this.lowAlarmSignal, 1, 2);
+        statusContainer.add(this.HighWarningSignal, 1, 3);
+        statusContainer.add(this.HighAlarmSignal, 1, 4);
+        this.checkDataForInitializingGraphics(dataModel);
+        this.actionHandler(dataModel);
     }
 
-    @Override
-    protected void actionHandler(RowDataDefinition dataModel) {
-
-        latchAlarmsTillReset.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
+    protected void actionHandler(final RowDataDefinition dataModel) {
+        this.latchAlarmsTillReset.selectedProperty().addListener(new ChangeListener<Boolean>() {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Latch_Alarms_Till_Reset)).setValue(newValue);
+                ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Latch_Alarms_Till_Reset)).setValue(newValue);
             }
         });
-        enableLowPassFilter.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
+        this.enableLowPassFilter.selectedProperty().addListener(new ChangeListener<Boolean>() {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Enable_Low_Pass_Filter)).setValue(newValue);
+                ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Enable_Low_Pass_Filter)).setValue(newValue);
             }
         });
+        this.Zero.onEneterKeyPressed(new Callback<String, Double>() {
+            public Double call(String param) {
+                if (WeightFacePlate.this.Zero.getText().length() > 0) {
+                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Zero)).setValue(Float.parseFloat(WeightFacePlate.this.Zero.getText()));
+                }
 
-        Zero.onEneterKeyPressed(new Callback<String, Double>() {
-            @Override
-            public Double call(String param) {
-                if (Zero.getText().length() > 0) {
-                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Zero)).setValue(Float.parseFloat(Zero.getText()));
-                }
                 return null;
             }
         });
-        Span.onEneterKeyPressed(new Callback<String, Double>() {
-            @Override
+        this.Span.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
-                if (Span.getText().length() > 0) {
-                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Span)).setValue(Float.parseFloat(Span.getText()));
+                if (WeightFacePlate.this.Span.getText().length() > 0) {
+                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Span)).setValue(Float.parseFloat(WeightFacePlate.this.Span.getText()));
                 }
-                return null;
-            }
-        });
-        LowWarning.onEneterKeyPressed(new Callback<String, Double>() {
-            @Override
-            public Double call(String param) {
-                if (LowWarning.getText().length() > 0) {
-                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Warning_SP)).setValue(Float.parseFloat(LowWarning.getText()));
-                }
-                return null;
-            }
-        });
-        LowAlarm.onEneterKeyPressed(new Callback<String, Double>() {
-            @Override
-            public Double call(String param) {
-                if (LowAlarm.getText().length() > 0) {
-                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Alarm_Sp)).setValue(Float.parseFloat(LowAlarm.getText()));
-                }
-                return null;
-            }
-        });
-        HighWarning.onEneterKeyPressed(new Callback<String, Double>() {
-            @Override
-            public Double call(String param) {
-                if (HighWarning.getText().length() > 0) {
-                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Warning_SP)).setValue(Float.parseFloat(HighWarning.getText()));
-                }
-                return null;
-            }
-        });
-        HighAlam.onEneterKeyPressed(new Callback<String, Double>() {
-            @Override
-            public Double call(String param) {
-                if (HighAlam.getText().length() > 0) {
-                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Alarm_SP)).setValue(Float.parseFloat(HighAlam.getText()));
-                }
-                return null;
-            }
-        });
-        coeffecient.onEneterKeyPressed(new Callback<String, Double>() {
-            @Override
-            public Double call(String param) {
-                if (coeffecient.getText().length() > 0) {
-                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Pass_Coeffecient)).setValue(Float.parseFloat(coeffecient.getText()));
-                }
-                return null;
-            }
-        });
 
-        ((BooleanDataType) dataModel.getAllValues().get(WeightInput.High_Alarm)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> HighAlarmSignal.setSelected(newValue));
-        ((BooleanDataType) dataModel.getAllValues().get(WeightInput.High_Warning)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> HighWarningSignal.setSelected(newValue));
-        ((BooleanDataType) dataModel.getAllValues().get(WeightInput.Low_Alarm)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> lowAlarmSignal.setSelected(newValue));
-        ((BooleanDataType) dataModel.getAllValues().get(WeightInput.Low_Warning)).addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> lowWarningSignal.setSelected(newValue));
+                return null;
+            }
+        });
+        this.LowWarning.onEneterKeyPressed(new Callback<String, Double>() {
+            public Double call(String param) {
+                if (WeightFacePlate.this.LowWarning.getText().length() > 0) {
+                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Warning_SP)).setValue(Float.parseFloat(WeightFacePlate.this.LowWarning.getText()));
+                }
+
+                return null;
+            }
+        });
+        this.LowAlarm.onEneterKeyPressed(new Callback<String, Double>() {
+            public Double call(String param) {
+                if (WeightFacePlate.this.LowAlarm.getText().length() > 0) {
+                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Alarm_Sp)).setValue(Float.parseFloat(WeightFacePlate.this.LowAlarm.getText()));
+                }
+
+                return null;
+            }
+        });
+        this.HighWarning.onEneterKeyPressed(new Callback<String, Double>() {
+            public Double call(String param) {
+                if (WeightFacePlate.this.HighWarning.getText().length() > 0) {
+                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.High_Warning_SP)).setValue(Float.parseFloat(WeightFacePlate.this.HighWarning.getText()));
+                }
+
+                return null;
+            }
+        });
+        this.HighAlam.onEneterKeyPressed(new Callback<String, Double>() {
+            public Double call(String param) {
+                if (WeightFacePlate.this.HighAlam.getText().length() > 0) {
+                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.High_Alarm_SP)).setValue(Float.parseFloat(WeightFacePlate.this.HighAlam.getText()));
+                }
+
+                return null;
+            }
+        });
+        this.coeffecient.onEneterKeyPressed(new Callback<String, Double>() {
+            public Double call(String param) {
+                if (WeightFacePlate.this.coeffecient.getText().length() > 0) {
+                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Pass_Coeffecient)).setValue(Float.parseFloat(WeightFacePlate.this.coeffecient.getText()));
+                }
+
+                return null;
+            }
+        });
+        ((BooleanDataType)dataModel.getAllValues().get(WeightInput.High_Alarm)).addListener((observable, oldValue, newValue) -> this.HighAlarmSignal.setSelected(newValue));
+        ((BooleanDataType)dataModel.getAllValues().get(WeightInput.High_Warning)).addListener((observable, oldValue, newValue) -> this.HighWarningSignal.setSelected(newValue));
+        ((BooleanDataType)dataModel.getAllValues().get(WeightInput.Low_Alarm)).addListener((observable, oldValue, newValue) -> this.lowAlarmSignal.setSelected(newValue));
+        ((BooleanDataType)dataModel.getAllValues().get(WeightInput.Low_Warning)).addListener((observable, oldValue, newValue) -> this.lowWarningSignal.setSelected(newValue));
     }
 
-    @Override
     protected void withFlasher(boolean flashTrigger) {
     }
 
-    @Override
     protected void checkDataForInitializingGraphics(RowDataDefinition dataModel) {
-        float zeroValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Zero)).getValue();
-        float spanValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Span)).getValue();
-
-        float lowWarnValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Warning_SP)).getValue();
-        float lowAlaValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Alarm_Sp)).getValue();
-        float highWarnValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Warning_SP)).getValue();
-        float highAlaValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Alarm_SP)).getValue();
-
-        boolean enableLowPass = ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Enable_Low_Pass_Filter)).getValue();
-        boolean enableSimulationR = ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Enable_Simulation)).getValue();
-        boolean enableLatchAlarms = ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Latch_Alarms_Till_Reset)).getValue();
-        float lowPassCoeffecient = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Pass_Coeffecient)).getValue();
-        float simulationValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Simulation_Value)).getValue();
-
-        boolean lowAlarmSig = ((BooleanDataType) dataModel.getAllValues().get(WeightInput.Low_Alarm)).getValue();
-        boolean lowWarningSig = ((BooleanDataType) dataModel.getAllValues().get(WeightInput.Low_Warning)).getValue();
-        boolean highAlarmSig = ((BooleanDataType) dataModel.getAllValues().get(WeightInput.High_Alarm)).getValue();
-        boolean highWarningSig = ((BooleanDataType) dataModel.getAllValues().get(WeightInput.High_Warning)).getValue();
-
-
-        Zero.setText(String.valueOf(zeroValue));
-        Span.setText(String.valueOf(spanValue));
-
-        LowWarning.setText(String.valueOf(lowWarnValue));
-        LowAlarm.setText(String.valueOf(lowAlaValue));
-        HighWarning.setText(String.valueOf(highWarnValue));
-        HighAlam.setText(String.valueOf(highAlaValue));
-
-        enableLowPassFilter.setSelected(enableLowPass);
-        coeffecient.setText(String.valueOf(lowPassCoeffecient));
+        float zeroValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Zero)).getValue();
+        float spanValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Span)).getValue();
+        float lowWarnValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Warning_SP)).getValue();
+        float lowAlaValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Alarm_Sp)).getValue();
+        float highWarnValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.High_Warning_SP)).getValue();
+        float highAlaValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.High_Alarm_SP)).getValue();
+        boolean enableLowPass = ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Enable_Low_Pass_Filter)).getValue();
+        boolean enableSimulationR = ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Enable_Simulation)).getValue();
+        boolean enableLatchAlarms = ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Latch_Alarms_Till_Reset)).getValue();
+        float lowPassCoeffecient = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Pass_Coeffecient)).getValue();
+        float simulationValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Simulation_Value)).getValue();
+        boolean lowAlarmSig = ((BooleanDataType)dataModel.getAllValues().get(WeightInput.Low_Alarm)).getValue();
+        boolean lowWarningSig = ((BooleanDataType)dataModel.getAllValues().get(WeightInput.Low_Warning)).getValue();
+        boolean highAlarmSig = ((BooleanDataType)dataModel.getAllValues().get(WeightInput.High_Alarm)).getValue();
+        boolean highWarningSig = ((BooleanDataType)dataModel.getAllValues().get(WeightInput.High_Warning)).getValue();
+        this.Zero.setText(String.valueOf(zeroValue));
+        this.Span.setText(String.valueOf(spanValue));
+        this.LowWarning.setText(String.valueOf(lowWarnValue));
+        this.LowAlarm.setText(String.valueOf(lowAlaValue));
+        this.HighWarning.setText(String.valueOf(highWarnValue));
+        this.HighAlam.setText(String.valueOf(highAlaValue));
+        this.enableLowPassFilter.setSelected(enableLowPass);
+        this.coeffecient.setText(String.valueOf(lowPassCoeffecient));
         super.simulationValueField.setText(String.valueOf(simulationValue));
-
-        enableLowPassFilter.setSelected(enableLowPass);
-        latchAlarmsTillReset.setSelected(enableLatchAlarms);
-        enableSimulation.setSelected(enableSimulationR);
-
-        HighAlarmSignal.setSelected(highAlarmSig);
-        HighWarningSignal.setSelected(highWarningSig);
-        lowAlarmSignal.setSelected(lowAlarmSig);
-        lowWarningSignal.setSelected(lowWarningSig);
+        this.enableLowPassFilter.setSelected(enableLowPass);
+        this.latchAlarmsTillReset.setSelected(enableLatchAlarms);
+        this.enableSimulation.setSelected(enableSimulationR);
+        this.HighAlarmSignal.setSelected(highAlarmSig);
+        this.HighWarningSignal.setSelected(highWarningSig);
+        this.lowAlarmSignal.setSelected(lowAlarmSig);
+        this.lowWarningSignal.setSelected(lowWarningSig);
     }
 
-
-
-    @Override
     protected void onResetPressed(MouseEvent action, RowDataDefinition dataModel) {
-
     }
 
-    @Override
     protected void onResetReleased(MouseEvent action, RowDataDefinition dataModel) {
-
     }
 }

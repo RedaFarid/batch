@@ -1,7 +1,5 @@
 
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
-
 
 public enum GeneralOutput implements RowAttripute {
     HI_Air_Pressure_Limit,

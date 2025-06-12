@@ -1,3 +1,4 @@
+
 package com.batch.Utilities;
 
 import javafx.beans.property.IntegerProperty;
@@ -9,39 +10,38 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextField;
 
 public class RestrictiveTextField extends TextField {
-
     private final IntegerProperty maxLength = new SimpleIntegerProperty(this, "maxLength", -1);
     private final StringProperty restrict = new SimpleStringProperty(this, "restrict");
 
     public RestrictiveTextField() {
-        textProperty().addListener(new ChangeListener<String>() {
+        this.textProperty().addListener(new ChangeListener<String>() {
             private boolean ignore;
-            @Override
+
             public void changed(ObservableValue<? extends String> observableValue, String s, String s1) {
-//                setText(s1.toUpperCase());
-                if (ignore || s1 == null) {
-                    return;
-                }
-                if (maxLength.get() > -1 && s1.length() > maxLength.get()) {
-                    ignore = true;
-                    setText(s1.substring(0, maxLength.get()));
-                    ignore = false;
-                }
-                if (restrict.get() != null && !restrict.get().equals("") && !s1.matches(restrict.get() + "*")) {
-                    ignore = true;
-                    setText(s);
-                    ignore = false;
+                if (!this.ignore && s1 != null) {
+                    if (RestrictiveTextField.this.maxLength.get() > -1 && s1.length() > RestrictiveTextField.this.maxLength.get()) {
+                        this.ignore = true;
+                        RestrictiveTextField.this.setText(s1.substring(0, RestrictiveTextField.this.maxLength.get()));
+                        this.ignore = false;
+                    }
+
+                    if (RestrictiveTextField.this.restrict.get() != null && !((String)RestrictiveTextField.this.restrict.get()).equals("") && !s1.matches((String)RestrictiveTextField.this.restrict.get() + "*")) {
+                        this.ignore = true;
+                        RestrictiveTextField.this.setText(s);
+                        this.ignore = false;
+                    }
+
                 }
             }
         });
     }
 
     public IntegerProperty maxLengthProperty() {
-        return maxLength;
+        return this.maxLength;
     }
 
     public int getMaxLength() {
-        return maxLength.get();
+        return this.maxLength.get();
     }
 
     public void setMaxLength(int maxLength) {
@@ -49,11 +49,11 @@ public class RestrictiveTextField extends TextField {
     }
 
     public StringProperty restrictProperty() {
-        return restrict;
+        return this.restrict;
     }
 
     public String getRestrict() {
-        return restrict.get();
+        return (String)this.restrict.get();
     }
 
     public void setRestrict(String restrict) {

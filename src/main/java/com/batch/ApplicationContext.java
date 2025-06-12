@@ -1,51 +1,47 @@
-package com.batch;
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
 
+package com.batch;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.support.GenericApplicationContext;
 
-@Log4j2
 public class ApplicationContext extends Application {
-
+    private static final Logger log = LogManager.getLogger(ApplicationContext.class);
     public static ConfigurableApplicationContext applicationContext;
 
-    @Override
     public void start(Stage stage) throws Exception {
         try {
             applicationContext.publishEvent(new GraphicsInitializerEvent(stage));
             applicationContext.start();
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.fatal(e, e);
         }
+
     }
 
-    @Override
     public void init() throws Exception {
-        ApplicationContextInitializer<GenericApplicationContext> initializer = applicationContext -> {
-            applicationContext.registerBean(Application.class, () -> ApplicationContext.this);
-        };
-        ApplicationContext.applicationContext = new SpringApplicationBuilder()
-                .sources(BatchingApplication.class)
-                .initializers(initializer)
-                .run(getParameters().getRaw().toArray(new String[0]));
+        ApplicationContextInitializer<GenericApplicationContext> initializer = (applicationContext) -> applicationContext.registerBean(Application.class, () -> this, new BeanDefinitionCustomizer[0]);
+        applicationContext = (new SpringApplicationBuilder(new Class[0])).sources(new Class[]{BatchingApplication.class}).initializers(new ApplicationContextInitializer[]{initializer}).run((String[])this.getParameters().getRaw().toArray(new String[0]));
         applicationContext.registerShutdownHook();
-        applicationContext.addApplicationListener((ApplicationListener <ContextClosedEvent>) event -> Platform.exit());
+        applicationContext.addApplicationListener((event) -> Platform.exit());
         super.init();
     }
 
-    @Override
     public void stop() throws Exception {
         applicationContext.stop();
-        Thread.sleep(500);
+        Thread.sleep(500L);
         System.exit(0);
     }
 
@@ -53,8 +49,9 @@ public class ApplicationContext extends Application {
         public GraphicsInitializerEvent(Stage stage) {
             super(stage);
         }
+
         public Stage getStage() {
-            return ((Stage) getSource());
+            return (Stage)this.getSource();
         }
     }
 }

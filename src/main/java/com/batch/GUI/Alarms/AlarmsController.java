@@ -1,3 +1,4 @@
+
 package com.batch.GUI.Alarms;
 
 import com.batch.ApplicationContext;
@@ -7,89 +8,104 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.batch.Services.LoggingService.LoggingService;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-@Log4j2
 @Controller
-@RequiredArgsConstructor
 public class AlarmsController {
-
+    private static final Logger log = LogManager.getLogger(AlarmsController.class);
     private Map<String, RowDataDefinition> allDevices;
     private final AlarmsModel model = new AlarmsModel();
     private final PLCDataDefinitionFactory plcDataDefinitionFactory;
-
     private final LoggingService loggingService;
 
     public AlarmsModel getModel() {
-        return model;
+        return this.model;
     }
 
-
-    @Scheduled(fixedDelay = 2000)
+    @Scheduled(
+            fixedDelay = 2000L
+    )
     public void update() {
-        if (model.getIsShown().getValue()) {
-            final List<Log> allLogs = loggingService.getAllLogs();
-            final ObservableList<Log> tableList = model.getAllAlarmsList();
-
-            tableList.removeAll(allLogs.stream()
-                    .filter(item -> !tableList.contains(item))
-                    .collect(() -> tableList, ObservableList::add, ObservableList::addAll)
-                    .stream()
-                    .filter(tableListItem -> allLogs.stream().noneMatch(dataBaseItem -> dataBaseItem.equals(tableListItem)))
-                    .collect(Collectors.toList()));
+        if (this.model.getIsShown().getValue()) {
+            List<Log> allLogs = this.loggingService.getAllLogs();
+            ObservableList<Log> tableList = this.model.getAllAlarmsList();
+            tableList.removeAll((Collection)((ObservableList)allLogs.stream().filter((item) -> !tableList.contains(item)).collect(() -> tableList, List::add, List::addAll)).stream().filter((tableListItem) -> allLogs.stream().noneMatch((dataBaseItem) -> dataBaseItem.equals(tableListItem))).collect(Collectors.toList()));
+            Platform.runLater(() -> FXCollections.sort(tableList, (o1, o2) -> {
+                try {
+                    LocalDate date1 = o1.getDate();
+                    LocalDate date2 = o2.getDate();
+                    LocalTime time1 = o1.getTime();
+                    LocalTime time2 = o2.getTime();
+                    LocalDateTime localDateTime1 = LocalDateTime.of(date1, time1);
+                    LocalDateTime localDateTime2 = LocalDateTime.of(date2, time2);
+                    return localDateTime1.compareTo(localDateTime2);
+                } catch (Exception var8) {
+                    return 0;
+                }
+            }));
         }
+
     }
 
     @EventListener
     public void afterRefreshed(ApplicationContext.GraphicsInitializerEvent event) {
-        allDevices = plcDataDefinitionFactory.getAllDevicesDataModel();
+        this.allDevices = this.plcDataDefinitionFactory.getAllDevicesDataModel();
     }
 
     @EventListener
     public void afterStarted(ContextStartedEvent event) {
-
-        updateHiPressureValue();
-        updateLoPressureValue();
-        ((RealDataType) allDevices.get("General").getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).addListener((observable, oldValue, newValue) -> updateHiPressureValue());
-        ((RealDataType) allDevices.get("General").getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).addListener((observable, oldValue, newValue) -> updateLoPressureValue());
+        this.updateHiPressureValue();
+        this.updateLoPressureValue();
+        ((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).addListener((observable, oldValue, newValue) -> this.updateHiPressureValue());
+        ((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).addListener((observable, oldValue, newValue) -> this.updateLoPressureValue());
     }
+
     private void updateLoPressureValue() {
         try {
-            Platform.runLater(() -> {
-                model.getAirPressureLoAlarm().setValue(String.valueOf(((RealDataType) allDevices.get("General").getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).getValue()));
-            });
+            Platform.runLater(() -> this.model.getAirPressureLoAlarm().setValue(String.valueOf(((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).getValue())));
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
+
     private void updateHiPressureValue() {
         try {
-            Platform.runLater(() -> {
-                model.getAirPressureHiAlarm().setValue(String.valueOf(((RealDataType) allDevices.get("General").getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).getValue()));
-            });
+            Platform.runLater(() -> this.model.getAirPressureHiAlarm().setValue(String.valueOf(((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).getValue())));
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     @Async
     public void highPressureLimitCommit() {
-        ((RealDataType) allDevices.get("General").getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).setValue(Float.parseFloat(model.getAirPressureHiAlarm().getValue()));
+        ((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).setValue(Float.parseFloat(this.model.getAirPressureHiAlarm().getValue()));
     }
+
     @Async
     public void lowPressureLimitCommit() {
-        ((RealDataType) allDevices.get("General").getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).setValue(Float.parseFloat(model.getAirPressureLoAlarm().getValue()));
+        ((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).setValue(Float.parseFloat(this.model.getAirPressureLoAlarm().getValue()));
+    }
+
+    public AlarmsController(final PLCDataDefinitionFactory plcDataDefinitionFactory, final LoggingService loggingService) {
+        this.plcDataDefinitionFactory = plcDataDefinitionFactory;
+        this.loggingService = loggingService;
     }
 }

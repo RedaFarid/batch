@@ -1,20 +1,24 @@
+
+
 package com.batch.Database.Repositories;
 
 import com.batch.Database.Entities.Batch;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import org.springframework.data.jdbc.repository.query.Modifying;
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Transactional
-public interface BatchesRepository extends JpaRepository<Batch, Long> {
-
+public interface BatchesRepository extends PagingAndSortingRepository<Batch, Long> {
     Optional<Batch> findByBatchName(String batchName);
 
+    @Modifying
+    @Query("update batches set [order] = :order where id = :batchId")
+    void updateBatchControlOrder(long batchId, String order);
 
     @Modifying
-    @Query(value = "update batches set [order] = ?2 where id = ?1", nativeQuery = true)
-    void updateBatchControlOrder(long batchId, String order);
+    @Query("update batches set endTime = :now where id = :id")
+    void updateEndTime(Long id, LocalDateTime now);
 }

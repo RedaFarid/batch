@@ -4,9 +4,7 @@ package com.batch.GUI.RecipeEditor.WindowComponents;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 
-
 public class TreeItemIdentity extends TreeItem<String> {
-
     private long itemParent;
     private int itemLevel;
     private long itemID;
@@ -21,9 +19,8 @@ public class TreeItemIdentity extends TreeItem<String> {
     public TreeItemIdentity() {
     }
 
-
     public long getItemParent() {
-        return itemParent;
+        return this.itemParent;
     }
 
     public void setItemParent(long itemParent) {
@@ -31,7 +28,7 @@ public class TreeItemIdentity extends TreeItem<String> {
     }
 
     public int getItemLevel() {
-        return itemLevel;
+        return this.itemLevel;
     }
 
     public void setItemLevel(int itemLevel) {
@@ -39,12 +36,10 @@ public class TreeItemIdentity extends TreeItem<String> {
     }
 
     public long getItemID() {
-        return itemID;
+        return this.itemID;
     }
 
     public void setItemID(long itemID) {
         this.itemID = itemID;
     }
-
-
 }

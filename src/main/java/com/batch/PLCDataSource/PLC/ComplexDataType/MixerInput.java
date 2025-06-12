@@ -1,9 +1,7 @@
 
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
-
-public enum MixerInput implements RowAttripute{
+public enum MixerInput implements RowAttripute {
     Running,
     QControl,
     Fault,

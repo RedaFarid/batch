@@ -1,3 +1,4 @@
+
 package com.batch.Utilities;
 
 import javafx.application.Platform;
@@ -7,6 +8,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -18,7 +20,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class ProgressWindow {
-
     private Stage Window = null;
     private Stage dialogStage = new Stage();
     private ProgressBar progressbar = new ProgressBar();
@@ -31,73 +32,59 @@ public class ProgressWindow {
 
     public ProgressWindow(Stage parentsatge, String Title) {
         this.Window = parentsatge;
-        label.setText(Title);
-        graphicsBuilder();
+        this.label.setText(Title);
+        this.graphicsBuilder();
     }
 
     private void graphicsBuilder() {
-        work.setPrefSize(400, 100);
-
-        progressbar.setProgress(0);
-        progressbar.setPrefWidth(400);
-        progressbar.setPrefHeight(50);
-
-        progressindicator.setProgress(0);
-        progressindicator.setPrefSize(50, 50);
-
-        progressindicator.progressProperty().bind(progressbar.progressProperty());
-        hbox.getChildren().addAll(progressbar, progressindicator);
-
-        StringProgress.addListener(new ChangeListener<String>() {
-            @Override
+        this.work.setPrefSize((double)400.0F, (double)100.0F);
+        this.progressbar.setProgress((double)0.0F);
+        this.progressbar.setPrefWidth((double)400.0F);
+        this.progressbar.setPrefHeight((double)50.0F);
+        this.progressindicator.setProgress((double)0.0F);
+        this.progressindicator.setPrefSize((double)50.0F, (double)50.0F);
+        this.progressindicator.progressProperty().bind(this.progressbar.progressProperty());
+        this.hbox.getChildren().addAll(new Node[]{this.progressbar, this.progressindicator});
+        this.StringProgress.addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                work.setText(newValue);
+                ProgressWindow.this.work.setText(newValue);
             }
         });
-
-        Pane.setTop(label);
-        Pane.setCenter(work);
-        Pane.setBottom(hbox);
-        Pane.setPadding(new Insets(10));
-
-        Scene scene = new Scene(Pane);
-
-        dialogStage.initOwner(Window);
-        dialogStage.initStyle(StageStyle.UTILITY);
-        dialogStage.setResizable(false);
-        dialogStage.initModality(Modality.APPLICATION_MODAL);
-        dialogStage.setScene(scene);
-        dialogStage.setTitle("Progress .... ");
-        dialogStage.setOnCloseRequest(a -> {
-            a.consume();
-        });
+        this.Pane.setTop(this.label);
+        this.Pane.setCenter(this.work);
+        this.Pane.setBottom(this.hbox);
+        this.Pane.setPadding(new Insets((double)10.0F));
+        Scene scene = new Scene(this.Pane);
+        this.dialogStage.initOwner(this.Window);
+        this.dialogStage.initStyle(StageStyle.UTILITY);
+        this.dialogStage.setResizable(false);
+        this.dialogStage.initModality(Modality.APPLICATION_MODAL);
+        this.dialogStage.setScene(scene);
+        this.dialogStage.setTitle("Progress .... ");
+        this.dialogStage.setOnCloseRequest((a) -> a.consume());
     }
 
     public DoubleProperty GetProgress() {
-        return progressbar.progressProperty();
+        return this.progressbar.progressProperty();
     }
 
     public StringProperty GetStringProgress() {
-        return StringProgress;
+        return this.StringProgress;
     }
 
     public void show() {
         Platform.runLater(new Runnable() {
-            @Override
             public void run() {
-                dialogStage.show();
+                ProgressWindow.this.dialogStage.show();
             }
         });
-
     }
 
     public void close() {
         Platform.runLater(new Runnable() {
-            @Override
             public void run() {
-                dialogStage.close();
+                ProgressWindow.this.dialogStage.close();
             }
         });
     }
-
 }

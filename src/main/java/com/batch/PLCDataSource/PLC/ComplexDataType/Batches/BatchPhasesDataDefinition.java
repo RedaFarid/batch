@@ -8,80 +8,77 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.Alarming;
 import com.batch.PLCDataSource.PLC.ComplexDataType.Logging;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowAttripute;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.*;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.Address;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.batch.Utilities.LogIdentefires;
-
+import com.google.common.collect.Lists;
 
 public class BatchPhasesDataDefinition extends RowDataDefinition {
-
     private int InAddressTemp = 2;
     private int OutAddressTemp = 2;
     private int bitIncrement = 0;
-
     private String StepNo;
     private String unit = "";
-
     private final PhaseRepository phaseRepository;
 
     public BatchPhasesDataDefinition(String name, String unit) {
         super(name, 6, 6);
         this.unit = unit;
-        this.phaseRepository = ApplicationContext.applicationContext.getBean(PhaseRepository.class);
+        this.phaseRepository = (PhaseRepository)ApplicationContext.applicationContext.getBean(PhaseRepository.class);
     }
 
-    @Override
     public void createNewDeviceDataModel(int InAddress, int OutAddress) {
-
-        //Status
-        addAttribute(BatchControl.PhaseIn, EDT.Integer, new Address(InAddress, 0), new IntegerDataType(0), In, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-        addAttribute(BatchControl.Status, EDT.Integer, new Address(InAddress + 2, 0), new IntegerDataType(0), In, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-
-        //Orders
-        addAttribute(BatchControl.PhaseOut, EDT.Integer, new Address(OutAddress, 0), new IntegerDataType(0), Out, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-        addAttribute(BatchControl.Order, EDT.Integer, new Address(OutAddress + 2, 0), new IntegerDataType(0), Out, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-
-        InAddressTemp = 4;
-        OutAddressTemp = 4;
-        PhasesAttributes.getAttributes().addNewStep(StepNo);
-        phaseRepository.findAll().stream().filter(Phase -> Phase.getUnit().equals(unit)).forEachOrdered(phase -> {
-            PhasesAttributes.getAttributes().addNewPhase(StepNo, phase.getName());
-            phase.getParameters().forEach(para -> {
+        this.addAttribute(BatchControl.PhaseIn, EDT.Integer, new Address(InAddress, 0), new IntegerDataType(0), true, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
+        this.addAttribute(BatchControl.Status, EDT.Integer, new Address(InAddress + 2, 0), new IntegerDataType(0), true, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
+        this.addAttribute(BatchControl.PhaseOut, EDT.Integer, new Address(OutAddress, 0), new IntegerDataType(0), false, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
+        this.addAttribute(BatchControl.Order, EDT.Integer, new Address(OutAddress + 2, 0), new IntegerDataType(0), false, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
+        this.InAddressTemp = 4;
+        this.OutAddressTemp = 4;
+        PhasesAttributes.getAttributes().addNewStep(this.StepNo);
+        Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((Phase) -> Phase.getUnit().equals(this.unit)).forEachOrdered((phase) -> {
+            PhasesAttributes.getAttributes().addNewPhase(this.StepNo, phase.getName());
+            phase.getParameters().forEach((para) -> {
                 AttributeName inAttributeName = new AttributeName(phase.getName(), para.getName());
                 AttributeName outAttributeName = new AttributeName(phase.getName(), para.getName());
-                PhasesAttributes.getAttributes().addAttributeForPhaseAndParameter(StepNo, phase.getName(), para.getName() + "IN", inAttributeName);
-                PhasesAttributes.getAttributes().addAttributeForPhaseAndParameter(StepNo, phase.getName(), para.getName() + "OUT", outAttributeName);
+                PhasesAttributes.getAttributes().addAttributeForPhaseAndParameter(this.StepNo, phase.getName(), para.getName() + "IN", inAttributeName);
+                PhasesAttributes.getAttributes().addAttributeForPhaseAndParameter(this.StepNo, phase.getName(), para.getName() + "OUT", outAttributeName);
                 if (para.getType().equals(PhaseParameterType.Check.name())) {
-                    addAttribute(inAttributeName, EDT.Boolean, new Address(InAddress + InAddressTemp, bitIncrement), new BooleanDataType(Boolean.FALSE), In, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-                    addAttribute(outAttributeName, EDT.Boolean, new Address(OutAddress + OutAddressTemp, bitIncrement), new BooleanDataType(Boolean.FALSE), Out, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-                    bitIncrement++;
-                    if (bitIncrement > 7) {
-                        bitIncrement = 0;
-                        InAddressTemp += 1;
-                        OutAddressTemp += 1;
+                    this.addAttribute(inAttributeName, EDT.Boolean, new Address(InAddress + this.InAddressTemp, this.bitIncrement), new BooleanDataType(Boolean.FALSE), true, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
+                    this.addAttribute(outAttributeName, EDT.Boolean, new Address(OutAddress + this.OutAddressTemp, this.bitIncrement), new BooleanDataType(Boolean.FALSE), false, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
+                    ++this.bitIncrement;
+                    if (this.bitIncrement > 7) {
+                        this.bitIncrement = 0;
+                        ++this.InAddressTemp;
+                        ++this.OutAddressTemp;
                     }
-                } else if (para.getType().equals(PhaseParameterType.Value.name())){
-                    addAttribute(inAttributeName, EDT.Real, new Address(InAddress + InAddressTemp, 0), new RealDataType(0.0f), In, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-                    addAttribute(outAttributeName, EDT.Real, new Address(OutAddress + OutAddressTemp, 0), new RealDataType(0.0f), Out, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
-                    InAddressTemp += 4;
-                    OutAddressTemp += 4;
+                } else if (para.getType().equals(PhaseParameterType.Value.name())) {
+                    this.addAttribute(inAttributeName, EDT.Real, new Address(InAddress + this.InAddressTemp, 0), new RealDataType(0.0F), true, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
+                    this.addAttribute(outAttributeName, EDT.Real, new Address(OutAddress + this.OutAddressTemp, 0), new RealDataType(0.0F), false, Alarming.Disable, LogIdentefires.Info, Logging.Disable);
+                    this.InAddressTemp += 4;
+                    this.OutAddressTemp += 4;
                 }
+
             });
         });
-        if ((InAddressTemp % 2) == 0) {
-            if (bitIncrement != 0) {
-                InAddressTemp += 2;
-                OutAddressTemp += 2;
+        if (this.InAddressTemp % 2 == 0) {
+            if (this.bitIncrement != 0) {
+                this.InAddressTemp += 2;
+                this.OutAddressTemp += 2;
             }
         } else {
-            InAddressTemp += 1;
-            OutAddressTemp += 1;
+            ++this.InAddressTemp;
+            ++this.OutAddressTemp;
         }
-        setInAddress(InAddressTemp);
-        setOutAddress(OutAddressTemp);
+
+        this.setInAddress(this.InAddressTemp);
+        this.setOutAddress(this.OutAddressTemp);
     }
 
     public String getStepNo() {
-        return StepNo;
+        return this.StepNo;
     }
 
     public void setStepNo(String StepNo) {
@@ -89,7 +86,6 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
     }
 
     private static class AttributeName implements RowAttripute {
-
         private String phase;
         private String Parameter;
 
@@ -99,7 +95,7 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
         }
 
         public String getPhase() {
-            return phase;
+            return this.phase;
         }
 
         public void setPhase(String phase) {
@@ -107,16 +103,16 @@ public class BatchPhasesDataDefinition extends RowDataDefinition {
         }
 
         public String getParameter() {
-            return Parameter;
+            return this.Parameter;
         }
 
         public void setParameter(String Parameter) {
             this.Parameter = Parameter;
         }
 
-        @Override
         public String toString() {
-            return phase + " " +  Parameter + hashCode();
+            String var10000 = this.phase;
+            return var10000 + " " + this.Parameter + this.hashCode();
         }
     }
 }

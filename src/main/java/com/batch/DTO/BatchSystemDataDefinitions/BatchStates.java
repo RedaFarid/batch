@@ -1,5 +1,5 @@
-package com.batch.DTO.BatchSystemDataDefinitions;
 
+package com.batch.DTO.BatchSystemDataDefinitions;
 
 public enum BatchStates {
     Idle,

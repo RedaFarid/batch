@@ -8,26 +8,25 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+
 @Configuration
 @EnableCaching
 public class CachingConfig {
-
     @Bean
     @Primary
     public CacheManager cacheManagerForRecipes() {
-        return new ConcurrentMapCacheManager("recipes");
+        return new ConcurrentMapCacheManager(new String[]{"recipes"});
     }
 
     @Bean
-    @Qualifier(value = "Batch")
+    @Qualifier("Batch")
     public CacheManager cacheManagerForBatches() {
-        return new ConcurrentMapCacheManager("batches");
+        return new ConcurrentMapCacheManager(new String[]{"batches"});
     }
 
     @Bean
-    @Qualifier(value = "Recipe_Config")
+    @Qualifier("Recipe_Config")
     public CacheManager cacheManagerForRecipeConfig() {
-        return new ConcurrentMapCacheManager("recipe_config");
+        return new ConcurrentMapCacheManager(new String[]{"recipe_config"});
     }
-
 }

@@ -7,77 +7,79 @@ import com.batch.Database.Repositories.LogRepository;
 import com.batch.Services.UserAdministration.UserEvent;
 import com.batch.Services.UserAdministration.UserEventMessage;
 import com.batch.Utilities.LogIdentefires;
-import lombok.RequiredArgsConstructor;
+import com.google.common.collect.Lists;
+import java.util.LinkedList;
+import java.util.List;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
-import java.util.List;
-
 @Service
-@RequiredArgsConstructor
 public class LoggingService {
-
-    private long greaterID = 0;
+    private long greaterID = 0L;
     private final LogRepository logRepository;
-
     private Log lastLog;
-
     private User currentUser = new User("System");
 
-
     public List<Log> getAllLogs() {
-        return logRepository.findAll();
+        return Lists.newArrayList(this.logRepository.findAll());
     }
 
     public List<Log> getLogsForAutoUpdateWindow() {
-        List<Log> logs = new LinkedList<>();
+        List<Log> logs = new LinkedList();
+
         try {
-            logs = logRepository.getLogsTillID(greaterID);
-            long x = logs.isEmpty() ? 0 : logs.get(0).getId();
-            greaterID = Math.max(x, greaterID);
+            logs = this.logRepository.getLogsTillID(this.greaterID);
+            long x = logs.isEmpty() ? 0L : ((Log)logs.get(0)).getId();
+            this.greaterID = Math.max(x, this.greaterID);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return logs;
     }
 
     @Async
     public void LogRecord(Log log) {
-        log.setUserName(currentUser.getUserName());
-        log.setGroupName(currentUser.getGroup() == null ? "" : currentUser.getGroup());
-        logRepository.save(log);
+        log.setUserName(this.currentUser.getUserName());
+        log.setGroupName(this.currentUser.getGroup() == null ? "" : this.currentUser.getGroup());
+        this.logRepository.save(log);
     }
 
     @Async
     public void LogRecordForException(String source, Exception e) {
         try {
             StringBuilder message = new StringBuilder();
-            for (StackTraceElement object : e.getStackTrace()) {
+
+            for(StackTraceElement object : e.getStackTrace()) {
                 message.append(object.toString()).append("\n");
             }
+
             Log log = new Log(LogIdentefires.System.name(), message.toString());
             log.setIdentifier(LogIdentefires.System.name());
             log.setSource(source);
-
-            logRepository.save(log);
+            this.logRepository.save(log);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
     }
 
     public Log getLastEnteredLog() {
-        if (lastLog == null){
-            lastLog = logRepository.findLast().orElse(new Log());
+        if (this.lastLog == null) {
+            this.lastLog = (Log)this.logRepository.findLast().orElse(new Log());
         }
-        return lastLog;
+
+        return this.lastLog;
     }
 
-
     @EventListener
-    public void newUserLogIn(UserEvent event){
-        final UserEventMessage message = event.getMessage();
-        currentUser = message.getUser();
+    public void newUserLogIn(UserEvent event) {
+        UserEventMessage message = event.getMessage();
+        this.currentUser = message.getUser();
+    }
+
+    public LoggingService(final LogRepository logRepository) {
+        this.logRepository = logRepository;
     }
 }

@@ -1,8 +1,7 @@
+
 package com.batch.PLCDataSource.ModBus;
 
-
 import com.batch.PLCDataSource.ModBus.Exceptions.PacketShiftException;
-
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ModbusClientUpdated {
     private AtomicInteger transactionIdentifierCounter = new AtomicInteger(0);
     private Socket tcpClientSocket = new Socket();
-    protected String ipAddress = "190.168.0.2";
+    protected String ipAddress = "190.168.0.1";
     protected int port = 502;
     private byte[] transactionIdentifier = new byte[2];
     private byte[] protocolIdentifier = new byte[2];
@@ -44,62 +43,51 @@ public class ModbusClientUpdated {
     }
 
     public synchronized int[] ReadHoldingRegisters(int startingAddress, int quantity) throws Exception {
-        if (transactionIdentifierCounter.get() > 120) {
-            transactionIdentifierCounter.set(0);
+        if (this.transactionIdentifierCounter.get() > 120) {
+            this.transactionIdentifierCounter.set(0);
         }
+
         if (this.tcpClientSocket == null) {
             throw new Exception("connection Error");
         } else if (startingAddress > 65535 | quantity > 120) {
             throw new IllegalArgumentException("Starting adress must be 0 - 65535; quantity must be 0 - 125");
         } else {
             int[] response = new int[quantity];
-            this.transactionIdentifier = toByteArray(transactionIdentifierCounter.getAndIncrement());
+            this.transactionIdentifier = toByteArray(this.transactionIdentifierCounter.getAndIncrement());
             this.protocolIdentifier = toByteArray(0);
             this.length = toByteArray(6);
             this.functionCode = 3;
             this.startingAddress = toByteArray(startingAddress);
             this.quantity = toByteArray(quantity);
-            byte[] data = new byte[]{
-                    this.transactionIdentifier[1],
-                    this.transactionIdentifier[0],
-                    this.protocolIdentifier[1],
-                    this.protocolIdentifier[0],
-                    this.length[1],
-                    this.length[0],
-                    this.unitIdentifier,
-                    this.functionCode,
-                    this.startingAddress[1],
-                    this.startingAddress[0],
-                    this.quantity[1],
-                    this.quantity[0],
-                    this.crc[0],
-                    this.crc[1]};
+            byte[] data = new byte[]{this.transactionIdentifier[1], this.transactionIdentifier[0], this.protocolIdentifier[1], this.protocolIdentifier[0], this.length[1], this.length[0], this.unitIdentifier, this.functionCode, this.startingAddress[1], this.startingAddress[0], this.quantity[1], this.quantity[0], this.crc[0], this.crc[1]};
             int i = 0;
             if (this.tcpClientSocket.isConnected()) {
                 this.outStream.write(data, 0, data.length - 2);
                 data = new byte[2100];
                 i = this.inStream.read(data, 0, data.length);
             }
-            if ((data[0] != transactionIdentifier[1]) || (data[1] != transactionIdentifier[0])) {
-                System.err.println("Recieve " + data[0] + " " + data[1] + " Send " + transactionIdentifier[1] + " " + transactionIdentifier[0] + "        " + i);
-                throw new PacketShiftException();
-            }
 
-            if (data[7] == 131 & data[8] == 1) {
-                throw new Exception("Function code not supported by master");
-            } else if (data[7] == 131 & data[8] == 2) {
-                throw new Exception("Starting adress invalid or starting adress + quantity invalid");
-            } else if (data[7] == 131 & data[8] == 3) {
-                throw new Exception("Quantity invalid");
-            } else if (data[7] == 131 & data[8] == 4) {
-                throw new Exception("Error reading");
-            } else {
-                for (i = 0; i < quantity; ++i) {
-                    byte[] bytes = new byte[]{data[9 + i * 2], data[9 + i * 2 + 1]};
-                    ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-                    response[i] = byteBuffer.getShort();
+            if (data[0] == this.transactionIdentifier[1] && data[1] == this.transactionIdentifier[0]) {
+                if (data[7] == 131 & data[8] == 1) {
+                    throw new Exception("Function code not supported by master");
+                } else if (data[7] == 131 & data[8] == 2) {
+                    throw new Exception("Starting adress invalid or starting adress + quantity invalid");
+                } else if (data[7] == 131 & data[8] == 3) {
+                    throw new Exception("Quantity invalid");
+                } else if (data[7] == 131 & data[8] == 4) {
+                    throw new Exception("Error reading");
+                } else {
+                    for(int var8 = 0; var8 < quantity; ++var8) {
+                        byte[] bytes = new byte[]{data[9 + var8 * 2], data[9 + var8 * 2 + 1]};
+                        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+                        response[var8] = byteBuffer.getShort();
+                    }
+
+                    return response;
                 }
-                return response;
+            } else {
+                System.err.println("Recieve " + data[0] + " " + data[1] + " Send " + this.transactionIdentifier[1] + " " + this.transactionIdentifier[0] + "        " + i);
+                throw new PacketShiftException();
             }
         }
     }
@@ -109,43 +97,43 @@ public class ModbusClientUpdated {
             throw new Exception("connection error");
         } else {
             byte[] registerValue = new byte[2];
-            this.transactionIdentifier = toByteArray(transactionIdentifierCounter.getAndIncrement());
+            this.transactionIdentifier = toByteArray(this.transactionIdentifierCounter.getAndIncrement());
             this.protocolIdentifier = toByteArray(0);
             this.length = toByteArray(6);
             this.functionCode = 6;
             this.startingAddress = toByteArray(startingAddress);
-            registerValue = toByteArray((short) value);
+            registerValue = toByteArray((short)value);
             byte[] data = new byte[]{this.transactionIdentifier[1], this.transactionIdentifier[0], this.protocolIdentifier[1], this.protocolIdentifier[0], this.length[1], this.length[0], this.unitIdentifier, this.functionCode, this.startingAddress[1], this.startingAddress[0], registerValue[1], registerValue[0], this.crc[0], this.crc[1]};
-
             if (this.tcpClientSocket.isConnected()) {
                 this.outStream.write(data, 0, data.length - 2);
                 data = new byte[2100];
-                int numberOfBytes = this.inStream.read(data, 0, data.length);
-            }
-            if ((data[0] != transactionIdentifier[1]) || (data[1] != transactionIdentifier[0])) {
-                System.err.println("Send " + data[0] + " " + data[1] + " Send " + transactionIdentifier[1] + " " + transactionIdentifier[0]);
-                throw new PacketShiftException();
+                this.inStream.read(data, 0, data.length);
             }
 
-            if ((data[7] & 255) == 134 & data[8] == 1) {
-                throw new Exception("Function code not supported by master");
-            } else if ((data[7] & 255) == 134 & data[8] == 2) {
-                throw new Exception("Starting address invalid or starting address + quantity invalid");
-            } else if ((data[7] & 255) == 134 & data[8] == 3) {
-                throw new Exception("quantity invalid");
-            } else if ((data[7] & 255) == 134 & data[8] == 4) {
-                throw new Exception("error reading");
+            if (data[0] == this.transactionIdentifier[1] && data[1] == this.transactionIdentifier[0]) {
+                if ((data[7] & 255) == 134 & data[8] == 1) {
+                    throw new Exception("Function code not supported by master");
+                } else if ((data[7] & 255) == 134 & data[8] == 2) {
+                    throw new Exception("Starting address invalid or starting address + quantity invalid");
+                } else if ((data[7] & 255) == 134 & data[8] == 3) {
+                    throw new Exception("quantity invalid");
+                } else if ((data[7] & 255) == 134 & data[8] == 4) {
+                    throw new Exception("error reading");
+                }
+            } else {
+                System.err.println("Send " + data[0] + " " + data[1] + " Send " + this.transactionIdentifier[1] + " " + this.transactionIdentifier[0]);
+                throw new PacketShiftException();
             }
         }
     }
 
     public synchronized void WriteMultipleRegisters(int startingAddress, int[] values) throws Exception {
-        byte byteCount = (byte) (values.length * 2);
+        byte byteCount = (byte)(values.length * 2);
         byte[] quantityOfOutputs = toByteArray(values.length);
         if (this.tcpClientSocket == null & !this.udpFlag) {
             throw new Exception("connection error");
         } else {
-            this.transactionIdentifier = toByteArray(transactionIdentifierCounter.getAndIncrement());
+            this.transactionIdentifier = toByteArray(this.transactionIdentifierCounter.getAndIncrement());
             this.protocolIdentifier = toByteArray(0);
             this.length = toByteArray(7 + values.length * 2);
             this.functionCode = 16;
@@ -165,7 +153,7 @@ public class ModbusClientUpdated {
             data[11] = quantityOfOutputs[0];
             data[12] = byteCount;
 
-            for (int i = 0; i < values.length; ++i) {
+            for(int i = 0; i < values.length; ++i) {
                 byte[] singleRegisterValue = toByteArray(values[i]);
                 data[13 + i * 2] = singleRegisterValue[1];
                 data[14 + i * 2] = singleRegisterValue[0];
@@ -174,21 +162,22 @@ public class ModbusClientUpdated {
             if (this.tcpClientSocket.isConnected()) {
                 this.outStream.write(data, 0, data.length - 2);
                 data = new byte[2100];
-                int numberOfBytes = this.inStream.read(data, 0, data.length);
-            }
-            if ((data[0] != transactionIdentifier[1]) || (data[1] != transactionIdentifier[0])) {
-                System.err.println("Send " + data[0] + " " + data[1] + " Send " + transactionIdentifier[1] + " " + transactionIdentifier[0]);
-                throw new PacketShiftException();
+                this.inStream.read(data, 0, data.length);
             }
 
-            if ((data[7] & 255) == 144 & data[8] == 1) {
-                throw new Exception("Function code not supported by master");
-            } else if ((data[7] & 255) == 144 & data[8] == 2) {
-                throw new Exception("Starting address invalid or starting address + quantity invalid");
-            } else if ((data[7] & 255) == 144 & data[8] == 3) {
-                throw new Exception("quantity invalid");
-            } else if ((data[7] & 255) == 144 & data[8] == 4) {
-                throw new Exception("error reading");
+            if (data[0] == this.transactionIdentifier[1] && data[1] == this.transactionIdentifier[0]) {
+                if ((data[7] & 255) == 144 & data[8] == 1) {
+                    throw new Exception("Function code not supported by master");
+                } else if ((data[7] & 255) == 144 & data[8] == 2) {
+                    throw new Exception("Starting address invalid or starting address + quantity invalid");
+                } else if ((data[7] & 255) == 144 & data[8] == 3) {
+                    throw new Exception("quantity invalid");
+                } else if ((data[7] & 255) == 144 & data[8] == 4) {
+                    throw new Exception("error reading");
+                }
+            } else {
+                System.err.println("Send " + data[0] + " " + data[1] + " Send " + this.transactionIdentifier[1] + " " + this.transactionIdentifier[0]);
+                throw new PacketShiftException();
             }
         }
     }
@@ -210,15 +199,16 @@ public class ModbusClientUpdated {
     }
 
     public static byte[] toByteArray(int value) {
-        byte[] result = new byte[]{(byte) value, (byte) (value >> 8)};
+        byte[] result = new byte[]{(byte)value, (byte)(value >> 8)};
         return result;
     }
 
     public boolean isConnected() {
-        if ((tcpClientSocket != null)) {
-            return (tcpClientSocket.isConnected() && (outStream != null) && (inStream != null));
+        if (this.tcpClientSocket == null) {
+            return false;
+        } else {
+            return this.tcpClientSocket.isConnected() && this.outStream != null && this.inStream != null;
         }
-        return false;
     }
 
     public String getIpAddress() {
