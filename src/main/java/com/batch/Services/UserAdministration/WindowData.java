@@ -1,4 +1,3 @@
-
 package com.batch.Services.UserAdministration;
 
 import com.google.common.base.Objects;
@@ -6,11 +5,18 @@ import com.google.common.base.Objects;
 public class WindowData {
     private String windowName;
 
+    public WindowData(final String windowName) {
+        this.windowName = windowName;
+    }
+
+    public WindowData() {
+    }
+
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         } else if (o != null && this.getClass() == o.getClass()) {
-            WindowData that = (WindowData)o;
+            WindowData that = (WindowData) o;
             return Objects.equal(this.windowName, that.windowName);
         } else {
             return false;
@@ -18,7 +24,7 @@ public class WindowData {
     }
 
     public int hashCode() {
-        return Objects.hashCode(new Object[]{this.windowName});
+        return Objects.hashCode(this.windowName);
     }
 
     public String toString() {
@@ -31,12 +37,5 @@ public class WindowData {
 
     public void setWindowName(final String windowName) {
         this.windowName = windowName;
-    }
-
-    public WindowData(final String windowName) {
-        this.windowName = windowName;
-    }
-
-    public WindowData() {
     }
 }

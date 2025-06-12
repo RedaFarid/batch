@@ -1,4 +1,3 @@
-
 package com.batch.Database.Entities;
 
 import org.springframework.data.annotation.Id;
@@ -37,48 +36,60 @@ public class User {
         this.userName = userName;
     }
 
+    public User(final Long id, final String userName, final String password, final boolean AutoLogOff, final long LogOffTime, final String Group) {
+        this.id = id;
+        this.userName = userName;
+        this.password = password;
+        this.AutoLogOff = AutoLogOff;
+        this.LogOffTime = LogOffTime;
+        this.Group = Group;
+    }
+
+    public User() {
+    }
+
     public Long getId() {
         return this.id;
-    }
-
-    public String getUserName() {
-        return this.userName;
-    }
-
-    public String getPassword() {
-        return this.password;
-    }
-
-    public boolean isAutoLogOff() {
-        return this.AutoLogOff;
-    }
-
-    public long getLogOffTime() {
-        return this.LogOffTime;
-    }
-
-    public String getGroup() {
-        return this.Group;
     }
 
     public void setId(final Long id) {
         this.id = id;
     }
 
+    public String getUserName() {
+        return this.userName;
+    }
+
     public void setUserName(final String userName) {
         this.userName = userName;
+    }
+
+    public String getPassword() {
+        return this.password;
     }
 
     public void setPassword(final String password) {
         this.password = password;
     }
 
+    public boolean isAutoLogOff() {
+        return this.AutoLogOff;
+    }
+
     public void setAutoLogOff(final boolean AutoLogOff) {
         this.AutoLogOff = AutoLogOff;
     }
 
+    public long getLogOffTime() {
+        return this.LogOffTime;
+    }
+
     public void setLogOffTime(final long LogOffTime) {
         this.LogOffTime = LogOffTime;
+    }
+
+    public String getGroup() {
+        return this.Group;
     }
 
     public void setGroup(final String Group) {
@@ -88,10 +99,9 @@ public class User {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof User)) {
+        } else if (!(o instanceof User other)) {
             return false;
         } else {
-            User other = (User)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.isAutoLogOff() != other.isAutoLogOff()) {
@@ -132,14 +142,8 @@ public class User {
                 Object this$Group = this.getGroup();
                 Object other$Group = other.getGroup();
                 if (this$Group == null) {
-                    if (other$Group != null) {
-                        return false;
-                    }
-                } else if (!this$Group.equals(other$Group)) {
-                    return false;
-                }
-
-                return true;
+                    return other$Group == null;
+                } else return this$Group.equals(other$Group);
             }
         }
     }
@@ -153,7 +157,7 @@ public class User {
         int result = 1;
         result = result * 59 + (this.isAutoLogOff() ? 79 : 97);
         long $LogOffTime = this.getLogOffTime();
-        result = result * 59 + (int)($LogOffTime >>> 32 ^ $LogOffTime);
+        result = result * 59 + (int) ($LogOffTime >>> 32 ^ $LogOffTime);
         Object $id = this.getId();
         result = result * 59 + ($id == null ? 43 : $id.hashCode());
         Object $userName = this.getUserName();
@@ -168,17 +172,5 @@ public class User {
     public String toString() {
         Long var10000 = this.getId();
         return "User(id=" + var10000 + ", userName=" + this.getUserName() + ", password=" + this.getPassword() + ", AutoLogOff=" + this.isAutoLogOff() + ", LogOffTime=" + this.getLogOffTime() + ", Group=" + this.getGroup() + ")";
-    }
-
-    public User(final Long id, final String userName, final String password, final boolean AutoLogOff, final long LogOffTime, final String Group) {
-        this.id = id;
-        this.userName = userName;
-        this.password = password;
-        this.AutoLogOff = AutoLogOff;
-        this.LogOffTime = LogOffTime;
-        this.Group = Group;
-    }
-
-    public User() {
     }
 }

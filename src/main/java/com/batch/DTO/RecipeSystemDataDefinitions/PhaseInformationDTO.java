@@ -1,5 +1,3 @@
-
-
 package com.batch.DTO.RecipeSystemDataDefinitions;
 
 public class PhaseInformationDTO {

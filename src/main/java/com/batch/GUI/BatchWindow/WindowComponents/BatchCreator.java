@@ -1,13 +1,7 @@
-
-
 package com.batch.GUI.BatchWindow.WindowComponents;
 
 import com.batch.ApplicationContext;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchModel;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchOrders;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchParallelStepsModel;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchStates;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchStepModel;
+import com.batch.DTO.BatchSystemDataDefinitions.*;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
 import com.batch.Database.Entities.Batch;
 import com.batch.Database.Entities.Recipe;
@@ -17,12 +11,6 @@ import com.batch.GUI.BatchWindow.BatchesModel;
 import com.batch.GUI.RecipeEditor.WindowComponents.RecipeTreeItem;
 import com.batch.GUI.RecipeEditor.WindowComponents.TreeItemType;
 import com.batch.Utilities.RestrictiveTextField;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -32,13 +20,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -52,19 +34,15 @@ import javafx.stage.StageStyle;
 import org.apache.commons.lang3.StringUtils;
 import org.controlsfx.dialog.ExceptionDialog;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
 public class BatchCreator extends Stage {
     private static volatile BatchCreator singleton = null;
-    private BorderPane rootPane = new BorderPane();
-    private GridPane parametersPane = new GridPane();
-    private Scene scene;
-    private Stage mainWindow;
-    private TreeView<String> treeView;
-    private RecipeTreeItem root;
-    private ToolBar toolBar;
-    private ToolBar statusBar;
-    private Button CreateBatch;
-    private Recipe selectedRecipe;
-    private Batch createdBatch;
     private final RestrictiveTextField selectedRecipeName;
     private final RestrictiveTextField selectedRecipeID;
     private final RestrictiveTextField batchID;
@@ -81,9 +59,20 @@ public class BatchCreator extends Stage {
     private final Label productNameLabel;
     private final BatchesController controller;
     private final BatchesModel model;
-    private double quantity;
     private final ObjectProperty<Cursor> CURSOR_DEFAULT;
     private final ObjectProperty<Cursor> CURSOR_WAIT;
+    private final BorderPane rootPane = new BorderPane();
+    private final GridPane parametersPane = new GridPane();
+    private final Scene scene;
+    private final Stage mainWindow;
+    private final TreeView<String> treeView;
+    private final RecipeTreeItem root;
+    private final ToolBar toolBar;
+    private final ToolBar statusBar;
+    private final Button CreateBatch;
+    private Recipe selectedRecipe;
+    private Batch createdBatch;
+    private double quantity;
 
     public BatchCreator(Stage stage) {
         this.scene = new Scene(this.rootPane);
@@ -106,11 +95,11 @@ public class BatchCreator extends Stage {
         this.batchCommentLabel = new Label("Batch comment");
         this.clientNameLabel = new Label("Client name");
         this.productNameLabel = new Label("Product name");
-        this.quantity = (double)0.0F;
+        this.quantity = 0.0F;
         this.CURSOR_DEFAULT = new SimpleObjectProperty(Cursor.DEFAULT);
         this.CURSOR_WAIT = new SimpleObjectProperty(Cursor.WAIT);
         this.mainWindow = stage;
-        this.controller = (BatchesController)ApplicationContext.applicationContext.getBean(BatchesController.class);
+        this.controller = ApplicationContext.applicationContext.getBean(BatchesController.class);
         this.model = this.controller.getModel();
         this.graphicsBuilder();
         this.actionHandler();
@@ -118,7 +107,7 @@ public class BatchCreator extends Stage {
     }
 
     public static BatchCreator getWindow(Stage stage) {
-        synchronized(BatchCreator.class) {
+        synchronized (BatchCreator.class) {
             if (singleton == null) {
                 singleton = new BatchCreator(stage);
             }
@@ -128,38 +117,38 @@ public class BatchCreator extends Stage {
     }
 
     private void graphicsBuilder() {
-        this.selectedRecipeID.setPrefWidth((double)150.0F);
-        this.selectedRecipeName.setPrefWidth((double)300.0F);
-        this.batchID.setPrefWidth((double)150.0F);
-        this.batchQuantity.setPrefWidth((double)300.0F);
+        this.selectedRecipeID.setPrefWidth(150.0F);
+        this.selectedRecipeName.setPrefWidth(300.0F);
+        this.batchID.setPrefWidth(150.0F);
+        this.batchQuantity.setPrefWidth(300.0F);
         this.batchQuantity.setPromptText("0.0");
         this.batchQuantity.setRestrict("[0-9].");
         this.batchQuantity.setMaxLength(10);
-        this.clientName.setPrefWidth((double)610.0F);
-        this.batchComment.setPrefWidth((double)610.0F);
-        this.productName.setPrefWidth((double)610.0F);
-        this.selectedRecipeIDLabel.setPrefWidth((double)150.0F);
-        this.selectedRecipeNameLabel.setPrefWidth((double)150.0F);
-        this.batchIDLabel.setPrefWidth((double)150.0F);
-        this.batchQuantityLabel.setPrefWidth((double)150.0F);
-        this.batchCommentLabel.setPrefWidth((double)150.0F);
-        this.clientNameLabel.setPrefWidth((double)150.0F);
-        this.productNameLabel.setPrefWidth((double)150.0F);
+        this.clientName.setPrefWidth(610.0F);
+        this.batchComment.setPrefWidth(610.0F);
+        this.productName.setPrefWidth(610.0F);
+        this.selectedRecipeIDLabel.setPrefWidth(150.0F);
+        this.selectedRecipeNameLabel.setPrefWidth(150.0F);
+        this.batchIDLabel.setPrefWidth(150.0F);
+        this.batchQuantityLabel.setPrefWidth(150.0F);
+        this.batchCommentLabel.setPrefWidth(150.0F);
+        this.clientNameLabel.setPrefWidth(150.0F);
+        this.productNameLabel.setPrefWidth(150.0F);
         this.selectedRecipeID.setEditable(false);
         this.selectedRecipeName.setEditable(false);
-        this.CreateBatch.setPrefWidth((double)150.0F);
-        this.treeView.setMaxWidth((double)600.0F);
+        this.CreateBatch.setPrefWidth(150.0F);
+        this.treeView.setMaxWidth(600.0F);
         this.treeView.setRoot(this.root);
-        this.treeView.setPadding(new Insets((double)0.0F, (double)0.0F, (double)20.0F, (double)0.0F));
-        this.toolBar.getItems().addAll(new Node[]{this.CreateBatch});
-        this.statusBar.getItems().addAll(new Node[]{new Label("Batch interfece status")});
+        this.treeView.setPadding(new Insets(0.0F, 0.0F, 20.0F, 0.0F));
+        this.toolBar.getItems().addAll(this.CreateBatch);
+        this.statusBar.getItems().addAll(new Label("Batch interfece status"));
         this.rootPane.setTop(this.toolBar);
         this.rootPane.setBottom(this.statusBar);
         this.rootPane.setCenter(this.parametersPane);
         this.rootPane.setLeft(this.treeView);
-        this.parametersPane.setVgap((double)5.0F);
-        this.parametersPane.setHgap((double)5.0F);
-        this.parametersPane.setPadding(new Insets((double)30.0F));
+        this.parametersPane.setVgap(5.0F);
+        this.parametersPane.setHgap(5.0F);
+        this.parametersPane.setPadding(new Insets(30.0F));
         this.parametersPane.add(this.selectedRecipeIDLabel, 1, 1);
         this.parametersPane.add(this.selectedRecipeID, 2, 1);
         this.parametersPane.add(this.selectedRecipeNameLabel, 3, 1);
@@ -195,7 +184,7 @@ public class BatchCreator extends Stage {
                             if (!StringUtils.isBlank(this.batchQuantity.getText()) && !StringUtils.isBlank(this.selectedRecipeID.getText())) {
                                 this.quantity = Double.parseDouble(this.batchQuantity.getText());
                                 this.controller.getRecipeConfig().ifPresentOrElse((recipeConfig) -> {
-                                    if (!(this.quantity > recipeConfig.getMaxBatchSize()) && this.quantity != (double)0.0F) {
+                                    if (!(this.quantity > recipeConfig.getMaxBatchSize()) && this.quantity != (double) 0.0F) {
                                         try {
                                             this.controller.parseRecipeToDetailsString(this.selectedRecipe).flatMap((details) -> this.showInfoWindow("Recipe details", details)).ifPresent((buttonType) -> {
                                                 if (buttonType.equals(ButtonType.OK)) {
@@ -205,8 +194,8 @@ public class BatchCreator extends Stage {
                                                     batchModel.setParallelSteps(listOfBatchParallelStepModel);
                                                     this.selectedRecipe.getModel().getParallelSteps().forEach((recipeParallelStep) -> listOfBatchParallelStepModel.add(new BatchParallelStepsModel(recipeParallelStep.getSteps().stream().map((item) -> {
                                                         if (item.getPhaseType() != null && item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
-                                                            double percentage = (Double)item.getValueParametersData().get("Percentage %");
-                                                            double totalQty = this.quantity * percentage / (double)100.0F;
+                                                            double percentage = item.getValueParametersData().get("Percentage %");
+                                                            double totalQty = this.quantity * percentage / (double) 100.0F;
                                                             item.getValueParametersData().replace("Percentage %", totalQty);
                                                         }
 
@@ -256,7 +245,7 @@ public class BatchCreator extends Stage {
     private void onLoadRecipeAtClick(MouseEvent action) {
         try {
             if (action.getButton().equals(MouseButton.PRIMARY) && action.getClickCount() == 2) {
-                RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+                RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
                 if (parent != null && parent.isLeaf() && parent.getItemType().equals(TreeItemType.Recipe)) {
                     Recipe recipe = parent.getRecipe();
                     this.selectedRecipe = recipe;
@@ -342,22 +331,22 @@ public class BatchCreator extends Stage {
             result.set(Optional.of(ButtonType.CANCEL));
             stage.hide();
         });
-        ok.setPrefWidth((double)100.0F);
-        cancel.setPrefWidth((double)100.0F);
-        HBox hBox = new HBox(new Node[]{ok, cancel});
-        hBox.setSpacing((double)5.0F);
-        hBox.setPadding(new Insets((double)5.0F));
-        VBox vBox = new VBox(new Node[]{label, textArea, hBox});
-        vBox.setPadding(new Insets((double)5.0F));
-        vBox.setMinWidth((double)1300.0F);
-        vBox.setMinHeight((double)500.0F);
+        ok.setPrefWidth(100.0F);
+        cancel.setPrefWidth(100.0F);
+        HBox hBox = new HBox(ok, cancel);
+        hBox.setSpacing(5.0F);
+        hBox.setPadding(new Insets(5.0F));
+        VBox vBox = new VBox(label, textArea, hBox);
+        vBox.setPadding(new Insets(5.0F));
+        vBox.setMinWidth(1300.0F);
+        vBox.setMinHeight(500.0F);
         textArea.prefHeightProperty().bind(vBox.heightProperty().subtract(80));
         stage.setScene(new Scene(vBox));
         stage.setTitle("Please confirm ");
         stage.initOwner(this);
         stage.initStyle(StageStyle.UTILITY);
         stage.showAndWait();
-        return (Optional)result.get();
+        return result.get();
     }
 
     private void showErrorWindow(String header, String content) {
@@ -374,7 +363,7 @@ public class BatchCreator extends Stage {
         Platform.runLater(() -> {
             ExceptionDialog exceptionDialog = new ExceptionDialog(e);
             exceptionDialog.setHeaderText(header);
-            exceptionDialog.getDialogPane().setMaxWidth((double)500.0F);
+            exceptionDialog.getDialogPane().setMaxWidth(500.0F);
             exceptionDialog.initOwner(this.mainWindow);
             exceptionDialog.initModality(Modality.WINDOW_MODAL);
             exceptionDialog.initStyle(StageStyle.UTILITY);

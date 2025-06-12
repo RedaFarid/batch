@@ -1,4 +1,3 @@
-
 package com.batch.Services.NotificationService.BackgroundServicesNotifier;
 
 import com.batch.Services.NotificationService.AcknowledgementObject;
@@ -7,13 +6,13 @@ public class BGAcknowledgementObject implements AcknowledgementObject {
     private final String serviceName;
     private final String familyName;
 
-    public String toString() {
-        return "Back ground Acknowledgement Object -->  serviceName = %-20s  familyName=%-50s ".formatted(this.serviceName, this.familyName);
-    }
-
     public BGAcknowledgementObject(final String serviceName, final String familyName) {
         this.serviceName = serviceName;
         this.familyName = familyName;
+    }
+
+    public String toString() {
+        return "Back ground Acknowledgement Object -->  serviceName = %-20s  familyName=%-50s ".formatted(this.serviceName, this.familyName);
     }
 
     public String getServiceName() {
@@ -27,10 +26,9 @@ public class BGAcknowledgementObject implements AcknowledgementObject {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof BGAcknowledgementObject)) {
+        } else if (!(o instanceof BGAcknowledgementObject other)) {
             return false;
         } else {
-            BGAcknowledgementObject other = (BGAcknowledgementObject)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -47,14 +45,8 @@ public class BGAcknowledgementObject implements AcknowledgementObject {
                 Object this$familyName = this.getFamilyName();
                 Object other$familyName = other.getFamilyName();
                 if (this$familyName == null) {
-                    if (other$familyName != null) {
-                        return false;
-                    }
-                } else if (!this$familyName.equals(other$familyName)) {
-                    return false;
-                }
-
-                return true;
+                    return other$familyName == null;
+                } else return this$familyName.equals(other$familyName);
             }
         }
     }

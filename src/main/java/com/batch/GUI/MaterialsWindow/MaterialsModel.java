@@ -1,5 +1,3 @@
-
-
 package com.batch.GUI.MaterialsWindow;
 
 import com.batch.Database.Entities.Material;
@@ -16,12 +14,12 @@ public class MaterialsModel {
         return this.list;
     }
 
-    public BooleanProperty getIsShown() {
-        return this.isShown;
-    }
-
     public void setList(final ObservableList<Material> list) {
         this.list = list;
+    }
+
+    public BooleanProperty getIsShown() {
+        return this.isShown;
     }
 
     public void setIsShown(final BooleanProperty isShown) {
@@ -31,10 +29,9 @@ public class MaterialsModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof MaterialsModel)) {
+        } else if (!(o instanceof MaterialsModel other)) {
             return false;
         } else {
-            MaterialsModel other = (MaterialsModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -51,14 +48,8 @@ public class MaterialsModel {
                 Object this$isShown = this.getIsShown();
                 Object other$isShown = other.getIsShown();
                 if (this$isShown == null) {
-                    if (other$isShown != null) {
-                        return false;
-                    }
-                } else if (!this$isShown.equals(other$isShown)) {
-                    return false;
-                }
-
-                return true;
+                    return other$isShown == null;
+                } else return this$isShown.equals(other$isShown);
             }
         }
     }

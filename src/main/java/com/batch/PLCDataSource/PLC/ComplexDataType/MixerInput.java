@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 public enum MixerInput implements RowAttripute {
@@ -6,5 +5,5 @@ public enum MixerInput implements RowAttripute {
     QControl,
     Fault,
     Output_Speed,
-    Ampere_Reading;
+    Ampere_Reading
 }

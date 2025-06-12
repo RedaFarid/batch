@@ -5,6 +5,9 @@
 
 package com.batch.Utilities;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,9 +15,6 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.xml.bind.DatatypeConverter;
 
 public class HashingAlgorithm {
     public static String MD5Hash(String Input) {
@@ -25,7 +25,7 @@ public class HashingAlgorithm {
             md.update(Input.getBytes());
             digest = md.digest();
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(HashingAlgorithm.class.getName()).log(Level.SEVERE, (String)null, ex);
+            Logger.getLogger(HashingAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return DatatypeConverter.printHexBinary(digest).toUpperCase();
@@ -39,7 +39,7 @@ public class HashingAlgorithm {
             md.update(Input.getBytes());
             digest = md.digest();
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(HashingAlgorithm.class.getName()).log(Level.SEVERE, (String)null, ex);
+            Logger.getLogger(HashingAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return DatatypeConverter.printHexBinary(digest).toUpperCase();
@@ -65,7 +65,7 @@ public class HashingAlgorithm {
         byte[] testHash = skf.generateSecret(spec).getEncoded();
         int diff = hash.length ^ testHash.length;
 
-        for(int i = 0; i < hash.length && i < testHash.length; ++i) {
+        for (int i = 0; i < hash.length && i < testHash.length; ++i) {
             diff |= hash[i] ^ testHash[i];
         }
 
@@ -82,8 +82,8 @@ public class HashingAlgorithm {
     private static byte[] fromHex(String hex) throws NoSuchAlgorithmException {
         byte[] bytes = new byte[hex.length() / 2];
 
-        for(int i = 0; i < bytes.length; ++i) {
-            bytes[i] = (byte)Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
+        for (int i = 0; i < bytes.length; ++i) {
+            bytes[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
         }
 
         return bytes;

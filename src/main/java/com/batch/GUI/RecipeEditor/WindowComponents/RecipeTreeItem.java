@@ -1,4 +1,3 @@
-
 package com.batch.GUI.RecipeEditor.WindowComponents;
 
 import com.batch.Database.Entities.Recipe;
@@ -24,8 +23,8 @@ public class RecipeTreeItem extends TreeItemIdentity {
             case Recipe: {
                 Image image = new Image(Resources.getResource("Icons/Recipe.png").toString());
                 view = new ImageView(image);
-                view.setFitHeight((double) 20.0F);
-                view.setFitWidth((double) 20.0F);
+                view.setFitHeight(20.0F);
+                view.setFitWidth(20.0F);
                 break;
             }
             default:

@@ -1,4 +1,3 @@
-
 package com.batch.Services.LoggingService;
 
 import com.batch.Database.Entities.Log;
@@ -8,18 +7,23 @@ import com.batch.Services.UserAdministration.UserEvent;
 import com.batch.Services.UserAdministration.UserEventMessage;
 import com.batch.Utilities.LogIdentefires;
 import com.google.common.collect.Lists;
-import java.util.LinkedList;
-import java.util.List;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Service
 public class LoggingService {
-    private long greaterID = 0L;
     private final LogRepository logRepository;
+    private long greaterID = 0L;
     private Log lastLog;
     private User currentUser = new User("System");
+
+    public LoggingService(final LogRepository logRepository) {
+        this.logRepository = logRepository;
+    }
 
     public List<Log> getAllLogs() {
         return Lists.newArrayList(this.logRepository.findAll());
@@ -30,7 +34,7 @@ public class LoggingService {
 
         try {
             logs = this.logRepository.getLogsTillID(this.greaterID);
-            long x = logs.isEmpty() ? 0L : ((Log)logs.get(0)).getId();
+            long x = logs.isEmpty() ? 0L : logs.get(0).getId();
             this.greaterID = Math.max(x, this.greaterID);
         } catch (Exception e) {
             e.printStackTrace();
@@ -51,7 +55,7 @@ public class LoggingService {
         try {
             StringBuilder message = new StringBuilder();
 
-            for(StackTraceElement object : e.getStackTrace()) {
+            for (StackTraceElement object : e.getStackTrace()) {
                 message.append(object.toString()).append("\n");
             }
 
@@ -67,7 +71,7 @@ public class LoggingService {
 
     public Log getLastEnteredLog() {
         if (this.lastLog == null) {
-            this.lastLog = (Log)this.logRepository.findLast().orElse(new Log());
+            this.lastLog = this.logRepository.findLast().orElse(new Log());
         }
 
         return this.lastLog;
@@ -77,9 +81,5 @@ public class LoggingService {
     public void newUserLogIn(UserEvent event) {
         UserEventMessage message = event.getMessage();
         this.currentUser = message.getUser();
-    }
-
-    public LoggingService(final LogRepository logRepository) {
-        this.logRepository = logRepository;
     }
 }

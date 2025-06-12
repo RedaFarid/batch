@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.ModBus;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
@@ -6,9 +5,6 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.Services.NotificationService.BackGroundServices;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Utilities.StringUtilsL;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +16,20 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Service
 public class ModBusService {
     private final BooleanProperty connectionStatus;
     private final BooleanProperty bufferSynchronized;
+    @Value("${modbus.receivingTime}")
+    private final int receivingCycle;
+    @Value("${modbus.sendingTime}")
+    private final int sendingCycle;
+    @Value("${modbus.monitoringTime}")
+    private final int monitorCycle;
     @Autowired
     private PLCDataDefinitionFactory plcDataDefinitionFactory;
     @Autowired
@@ -34,12 +40,6 @@ public class ModBusService {
     )
     @Qualifier("ModbusScheduler")
     private TaskScheduler scheduler;
-    @Value("${modbus.receivingTime}")
-    private final int receivingCycle;
-    @Value("${modbus.sendingTime}")
-    private final int sendingCycle;
-    @Value("${modbus.monitoringTime}")
-    private final int monitorCycle;
 
     public ModBusService() {
         this.connectionStatus = new SimpleBooleanProperty(Boolean.FALSE);
@@ -73,14 +73,14 @@ public class ModBusService {
             this.scheduler.scheduleWithFixedDelay(sender, 100L);
             this.scheduler.scheduleWithFixedDelay(receiver, 100L);
         } catch (Exception e) {
-            this.notificationService.newErrorMessage("Modbus Service", "Main run", StringUtilsL.textLimiter(e.getMessage(), 40));
+//            this.notificationService.newErrorMessage("Modbus Service", "Main run", StringUtilsL.textLimiter(e.getMessage(), 40));
         }
 
         this.bufferSynchronized.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                this.notificationService.newErrorMessage("Modbus connection monitor", "Check connection", "Buffer is synchronized");
+//                this.notificationService.newErrorMessage("Modbus connection monitor", "Check connection", "Buffer is synchronized");
             } else {
-                this.notificationService.newErrorMessage("Modbus connection monitor", "Check connection", "Buffer is not synchronized");
+//                this.notificationService.newErrorMessage("Modbus connection monitor", "Check connection", "Buffer is not synchronized");
             }
 
         });

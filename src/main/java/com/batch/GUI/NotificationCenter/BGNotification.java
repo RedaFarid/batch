@@ -1,11 +1,8 @@
-
 package com.batch.GUI.NotificationCenter;
 
-import com.batch.Services.NotificationService.ErrorObject;
 import com.batch.Services.NotificationService.BackgroundServicesNotifier.BGAcknowledgementObject;
+import com.batch.Services.NotificationService.ErrorObject;
 import com.google.common.base.Objects;
-import java.io.File;
-import java.time.LocalDateTime;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -22,16 +19,15 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.time.LocalDateTime;
 
 public class BGNotification extends BorderPane {
     private static final Logger log = LogManager.getLogger(BGNotification.class);
@@ -67,12 +63,12 @@ public class BGNotification extends BorderPane {
     private void errorHandler() {
         this.errorObject.getErrorMessage().addListener((SetChangeListener<String>) change -> {
             try {
-                String elementAdded = (String)change.getElementAdded();
+                String elementAdded = change.getElementAdded();
                 if (elementAdded != null) {
                     Platform.runLater(() -> this.messageContent.getChildren().add(this.getMessage(elementAdded)));
                 }
 
-                String elementRemoved = (String)change.getElementRemoved();
+                String elementRemoved = change.getElementRemoved();
                 if (elementRemoved != null) {
                     Platform.runLater(() -> this.messageContent.getChildren().remove(new BasicLabel(elementRemoved)));
                 }
@@ -92,7 +88,7 @@ public class BGNotification extends BorderPane {
     private void exportCSV(MouseEvent mouseEvent) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Export BackGround notifications to csv");
-        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("csv", new String[]{"csv"}));
+        chooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("csv", "csv"));
         chooser.setInitialFileName("BackGround.csv");
         File file = chooser.showSaveDialog(this.getScene().getWindow());
         this.controller.onExportCSV(file, this.errorObject);
@@ -111,34 +107,34 @@ public class BGNotification extends BorderPane {
     }
 
     private void graphicsBuilder() {
-        this.header.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.header.setBackground(new Background(new BackgroundFill(Color.WHITE.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
         this.header.setAlignment(Pos.CENTER_LEFT);
         this.header.prefWidthProperty().bind(this.widthProperty());
-        this.header.setPadding(new Insets((double)0.0F, (double)0.0F, (double)10.0F, (double)5.0F));
+        this.header.setPadding(new Insets(0.0F, 0.0F, 10.0F, 5.0F));
         this.header.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:black;-fx-font-size:17;-fx-font-family: 'Times New Roman';");
-        this.toolBar.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
-        this.toolBar.getItems().addAll(new Node[]{this.reset, this.exportCSV, this.exportExcel});
-        this.scrollPane.setMaxHeight((double)250.0F);
+        this.toolBar.setBackground(new Background(new BackgroundFill(Color.WHITE.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+        this.toolBar.getItems().addAll(this.reset, this.exportCSV, this.exportExcel);
+        this.scrollPane.setMaxHeight(250.0F);
         this.scrollPane.setContent(this.messageContent);
-        this.reset.setPrefWidth((double)150.0F);
-        this.exportCSV.setPrefWidth((double)150.0F);
-        this.exportExcel.setPrefWidth((double)150.0F);
+        this.reset.setPrefWidth(150.0F);
+        this.exportCSV.setPrefWidth(150.0F);
+        this.exportExcel.setPrefWidth(150.0F);
         this.errorObject.getErrorMessageList().forEach((message) -> this.messageContent.getChildren().add(this.getMessage(message)));
-        this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, new CornerRadii((double)5.0F), Insets.EMPTY)}));
-        this.setEffect(new DropShadow((double)5.0F, Color.GRAY));
-        this.setPadding(new Insets((double)10.0F));
-        this.setTop(new VBox(new Node[]{this.header, this.toolBar}));
+        this.setBackground(new Background(new BackgroundFill(Color.WHITE, new CornerRadii(5.0F), Insets.EMPTY)));
+        this.setEffect(new DropShadow(5.0F, Color.GRAY));
+        this.setPadding(new Insets(10.0F));
+        this.setTop(new VBox(this.header, this.toolBar));
         this.setCenter(this.scrollPane);
     }
 
     private BasicLabel getMessage(String message) {
         BasicLabel label = new BasicLabel(message);
-        label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)}));
+        label.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, CornerRadii.EMPTY, Insets.EMPTY)));
         label.prefWidthProperty().bind(this.widthProperty().subtract(40));
-        label.setPadding(new Insets((double)0.0F, (double)0.0F, (double)0.0F, (double)5.0F));
+        label.setPadding(new Insets(0.0F, 0.0F, 0.0F, 5.0F));
         label.setOnMouseClicked((action) -> {
             if (action.getClickCount() == 2) {
-                label.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.ANTIQUEWHITE.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
+                label.setBackground(new Background(new BackgroundFill(Color.ANTIQUEWHITE.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
             }
 
         });
@@ -157,7 +153,7 @@ public class BGNotification extends BorderPane {
             if (this == o) {
                 return true;
             } else if (o != null && this.getClass() == o.getClass()) {
-                BasicLabel hashLabel = (BasicLabel)o;
+                BasicLabel hashLabel = (BasicLabel) o;
                 return Objects.equal(this.s, hashLabel.s);
             } else {
                 return false;
@@ -165,7 +161,7 @@ public class BGNotification extends BorderPane {
         }
 
         public int hashCode() {
-            return Objects.hashCode(new Object[]{this.s});
+            return Objects.hashCode(this.s);
         }
     }
 }

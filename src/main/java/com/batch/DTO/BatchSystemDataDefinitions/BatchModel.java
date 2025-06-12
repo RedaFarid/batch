@@ -1,10 +1,9 @@
-
 package com.batch.DTO.BatchSystemDataDefinitions;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class BatchModel {
@@ -12,6 +11,13 @@ public class BatchModel {
 
     public BatchModel(BatchParallelStepsModel... firstParallelStepsModel) {
         this.parallelSteps.addAll(Arrays.asList(firstParallelStepsModel));
+    }
+
+    public BatchModel(final List<BatchParallelStepsModel> parallelSteps) {
+        this.parallelSteps = parallelSteps;
+    }
+
+    public BatchModel() {
     }
 
     public List<BatchParallelStepsModel> getParallelSteps() {
@@ -25,24 +31,17 @@ public class BatchModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof BatchModel)) {
+        } else if (!(o instanceof BatchModel other)) {
             return false;
         } else {
-            BatchModel other = (BatchModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
                 Object this$parallelSteps = this.getParallelSteps();
                 Object other$parallelSteps = other.getParallelSteps();
                 if (this$parallelSteps == null) {
-                    if (other$parallelSteps != null) {
-                        return false;
-                    }
-                } else if (!this$parallelSteps.equals(other$parallelSteps)) {
-                    return false;
-                }
-
-                return true;
+                    return other$parallelSteps == null;
+                } else return this$parallelSteps.equals(other$parallelSteps);
             }
         }
     }
@@ -61,12 +60,5 @@ public class BatchModel {
 
     public String toString() {
         return "BatchModel(parallelSteps=" + this.getParallelSteps() + ")";
-    }
-
-    public BatchModel(final List<BatchParallelStepsModel> parallelSteps) {
-        this.parallelSteps = parallelSteps;
-    }
-
-    public BatchModel() {
     }
 }

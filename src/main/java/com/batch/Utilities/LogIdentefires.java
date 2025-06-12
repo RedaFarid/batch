@@ -9,5 +9,5 @@ public enum LogIdentefires {
     System,
     Error,
     Warning,
-    Info;
+    Info
 }

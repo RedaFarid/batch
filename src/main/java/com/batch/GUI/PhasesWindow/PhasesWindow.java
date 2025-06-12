@@ -1,4 +1,3 @@
-
 package com.batch.GUI.PhasesWindow;
 
 import com.batch.ApplicationContext;
@@ -7,24 +6,10 @@ import com.batch.DTO.RecipeSystemDataDefinitions.PhaseParameterType;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
 import com.batch.Database.Entities.Parameter;
 import com.batch.Database.Entities.Phase;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableColumn;
-import javafx.scene.control.TreeTableView;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.BorderPane;
@@ -33,39 +18,45 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class PhasesWindow extends Stage {
     private static PhasesWindow singelton = null;
-    private Stage mainWindow;
-    private BorderPane root = new BorderPane();
-    private GridPane controlContainer = new GridPane();
-    private Label idLabel = new Label("ID number :");
-    private TextField idField = new TextField();
-    private Label phaseLabel = new Label("Phase name");
-    private TextField phaseField = new TextField();
-    private Label unitLabel = new Label("Unit name :");
-    private ComboBox<String> units = new ComboBox();
-    private Label parameterNameLabel = new Label("Parameter name ");
-    private TextField ParameterNameField = new TextField();
-    private Label parameterTypeLabel = new Label("Parameter Type ");
-    private ComboBox<String> parameterTypeField = new ComboBox();
-    private Label phaseTypeLabel = new Label("Phase Type ");
-    private ComboBox<String> phaseTypeField = new ComboBox();
-    private Button add = new Button("Add new phase");
-    private Button clear = new Button("Delete all phases");
-    private TreeTableView<PhaseInformationDTO> table = new TreeTableView();
-    private TreeItem rootItem = new TreeItem("Phases");
-    private TreeTableColumn<PhaseInformationDTO, String> id = new TreeTableColumn("ID");
-    private TreeTableColumn<PhaseInformationDTO, Double> name = new TreeTableColumn("Name");
-    private TreeTableColumn<PhaseInformationDTO, Double> unit = new TreeTableColumn("Unit");
-    private TreeTableColumn<PhaseInformationDTO, Double> phaseType = new TreeTableColumn("Phase Type");
-    private TreeTableColumn<PhaseInformationDTO, Double> parameterName = new TreeTableColumn("Parameter");
-    private TreeTableColumn<PhaseInformationDTO, Double> parameterType = new TreeTableColumn("Parameter Type");
     private final PhasesController controller;
     private final PhasesModel model;
+    private final Stage mainWindow;
+    private final BorderPane root = new BorderPane();
+    private final GridPane controlContainer = new GridPane();
+    private final Label idLabel = new Label("ID number :");
+    private final TextField idField = new TextField();
+    private final Label phaseLabel = new Label("Phase name");
+    private final TextField phaseField = new TextField();
+    private final Label unitLabel = new Label("Unit name :");
+    private final ComboBox<String> units = new ComboBox();
+    private final Label parameterNameLabel = new Label("Parameter name ");
+    private final TextField ParameterNameField = new TextField();
+    private final Label parameterTypeLabel = new Label("Parameter Type ");
+    private final ComboBox<String> parameterTypeField = new ComboBox();
+    private final Label phaseTypeLabel = new Label("Phase Type ");
+    private final ComboBox<String> phaseTypeField = new ComboBox();
+    private final Button add = new Button("Add new phase");
+    private final Button clear = new Button("Delete all phases");
+    private final TreeTableView<PhaseInformationDTO> table = new TreeTableView();
+    private final TreeItem rootItem = new TreeItem("Phases");
+    private final TreeTableColumn<PhaseInformationDTO, String> id = new TreeTableColumn("ID");
+    private final TreeTableColumn<PhaseInformationDTO, Double> name = new TreeTableColumn("Name");
+    private final TreeTableColumn<PhaseInformationDTO, Double> unit = new TreeTableColumn("Unit");
+    private final TreeTableColumn<PhaseInformationDTO, Double> phaseType = new TreeTableColumn("Phase Type");
+    private final TreeTableColumn<PhaseInformationDTO, Double> parameterName = new TreeTableColumn("Parameter");
+    private final TreeTableColumn<PhaseInformationDTO, Double> parameterType = new TreeTableColumn("Parameter Type");
 
     private PhasesWindow(Stage mainWindow) {
         this.mainWindow = mainWindow;
-        this.controller = (PhasesController)ApplicationContext.applicationContext.getBean(PhasesController.class);
+        this.controller = ApplicationContext.applicationContext.getBean(PhasesController.class);
         this.model = this.controller.getModel();
         this.model.setRootItem(this.rootItem);
         this.graphicsBuilder();
@@ -73,7 +64,7 @@ public class PhasesWindow extends Stage {
     }
 
     public static PhasesWindow getWindow(Stage stage) {
-        synchronized(PhasesWindow.class) {
+        synchronized (PhasesWindow.class) {
             if (singelton == null) {
                 singelton = new PhasesWindow(stage);
             }
@@ -87,7 +78,7 @@ public class PhasesWindow extends Stage {
         this.initModality(Modality.WINDOW_MODAL);
         this.initStyle(StageStyle.UTILITY);
         this.setScene(new Scene(this.root));
-        this.setHeight((double)800.0F);
+        this.setHeight(800.0F);
         this.setResizable(false);
         this.setTitle("Phases manager");
         this.id.setCellValueFactory(new TreeItemPropertyValueFactory("id"));
@@ -96,7 +87,7 @@ public class PhasesWindow extends Stage {
         this.phaseType.setCellValueFactory(new TreeItemPropertyValueFactory("phaseType"));
         this.parameterName.setCellValueFactory(new TreeItemPropertyValueFactory("ParameterName"));
         this.parameterType.setCellValueFactory(new TreeItemPropertyValueFactory("ParameterType"));
-        this.table.getColumns().addAll(new TreeTableColumn[]{this.id, this.name, this.unit, this.phaseType, this.parameterName, this.parameterType});
+        this.table.getColumns().addAll(this.id, this.name, this.unit, this.phaseType, this.parameterName, this.parameterType);
         this.table.setRoot(this.rootItem);
         this.table.setShowRoot(false);
         this.id.prefWidthProperty().bind(this.table.widthProperty().divide(13));
@@ -105,25 +96,25 @@ public class PhasesWindow extends Stage {
         this.phaseType.prefWidthProperty().bind(this.table.widthProperty().divide(13).multiply(2));
         this.parameterName.prefWidthProperty().bind(this.table.widthProperty().divide(13).multiply(2));
         this.parameterType.prefWidthProperty().bind(this.table.widthProperty().divide(13).multiply(2));
-        this.idLabel.setPrefWidth((double)150.0F);
-        this.phaseLabel.setPrefWidth((double)150.0F);
-        this.unitLabel.setPrefWidth((double)150.0F);
-        this.parameterNameLabel.setPrefWidth((double)150.0F);
-        this.parameterTypeLabel.setPrefWidth((double)150.0F);
-        this.phaseTypeLabel.setPrefWidth((double)150.0F);
-        this.idField.setPrefWidth((double)250.0F);
-        this.phaseField.setPrefWidth((double)670.0F);
-        this.units.setPrefWidth((double)670.0F);
-        this.ParameterNameField.setPrefWidth((double)250.0F);
-        this.parameterTypeField.setPrefWidth((double)250.0F);
-        this.phaseTypeField.setPrefWidth((double)670.0F);
-        this.add.setPrefWidth((double)150.0F);
-        this.clear.setPrefWidth((double)150.0F);
-        this.parameterTypeField.setItems(FXCollections.observableArrayList((Collection)Arrays.stream(PhaseParameterType.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
-        this.phaseTypeField.setItems(FXCollections.observableArrayList((Collection)Arrays.stream(PhasesTypes.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
-        this.controlContainer.setPadding(new Insets((double)10.0F));
-        this.controlContainer.setHgap((double)5.0F);
-        this.controlContainer.setVgap((double)5.0F);
+        this.idLabel.setPrefWidth(150.0F);
+        this.phaseLabel.setPrefWidth(150.0F);
+        this.unitLabel.setPrefWidth(150.0F);
+        this.parameterNameLabel.setPrefWidth(150.0F);
+        this.parameterTypeLabel.setPrefWidth(150.0F);
+        this.phaseTypeLabel.setPrefWidth(150.0F);
+        this.idField.setPrefWidth(250.0F);
+        this.phaseField.setPrefWidth(670.0F);
+        this.units.setPrefWidth(670.0F);
+        this.ParameterNameField.setPrefWidth(250.0F);
+        this.parameterTypeField.setPrefWidth(250.0F);
+        this.phaseTypeField.setPrefWidth(670.0F);
+        this.add.setPrefWidth(150.0F);
+        this.clear.setPrefWidth(150.0F);
+        this.parameterTypeField.setItems(FXCollections.observableArrayList((Collection) Arrays.stream(PhaseParameterType.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
+        this.phaseTypeField.setItems(FXCollections.observableArrayList((Collection) Arrays.stream(PhasesTypes.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
+        this.controlContainer.setPadding(new Insets(10.0F));
+        this.controlContainer.setHgap(5.0F);
+        this.controlContainer.setVgap(5.0F);
         this.controlContainer.add(this.idLabel, 1, 0);
         this.controlContainer.add(this.idField, 2, 0);
         this.controlContainer.add(this.phaseLabel, 1, 1);
@@ -138,7 +129,7 @@ public class PhasesWindow extends Stage {
         this.controlContainer.add(this.phaseTypeField, 2, 3, 5, 1);
         this.controlContainer.add(this.add, 1, 5);
         this.controlContainer.add(this.clear, 2, 5);
-        this.root.setPadding(new Insets((double)10.0F));
+        this.root.setPadding(new Insets(10.0F));
         this.root.setTop(this.controlContainer);
         this.root.setCenter(this.table);
     }
@@ -165,8 +156,8 @@ public class PhasesWindow extends Stage {
                 if (this.units.getValue() != null && this.idField.getText() != null && this.phaseField.getText() != null && !this.idField.getText().isEmpty() && !this.phaseField.getText().isEmpty()) {
                     this.controller.findPhaseById(this.idField.getText()).ifPresentOrElse((checkPhase) -> {
                         List<Parameter> parametersData = new LinkedList();
-                        parametersData.add(new Parameter(this.ParameterNameField.getText(), (String)this.parameterTypeField.getValue()));
-                        Phase phase = new Phase(Long.parseLong(this.idField.getText()), this.phaseField.getText(), (String)this.units.getValue(), (String)this.phaseTypeField.getValue(), parametersData);
+                        parametersData.add(new Parameter(this.ParameterNameField.getText(), this.parameterTypeField.getValue()));
+                        Phase phase = new Phase(Long.parseLong(this.idField.getText()), this.phaseField.getText(), this.units.getValue(), this.phaseTypeField.getValue(), parametersData);
 
                         try {
                             this.controller.createNewPhase(phase);
@@ -206,16 +197,16 @@ public class PhasesWindow extends Stage {
                 MenuItem deletePhase = new MenuItem("Delete phase      ");
                 MenuItem addParameter = new MenuItem("Add parameter    ");
                 MenuItem deleteParameter = new MenuItem("Delete parameter    ");
-                if (this.table.getTreeItemLevel((TreeItem)this.table.getSelectionModel().getSelectedItem()) == 1) {
-                    menu.getItems().addAll(new MenuItem[]{addParameter, deletePhase});
-                } else if (this.table.getTreeItemLevel((TreeItem)this.table.getSelectionModel().getSelectedItem()) == 2) {
-                    menu.getItems().addAll(new MenuItem[]{deleteParameter});
+                if (this.table.getTreeItemLevel(this.table.getSelectionModel().getSelectedItem()) == 1) {
+                    menu.getItems().addAll(addParameter, deletePhase);
+                } else if (this.table.getTreeItemLevel(this.table.getSelectionModel().getSelectedItem()) == 2) {
+                    menu.getItems().addAll(deleteParameter);
                 }
 
                 menu.show(this, action.getScreenX(), action.getScreenY());
-                addParameter.setOnAction((event) -> this.newParameterWindow(((PhaseInformationDTO)((TreeItem)this.table.getSelectionModel().getSelectedItem()).getValue()).getId()));
-                deleteParameter.setOnAction((event) -> this.controller.deleteParameterFromPhase(((PhaseInformationDTO)((TreeItem)this.table.getSelectionModel().getSelectedItem()).getParent().getValue()).getId(), ((PhaseInformationDTO)((TreeItem)this.table.getSelectionModel().getSelectedItem()).getValue()).getParameterName()));
-                deletePhase.setOnAction((event) -> this.controller.deletePhase(((PhaseInformationDTO)((TreeItem)this.table.getSelectionModel().getSelectedItem()).getValue()).getId()));
+                addParameter.setOnAction((event) -> this.newParameterWindow(((PhaseInformationDTO) ((TreeItem) this.table.getSelectionModel().getSelectedItem()).getValue()).getId()));
+                deleteParameter.setOnAction((event) -> this.controller.deleteParameterFromPhase(((PhaseInformationDTO) ((TreeItem) this.table.getSelectionModel().getSelectedItem()).getParent().getValue()).getId(), ((PhaseInformationDTO) ((TreeItem) this.table.getSelectionModel().getSelectedItem()).getValue()).getParameterName()));
+                deletePhase.setOnAction((event) -> this.controller.deletePhase(((PhaseInformationDTO) ((TreeItem) this.table.getSelectionModel().getSelectedItem()).getValue()).getId()));
             }
 
         });
@@ -228,20 +219,20 @@ public class PhasesWindow extends Stage {
         TextField parameter = new TextField();
         Label typeLabel = new Label("Parameter Type ");
         ComboBox<String> type = new ComboBox();
-        parameterLabel.setPrefWidth((double)150.0F);
-        typeLabel.setPrefWidth((double)150.0F);
-        parameter.setPrefWidth((double)250.0F);
-        type.setPrefWidth((double)250.0F);
-        addNewPara.setPrefWidth((double)150.0F);
+        parameterLabel.setPrefWidth(150.0F);
+        typeLabel.setPrefWidth(150.0F);
+        parameter.setPrefWidth(250.0F);
+        type.setPrefWidth(250.0F);
+        addNewPara.setPrefWidth(150.0F);
         rootPane.add(parameterLabel, 1, 1);
         rootPane.add(parameter, 2, 1);
         rootPane.add(typeLabel, 1, 2);
         rootPane.add(type, 2, 2);
         rootPane.add(addNewPara, 1, 5);
-        rootPane.setPadding(new Insets((double)10.0F));
-        rootPane.setVgap((double)4.0F);
-        rootPane.setHgap((double)10.0F);
-        type.setItems(FXCollections.observableArrayList((Collection)Arrays.stream(PhaseParameterType.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
+        rootPane.setPadding(new Insets(10.0F));
+        rootPane.setVgap(4.0F);
+        rootPane.setHgap(10.0F);
+        type.setItems(FXCollections.observableArrayList((Collection) Arrays.stream(PhaseParameterType.values()).map(Enum::name).map((item) -> item.replace("_", " ")).collect(Collectors.toList())));
         Scene scene = new Scene(rootPane);
         Stage stage = new Stage();
         stage.setScene(scene);
@@ -251,7 +242,7 @@ public class PhasesWindow extends Stage {
         stage.setResizable(false);
         addNewPara.setOnMouseClicked((action) -> {
             if (!parameter.getText().isEmpty() && type.getValue() != null) {
-                this.controller.addParameterToPhase(id, parameter.getText(), (String)type.getValue());
+                this.controller.addParameterToPhase(id, parameter.getText(), type.getValue());
             }
 
             stage.hide();

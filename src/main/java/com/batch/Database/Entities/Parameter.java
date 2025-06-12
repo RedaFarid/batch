@@ -1,4 +1,3 @@
-
 package com.batch.Database.Entities;
 
 import org.springframework.data.annotation.Id;
@@ -23,6 +22,17 @@ public class Parameter {
         this.type = type;
     }
 
+    public Parameter(final Long pid, final String name, final String type, final Long id, final Phase phase) {
+        this.pid = pid;
+        this.name = name;
+        this.type = type;
+        this.id = id;
+        this.phase = phase;
+    }
+
+    public Parameter() {
+    }
+
     public String toString() {
         return String.format("Parameter{id=%-10d, name='%-10s', type='%-5s}", this.pid, this.name, this.type);
     }
@@ -31,36 +41,36 @@ public class Parameter {
         return this.pid;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public String getType() {
-        return this.type;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public Phase getPhase() {
-        return this.phase;
-    }
-
     public void setPid(final Long pid) {
         this.pid = pid;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public void setName(final String name) {
         this.name = name;
     }
 
+    public String getType() {
+        return this.type;
+    }
+
     public void setType(final String type) {
         this.type = type;
     }
 
+    public Long getId() {
+        return this.id;
+    }
+
     public void setId(final Long id) {
         this.id = id;
+    }
+
+    public Phase getPhase() {
+        return this.phase;
     }
 
     public void setPhase(final Phase phase) {
@@ -70,10 +80,9 @@ public class Parameter {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof Parameter)) {
+        } else if (!(o instanceof Parameter other)) {
             return false;
         } else {
-            Parameter other = (Parameter)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -120,14 +129,8 @@ public class Parameter {
                 Object this$phase = this.getPhase();
                 Object other$phase = other.getPhase();
                 if (this$phase == null) {
-                    if (other$phase != null) {
-                        return false;
-                    }
-                } else if (!this$phase.equals(other$phase)) {
-                    return false;
-                }
-
-                return true;
+                    return other$phase == null;
+                } else return this$phase.equals(other$phase);
             }
         }
     }
@@ -150,16 +153,5 @@ public class Parameter {
         Object $phase = this.getPhase();
         result = result * 59 + ($phase == null ? 43 : $phase.hashCode());
         return result;
-    }
-
-    public Parameter(final Long pid, final String name, final String type, final Long id, final Phase phase) {
-        this.pid = pid;
-        this.name = name;
-        this.type = type;
-        this.id = id;
-        this.phase = phase;
-    }
-
-    public Parameter() {
     }
 }

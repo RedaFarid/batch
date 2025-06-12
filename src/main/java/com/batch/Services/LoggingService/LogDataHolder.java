@@ -1,4 +1,3 @@
-
 package com.batch.Services.LoggingService;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowAttripute;
@@ -11,32 +10,42 @@ public class LogDataHolder {
     private ValueObject value;
     private EDT type;
 
+    public LogDataHolder() {
+    }
+
+    public LogDataHolder(final String name, final RowAttripute attribute, final ValueObject value, final EDT type) {
+        this.name = name;
+        this.attribute = attribute;
+        this.value = value;
+        this.type = type;
+    }
+
     public String getName() {
         return this.name;
-    }
-
-    public RowAttripute getAttribute() {
-        return this.attribute;
-    }
-
-    public ValueObject getValue() {
-        return this.value;
-    }
-
-    public EDT getType() {
-        return this.type;
     }
 
     public void setName(final String name) {
         this.name = name;
     }
 
+    public RowAttripute getAttribute() {
+        return this.attribute;
+    }
+
     public void setAttribute(final RowAttripute attribute) {
         this.attribute = attribute;
     }
 
+    public ValueObject getValue() {
+        return this.value;
+    }
+
     public void setValue(final ValueObject value) {
         this.value = value;
+    }
+
+    public EDT getType() {
+        return this.type;
     }
 
     public void setType(final EDT type) {
@@ -46,10 +55,9 @@ public class LogDataHolder {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof LogDataHolder)) {
+        } else if (!(o instanceof LogDataHolder other)) {
             return false;
         } else {
-            LogDataHolder other = (LogDataHolder)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -86,14 +94,8 @@ public class LogDataHolder {
                 Object this$type = this.getType();
                 Object other$type = other.getType();
                 if (this$type == null) {
-                    if (other$type != null) {
-                        return false;
-                    }
-                } else if (!this$type.equals(other$type)) {
-                    return false;
-                }
-
-                return true;
+                    return other$type == null;
+                } else return this$type.equals(other$type);
             }
         }
     }
@@ -119,15 +121,5 @@ public class LogDataHolder {
     public String toString() {
         String var10000 = this.getName();
         return "LogDataHolder(name=" + var10000 + ", attribute=" + this.getAttribute() + ", value=" + this.getValue() + ", type=" + this.getType() + ")";
-    }
-
-    public LogDataHolder() {
-    }
-
-    public LogDataHolder(final String name, final RowAttripute attribute, final ValueObject value, final EDT type) {
-        this.name = name;
-        this.attribute = attribute;
-        this.value = value;
-        this.type = type;
     }
 }

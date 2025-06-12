@@ -1,4 +1,3 @@
-
 package com.batch.Utilities;
 
 import javafx.application.Platform;
@@ -21,14 +20,14 @@ import javafx.stage.StageStyle;
 
 public class ProgressWindow {
     private Stage Window = null;
-    private Stage dialogStage = new Stage();
-    private ProgressBar progressbar = new ProgressBar();
-    private ProgressIndicator progressindicator = new ProgressIndicator();
-    private Label label = new Label();
-    private Label work = new Label();
-    private BorderPane Pane = new BorderPane();
-    private HBox hbox = new HBox();
-    private StringProperty StringProgress = new SimpleStringProperty("Calculating ...");
+    private final Stage dialogStage = new Stage();
+    private final ProgressBar progressbar = new ProgressBar();
+    private final ProgressIndicator progressindicator = new ProgressIndicator();
+    private final Label label = new Label();
+    private final Label work = new Label();
+    private final BorderPane Pane = new BorderPane();
+    private final HBox hbox = new HBox();
+    private final StringProperty StringProgress = new SimpleStringProperty("Calculating ...");
 
     public ProgressWindow(Stage parentsatge, String Title) {
         this.Window = parentsatge;
@@ -37,14 +36,14 @@ public class ProgressWindow {
     }
 
     private void graphicsBuilder() {
-        this.work.setPrefSize((double)400.0F, (double)100.0F);
-        this.progressbar.setProgress((double)0.0F);
-        this.progressbar.setPrefWidth((double)400.0F);
-        this.progressbar.setPrefHeight((double)50.0F);
-        this.progressindicator.setProgress((double)0.0F);
-        this.progressindicator.setPrefSize((double)50.0F, (double)50.0F);
+        this.work.setPrefSize(400.0F, 100.0F);
+        this.progressbar.setProgress(0.0F);
+        this.progressbar.setPrefWidth(400.0F);
+        this.progressbar.setPrefHeight(50.0F);
+        this.progressindicator.setProgress(0.0F);
+        this.progressindicator.setPrefSize(50.0F, 50.0F);
         this.progressindicator.progressProperty().bind(this.progressbar.progressProperty());
-        this.hbox.getChildren().addAll(new Node[]{this.progressbar, this.progressindicator});
+        this.hbox.getChildren().addAll(this.progressbar, this.progressindicator);
         this.StringProgress.addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 ProgressWindow.this.work.setText(newValue);
@@ -53,7 +52,7 @@ public class ProgressWindow {
         this.Pane.setTop(this.label);
         this.Pane.setCenter(this.work);
         this.Pane.setBottom(this.hbox);
-        this.Pane.setPadding(new Insets((double)10.0F));
+        this.Pane.setPadding(new Insets(10.0F));
         Scene scene = new Scene(this.Pane);
         this.dialogStage.initOwner(this.Window);
         this.dialogStage.initStyle(StageStyle.UTILITY);

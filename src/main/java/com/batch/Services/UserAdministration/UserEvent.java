@@ -1,5 +1,3 @@
-
-
 package com.batch.Services.UserAdministration;
 
 import org.springframework.context.ApplicationEvent;
@@ -10,6 +8,6 @@ public class UserEvent extends ApplicationEvent {
     }
 
     public UserEventMessage getMessage() {
-        return (UserEventMessage)this.source;
+        return (UserEventMessage) this.source;
     }
 }

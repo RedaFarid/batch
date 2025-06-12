@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 public enum GeneralOutput implements RowAttripute {
@@ -12,5 +11,5 @@ public enum GeneralOutput implements RowAttripute {
     IPC_Fill_From_Mixer_2_Message_Confirmation,
     IPC_Fill_From_Tank_1_Message_Confirmation,
     IPC_Fill_From_Tank_2_Message_Confirmation,
-    IPC_Fill_From_Tank_3_Message_Confirmation;
+    IPC_Fill_From_Tank_3_Message_Confirmation
 }

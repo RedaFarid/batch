@@ -1,4 +1,3 @@
-
 package com.batch.GUI.Alarms;
 
 import com.batch.ApplicationContext;
@@ -7,11 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -20,27 +15,27 @@ import org.controlsfx.control.table.TableFilter;
 
 public class AllAlarmsWindow extends Tab {
     private static volatile AllAlarmsWindow Singleton = null;
-    private Stage mainWindow = null;
-    private GridPane dataentery = new GridPane();
-    private VBox root = new VBox();
-    private VBox vbox = new VBox();
-    private ToolBar toolbar = new ToolBar();
-    private ObservableList<Log> list = FXCollections.observableArrayList();
-    private TableView<Log> table = new TableView();
-    private TableColumn<Log, String> identifierColumn = new TableColumn("Identefier");
-    private TableColumn<Log, String> SourceColumn = new TableColumn("Source");
-    private TableColumn<Log, String> EventColumn = new TableColumn("Event");
-    private TableColumn<Log, String> UsernameColumn = new TableColumn("Username");
-    private TableColumn<Log, String> GroupColumn = new TableColumn("Group");
-    private TableColumn<Log, String> TimeColumn = new TableColumn("Time");
-    private TableColumn<Log, String> DateColumn = new TableColumn("Date");
-    private TableFilter<Log> tableFilter;
     private final AlarmsController controller;
     private final AlarmsModel model;
+    private Stage mainWindow = null;
+    private final GridPane dataentery = new GridPane();
+    private final VBox root = new VBox();
+    private final VBox vbox = new VBox();
+    private final ToolBar toolbar = new ToolBar();
+    private final ObservableList<Log> list = FXCollections.observableArrayList();
+    private final TableView<Log> table = new TableView();
+    private final TableColumn<Log, String> identifierColumn = new TableColumn("Identefier");
+    private final TableColumn<Log, String> SourceColumn = new TableColumn("Source");
+    private final TableColumn<Log, String> EventColumn = new TableColumn("Event");
+    private final TableColumn<Log, String> UsernameColumn = new TableColumn("Username");
+    private final TableColumn<Log, String> GroupColumn = new TableColumn("Group");
+    private final TableColumn<Log, String> TimeColumn = new TableColumn("Time");
+    private final TableColumn<Log, String> DateColumn = new TableColumn("Date");
+    private TableFilter<Log> tableFilter;
 
     private AllAlarmsWindow(Stage Window) {
         this.mainWindow = Window;
-        this.controller = (AlarmsController)ApplicationContext.applicationContext.getBean(AlarmsController.class);
+        this.controller = ApplicationContext.applicationContext.getBean(AlarmsController.class);
         this.model = this.controller.getModel();
         this.setStyle("-fx-background-color: SALMON;-fx-border-color: darkblue; -fx-border-width:0.1;-fx-text-fill:white;");
         this.graphicsBuilder();
@@ -48,7 +43,7 @@ public class AllAlarmsWindow extends Tab {
     }
 
     public static AllAlarmsWindow getWindow(Stage Window) {
-        synchronized(AllAlarmsWindow.class) {
+        synchronized (AllAlarmsWindow.class) {
             if (Singleton == null) {
                 Singleton = new AllAlarmsWindow(Window);
             }
@@ -58,9 +53,9 @@ public class AllAlarmsWindow extends Tab {
     }
 
     private void graphicsBuilder() {
-        this.dataentery.setPadding(new Insets((double)10.0F));
-        this.dataentery.setVgap((double)5.0F);
-        this.dataentery.setHgap((double)5.0F);
+        this.dataentery.setPadding(new Insets(10.0F));
+        this.dataentery.setVgap(5.0F);
+        this.dataentery.setHgap(5.0F);
         this.identifierColumn.setCellValueFactory(new PropertyValueFactory("identifier"));
         this.SourceColumn.setCellValueFactory(new PropertyValueFactory("source"));
         this.EventColumn.setCellValueFactory(new PropertyValueFactory("Event"));
@@ -75,7 +70,7 @@ public class AllAlarmsWindow extends Tab {
         this.GroupColumn.prefWidthProperty().bind(this.table.widthProperty().divide(10));
         this.TimeColumn.prefWidthProperty().bind(this.table.widthProperty().divide(11));
         this.DateColumn.prefWidthProperty().bind(this.table.widthProperty().divide(11));
-        this.table.getColumns().addAll(new TableColumn[]{this.identifierColumn, this.SourceColumn, this.EventColumn, this.UsernameColumn, this.GroupColumn, this.TimeColumn, this.DateColumn});
+        this.table.getColumns().addAll(this.identifierColumn, this.SourceColumn, this.EventColumn, this.UsernameColumn, this.GroupColumn, this.TimeColumn, this.DateColumn);
         this.table.prefHeightProperty().bind(this.root.heightProperty().subtract(this.vbox.heightProperty()));
         this.table.setItems(this.model.getAllAlarmsList());
         this.tableFilter = TableFilter.forTableView(this.table).apply();
@@ -111,7 +106,7 @@ public class AllAlarmsWindow extends Tab {
 
             }
         });
-        this.vbox.getChildren().addAll(new Node[]{this.dataentery, this.toolbar});
+        this.vbox.getChildren().addAll(this.dataentery, this.toolbar);
         this.root.getChildren().add(this.vbox);
         this.root.getChildren().add(this.table);
         this.setContent(this.root);

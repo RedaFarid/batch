@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 import com.batch.ApplicationContext;
@@ -10,17 +9,22 @@ import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.google.common.collect.Lists;
-import java.util.Map;
-
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class PLCDataDefinitionFactory {
     private final PLCDataDefinition definition = new PLCDataDefinition();
     private final RecipeConfRepository recipeConfRepository;
     private final UnitsRepository unitsRepository;
+
+    public PLCDataDefinitionFactory(final RecipeConfRepository recipeConfRepository, final UnitsRepository unitsRepository) {
+        this.recipeConfRepository = recipeConfRepository;
+        this.unitsRepository = unitsRepository;
+    }
 
     @PostConstruct
     public void init() {
@@ -89,7 +93,7 @@ public class PLCDataDefinitionFactory {
             int maxParallelSteps = recipeConfig.getMaxParallelSteps();
             if (maxParallelSteps > 0) {
                 this.unitsRepository.findAll().forEach((unit) -> {
-                    for(int i = 1; i <= maxParallelSteps; ++i) {
+                    for (int i = 1; i <= maxParallelSteps; ++i) {
                         this.addBatchDataToDataDefinition(unit.getName() + " [" + i + "]", new BatchPhasesDataDefinition(unit.getName() + " [" + i + "]", unit.getName()));
                     }
 
@@ -102,25 +106,31 @@ public class PLCDataDefinitionFactory {
     public void addListenerToAllInPropertiesOfAllDevices() {
         this.definition.getAllDevices().forEach((deviceNme, device) -> device.getAddresses().forEach((attributeName, attribute) -> {
             System.err.println(deviceNme + " " + attributeName + " " + attribute);
-            switch ((EDT)device.getTypes().get(attributeName)) {
-                case Boolean -> ((BooleanDataType)device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue));
-                case Integer -> ((IntegerDataType)device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue));
-                case Real -> ((RealDataType)device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue));
+            switch (device.getTypes().get(attributeName)) {
+                case Boolean ->
+                        ((BooleanDataType) device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue));
+                case Integer ->
+                        ((IntegerDataType) device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue));
+                case Real ->
+                        ((RealDataType) device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + "Attribute object " + attributeName + " changed from " + oldValue + " to " + newValue));
             }
 
         }));
     }
 
     public void addListenerToAllInPropertiesOfBatchData() {
-        RowDataDefinition device = (RowDataDefinition)this.definition.getAllDevices().get("BatchSystem");
+        RowDataDefinition device = this.definition.getAllDevices().get("BatchSystem");
         String deviceNme = "BatchSystem";
         device.getAddresses().forEach((attributeName, attribute) -> {
             System.err.println(deviceNme + " " + attributeName + " " + attribute);
-            if (((Boolean)device.getInOutIndecation().get(attributeName)).equals(true)) {
-                switch ((EDT)device.getTypes().get(attributeName)) {
-                    case Boolean -> ((BooleanDataType)device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue));
-                    case Integer -> ((IntegerDataType)device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue));
-                    case Real -> ((RealDataType)device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue));
+            if (device.getInOutIndecation().get(attributeName).equals(true)) {
+                switch (device.getTypes().get(attributeName)) {
+                    case Boolean ->
+                            ((BooleanDataType) device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue));
+                    case Integer ->
+                            ((IntegerDataType) device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue));
+                    case Real ->
+                            ((RealDataType) device.getAllValues().get(attributeName)).addListener((observable, oldValue, newValue) -> System.out.println(deviceNme + " " + attributeName + " changed from " + oldValue + " to " + newValue));
                 }
             }
 
@@ -144,10 +154,5 @@ public class PLCDataDefinitionFactory {
         this.definition.setInLastAddress(InLastAddress + batch.getInAddress());
         this.definition.setOutLastAddress(OutLastAddress + batch.getOutAddress());
         this.definition.getAllDevices().put(batch.getName(), batch);
-    }
-
-    public PLCDataDefinitionFactory(final RecipeConfRepository recipeConfRepository, final UnitsRepository unitsRepository) {
-        this.recipeConfRepository = recipeConfRepository;
-        this.unitsRepository = unitsRepository;
     }
 }

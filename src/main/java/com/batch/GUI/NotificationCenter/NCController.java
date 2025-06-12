@@ -1,48 +1,34 @@
-
 package com.batch.GUI.NotificationCenter;
 
 import com.batch.Services.NotificationService.BackGroundServices;
 import com.batch.Services.NotificationService.ErrorObject;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Services.NotificationService.ServiceErrorsListener;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+
 @Controller
 public class NCController {
     private static final Logger log = LogManager.getLogger(NCController.class);
-    @Autowired
-    @BackGroundServices
-    private NotificationService bgNotificationService;
     private final NCModel model = new NCModel();
     private final ObservableList<String> categories = FXCollections.observableArrayList();
     private final ObservableList<String> errors = FXCollections.observableArrayList();
+    @Autowired
+    @BackGroundServices
+    private NotificationService bgNotificationService;
 
     public NCModel getModel() {
         return this.model;
@@ -95,7 +81,7 @@ public class NCController {
 
         try (
                 FileWriter fW = new FileWriter(file);
-                BufferedWriter bR = new BufferedWriter(fW);
+                BufferedWriter bR = new BufferedWriter(fW)
         ) {
             headerLine = "service NameFamily NameerrorMessage,";
             headerLine = headerLine + "\n";
@@ -140,7 +126,7 @@ public class NCController {
             XSSFFont font = xssfWorkbook.createFont();
             font.setBold(true);
             firstSheet.setAutobreaks(true);
-            row.setHeight((short)400);
+            row.setHeight((short) 400);
             XSSFCellStyle cellStyle = xssfWorkbook.createCellStyle();
             cellStyle.setFont(font);
             cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);

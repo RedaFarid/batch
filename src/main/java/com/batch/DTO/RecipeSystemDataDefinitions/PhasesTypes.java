@@ -1,4 +1,3 @@
-
 package com.batch.DTO.RecipeSystemDataDefinitions;
 
 public enum PhasesTypes {
@@ -6,5 +5,5 @@ public enum PhasesTypes {
     Circulating_Phase,
     Washing_phase,
     Transfere_phase,
-    Mixing_phase;
+    Mixing_phase
 }

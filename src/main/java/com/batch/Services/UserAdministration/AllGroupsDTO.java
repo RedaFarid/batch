@@ -1,5 +1,3 @@
-
-
 package com.batch.Services.UserAdministration;
 
 import java.util.ArrayList;
@@ -7,6 +5,13 @@ import java.util.List;
 
 public class AllGroupsDTO {
     private List<WindowGroupsDTO> list = new ArrayList();
+
+    public AllGroupsDTO(final List<WindowGroupsDTO> list) {
+        this.list = list;
+    }
+
+    public AllGroupsDTO() {
+    }
 
     public List<WindowGroupsDTO> getList() {
         return this.list;
@@ -19,24 +24,17 @@ public class AllGroupsDTO {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof AllGroupsDTO)) {
+        } else if (!(o instanceof AllGroupsDTO other)) {
             return false;
         } else {
-            AllGroupsDTO other = (AllGroupsDTO)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
                 Object this$list = this.getList();
                 Object other$list = other.getList();
                 if (this$list == null) {
-                    if (other$list != null) {
-                        return false;
-                    }
-                } else if (!this$list.equals(other$list)) {
-                    return false;
-                }
-
-                return true;
+                    return other$list == null;
+                } else return this$list.equals(other$list);
             }
         }
     }
@@ -55,12 +53,5 @@ public class AllGroupsDTO {
 
     public String toString() {
         return "AllGroupsDTO(list=" + this.getList() + ")";
-    }
-
-    public AllGroupsDTO(final List<WindowGroupsDTO> list) {
-        this.list = list;
-    }
-
-    public AllGroupsDTO() {
     }
 }

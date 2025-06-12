@@ -5,7 +5,6 @@
 
 package com.batch;
 
-import javax.sql.DataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +22,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.Assert;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableJdbcAuditing

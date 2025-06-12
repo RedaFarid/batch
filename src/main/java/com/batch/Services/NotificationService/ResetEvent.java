@@ -1,4 +1,3 @@
-
 package com.batch.Services.NotificationService;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;

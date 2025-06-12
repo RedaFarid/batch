@@ -1,4 +1,3 @@
-
 package com.batch.GUI.RecipeEditor.WindowComponents;
 
 import javafx.scene.Node;

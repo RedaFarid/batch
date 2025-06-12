@@ -15,18 +15,18 @@ public class CachingConfig {
     @Bean
     @Primary
     public CacheManager cacheManagerForRecipes() {
-        return new ConcurrentMapCacheManager(new String[]{"recipes"});
+        return new ConcurrentMapCacheManager("recipes");
     }
 
     @Bean
     @Qualifier("Batch")
     public CacheManager cacheManagerForBatches() {
-        return new ConcurrentMapCacheManager(new String[]{"batches"});
+        return new ConcurrentMapCacheManager("batches");
     }
 
     @Bean
     @Qualifier("Recipe_Config")
     public CacheManager cacheManagerForRecipeConfig() {
-        return new ConcurrentMapCacheManager(new String[]{"recipe_config"});
+        return new ConcurrentMapCacheManager("recipe_config");
     }
 }

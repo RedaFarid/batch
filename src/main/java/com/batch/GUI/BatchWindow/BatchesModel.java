@@ -1,14 +1,12 @@
-
 package com.batch.GUI.BatchWindow;
 
 public class BatchesModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof BatchesModel)) {
+        } else if (!(o instanceof BatchesModel other)) {
             return false;
         } else {
-            BatchesModel other = (BatchesModel)o;
             return other.canEqual(this);
         }
     }

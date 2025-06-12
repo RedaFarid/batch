@@ -1,12 +1,12 @@
-
 package com.batch.Database.Entities;
 
-import java.util.LinkedList;
-import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.LinkedList;
+import java.util.List;
 
 @Table("PhasesTypesName")
 public class Phase {
@@ -21,6 +21,17 @@ public class Phase {
     )
     private List<Parameter> Parameters = new LinkedList();
 
+    public Phase(final Long id, final String name, final String unit, final String phaseType, final List<Parameter> Parameters) {
+        this.id = id;
+        this.name = name;
+        this.unit = unit;
+        this.phaseType = phaseType;
+        this.Parameters = Parameters;
+    }
+
+    public Phase() {
+    }
+
     public String toString() {
         return String.format("Phase{id=%-5d, name='%-40s', unit='%-15s', phaseType='%-30s', Parameters=%-10s}", this.id, this.name, this.unit, this.phaseType, this.Parameters);
     }
@@ -29,36 +40,36 @@ public class Phase {
         return this.id;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public String getUnit() {
-        return this.unit;
-    }
-
-    public String getPhaseType() {
-        return this.phaseType;
-    }
-
-    public List<Parameter> getParameters() {
-        return this.Parameters;
-    }
-
     public void setId(final Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public void setName(final String name) {
         this.name = name;
     }
 
+    public String getUnit() {
+        return this.unit;
+    }
+
     public void setUnit(final String unit) {
         this.unit = unit;
     }
 
+    public String getPhaseType() {
+        return this.phaseType;
+    }
+
     public void setPhaseType(final String phaseType) {
         this.phaseType = phaseType;
+    }
+
+    public List<Parameter> getParameters() {
+        return this.Parameters;
     }
 
     public void setParameters(final List<Parameter> Parameters) {
@@ -68,10 +79,9 @@ public class Phase {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof Phase)) {
+        } else if (!(o instanceof Phase other)) {
             return false;
         } else {
-            Phase other = (Phase)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -118,14 +128,8 @@ public class Phase {
                 Object this$Parameters = this.getParameters();
                 Object other$Parameters = other.getParameters();
                 if (this$Parameters == null) {
-                    if (other$Parameters != null) {
-                        return false;
-                    }
-                } else if (!this$Parameters.equals(other$Parameters)) {
-                    return false;
-                }
-
-                return true;
+                    return other$Parameters == null;
+                } else return this$Parameters.equals(other$Parameters);
             }
         }
     }
@@ -148,16 +152,5 @@ public class Phase {
         Object $Parameters = this.getParameters();
         result = result * 59 + ($Parameters == null ? 43 : $Parameters.hashCode());
         return result;
-    }
-
-    public Phase(final Long id, final String name, final String unit, final String phaseType, final List<Parameter> Parameters) {
-        this.id = id;
-        this.name = name;
-        this.unit = unit;
-        this.phaseType = phaseType;
-        this.Parameters = Parameters;
-    }
-
-    public Phase() {
     }
 }

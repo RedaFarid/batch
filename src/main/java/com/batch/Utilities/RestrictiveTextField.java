@@ -1,4 +1,3 @@
-
 package com.batch.Utilities;
 
 import javafx.beans.property.IntegerProperty;
@@ -25,7 +24,7 @@ public class RestrictiveTextField extends TextField {
                         this.ignore = false;
                     }
 
-                    if (RestrictiveTextField.this.restrict.get() != null && !((String)RestrictiveTextField.this.restrict.get()).equals("") && !s1.matches((String)RestrictiveTextField.this.restrict.get() + "*")) {
+                    if (RestrictiveTextField.this.restrict.get() != null && !RestrictiveTextField.this.restrict.get().equals("") && !s1.matches(RestrictiveTextField.this.restrict.get() + "*")) {
                         this.ignore = true;
                         RestrictiveTextField.this.setText(s);
                         this.ignore = false;
@@ -53,7 +52,7 @@ public class RestrictiveTextField extends TextField {
     }
 
     public String getRestrict() {
-        return (String)this.restrict.get();
+        return this.restrict.get();
     }
 
     public void setRestrict(String restrict) {

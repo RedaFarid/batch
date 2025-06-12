@@ -1,5 +1,3 @@
-
-
 package com.batch.DTO.BatchSystemDataDefinitions;
 
 import java.util.LinkedList;
@@ -7,6 +5,13 @@ import java.util.List;
 
 public class BatchParallelStepsModel {
     private List<BatchStepModel> steps = new LinkedList();
+
+    public BatchParallelStepsModel() {
+    }
+
+    public BatchParallelStepsModel(final List<BatchStepModel> steps) {
+        this.steps = steps;
+    }
 
     public void addStep(BatchStepModel step) {
         this.steps.add(step);
@@ -23,24 +28,17 @@ public class BatchParallelStepsModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof BatchParallelStepsModel)) {
+        } else if (!(o instanceof BatchParallelStepsModel other)) {
             return false;
         } else {
-            BatchParallelStepsModel other = (BatchParallelStepsModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
                 Object this$steps = this.getSteps();
                 Object other$steps = other.getSteps();
                 if (this$steps == null) {
-                    if (other$steps != null) {
-                        return false;
-                    }
-                } else if (!this$steps.equals(other$steps)) {
-                    return false;
-                }
-
-                return true;
+                    return other$steps == null;
+                } else return this$steps.equals(other$steps);
             }
         }
     }
@@ -59,12 +57,5 @@ public class BatchParallelStepsModel {
 
     public String toString() {
         return "BatchParallelStepsModel(steps=" + this.getSteps() + ")";
-    }
-
-    public BatchParallelStepsModel() {
-    }
-
-    public BatchParallelStepsModel(final List<BatchStepModel> steps) {
-        this.steps = steps;
     }
 }

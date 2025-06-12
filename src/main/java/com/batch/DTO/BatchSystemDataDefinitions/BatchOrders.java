@@ -1,4 +1,3 @@
-
 package com.batch.DTO.BatchSystemDataDefinitions;
 
 public enum BatchOrders {
@@ -8,5 +7,5 @@ public enum BatchOrders {
     Hold,
     Resume,
     Finish,
-    Close;
+    Close
 }

@@ -1,4 +1,3 @@
-
 package com.batch.Database.Entities;
 
 import org.springframework.data.annotation.Id;
@@ -13,40 +12,51 @@ public class BatchControllerData {
     private boolean controlBit;
     private boolean lockGeneralControl;
 
+    public BatchControllerData(final String unit, final long runningBatchID, final int CurrentParallelStepsNo, final boolean controlBit, final boolean lockGeneralControl) {
+        this.unit = unit;
+        this.runningBatchID = runningBatchID;
+        this.CurrentParallelStepsNo = CurrentParallelStepsNo;
+        this.controlBit = controlBit;
+        this.lockGeneralControl = lockGeneralControl;
+    }
+
+    public BatchControllerData() {
+    }
+
     public String getUnit() {
         return this.unit;
-    }
-
-    public long getRunningBatchID() {
-        return this.runningBatchID;
-    }
-
-    public int getCurrentParallelStepsNo() {
-        return this.CurrentParallelStepsNo;
-    }
-
-    public boolean isControlBit() {
-        return this.controlBit;
-    }
-
-    public boolean isLockGeneralControl() {
-        return this.lockGeneralControl;
     }
 
     public void setUnit(final String unit) {
         this.unit = unit;
     }
 
+    public long getRunningBatchID() {
+        return this.runningBatchID;
+    }
+
     public void setRunningBatchID(final long runningBatchID) {
         this.runningBatchID = runningBatchID;
+    }
+
+    public int getCurrentParallelStepsNo() {
+        return this.CurrentParallelStepsNo;
     }
 
     public void setCurrentParallelStepsNo(final int CurrentParallelStepsNo) {
         this.CurrentParallelStepsNo = CurrentParallelStepsNo;
     }
 
+    public boolean isControlBit() {
+        return this.controlBit;
+    }
+
     public void setControlBit(final boolean controlBit) {
         this.controlBit = controlBit;
+    }
+
+    public boolean isLockGeneralControl() {
+        return this.lockGeneralControl;
     }
 
     public void setLockGeneralControl(final boolean lockGeneralControl) {
@@ -56,10 +66,9 @@ public class BatchControllerData {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof BatchControllerData)) {
+        } else if (!(o instanceof BatchControllerData other)) {
             return false;
         } else {
-            BatchControllerData other = (BatchControllerData)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.getRunningBatchID() != other.getRunningBatchID()) {
@@ -74,14 +83,8 @@ public class BatchControllerData {
                 Object this$unit = this.getUnit();
                 Object other$unit = other.getUnit();
                 if (this$unit == null) {
-                    if (other$unit != null) {
-                        return false;
-                    }
-                } else if (!this$unit.equals(other$unit)) {
-                    return false;
-                }
-
-                return true;
+                    return other$unit == null;
+                } else return this$unit.equals(other$unit);
             }
         }
     }
@@ -94,7 +97,7 @@ public class BatchControllerData {
         int PRIME = 59;
         int result = 1;
         long $runningBatchID = this.getRunningBatchID();
-        result = result * 59 + (int)($runningBatchID >>> 32 ^ $runningBatchID);
+        result = result * 59 + (int) ($runningBatchID >>> 32 ^ $runningBatchID);
         result = result * 59 + this.getCurrentParallelStepsNo();
         result = result * 59 + (this.isControlBit() ? 79 : 97);
         result = result * 59 + (this.isLockGeneralControl() ? 79 : 97);
@@ -106,16 +109,5 @@ public class BatchControllerData {
     public String toString() {
         String var10000 = this.getUnit();
         return "BatchControllerData(unit=" + var10000 + ", runningBatchID=" + this.getRunningBatchID() + ", CurrentParallelStepsNo=" + this.getCurrentParallelStepsNo() + ", controlBit=" + this.isControlBit() + ", lockGeneralControl=" + this.isLockGeneralControl() + ")";
-    }
-
-    public BatchControllerData(final String unit, final long runningBatchID, final int CurrentParallelStepsNo, final boolean controlBit, final boolean lockGeneralControl) {
-        this.unit = unit;
-        this.runningBatchID = runningBatchID;
-        this.CurrentParallelStepsNo = CurrentParallelStepsNo;
-        this.controlBit = controlBit;
-        this.lockGeneralControl = lockGeneralControl;
-    }
-
-    public BatchControllerData() {
     }
 }

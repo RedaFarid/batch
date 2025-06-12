@@ -1,14 +1,14 @@
-
 package com.batch.GUI.Reporting;
 
 import com.batch.Database.Entities.Batch;
-import java.time.LocalDate;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.time.LocalDate;
 
 public class ReportsModel {
     private final ObservableList<Batch> list = FXCollections.observableArrayList();
@@ -24,20 +24,20 @@ public class ReportsModel {
         return this.fromDate;
     }
 
-    public ObjectProperty<LocalDate> getToDate() {
-        return this.toDate;
-    }
-
-    public StringProperty getFilterString() {
-        return this.filterString;
-    }
-
     public void setFromDate(final ObjectProperty<LocalDate> fromDate) {
         this.fromDate = fromDate;
     }
 
+    public ObjectProperty<LocalDate> getToDate() {
+        return this.toDate;
+    }
+
     public void setToDate(final ObjectProperty<LocalDate> toDate) {
         this.toDate = toDate;
+    }
+
+    public StringProperty getFilterString() {
+        return this.filterString;
     }
 
     public void setFilterString(final StringProperty filterString) {
@@ -47,10 +47,9 @@ public class ReportsModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof ReportsModel)) {
+        } else if (!(o instanceof ReportsModel other)) {
             return false;
         } else {
-            ReportsModel other = (ReportsModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -87,14 +86,8 @@ public class ReportsModel {
                 Object this$filterString = this.getFilterString();
                 Object other$filterString = other.getFilterString();
                 if (this$filterString == null) {
-                    if (other$filterString != null) {
-                        return false;
-                    }
-                } else if (!this$filterString.equals(other$filterString)) {
-                    return false;
-                }
-
-                return true;
+                    return other$filterString == null;
+                } else return this$filterString.equals(other$filterString);
             }
         }
     }

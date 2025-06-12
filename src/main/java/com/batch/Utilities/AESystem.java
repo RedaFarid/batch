@@ -5,13 +5,13 @@
 
 package com.batch.Utilities;
 
-import java.security.Key;
-import java.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+import java.util.Base64;
 
 public class AESystem {
-    private static String ALGO = "AES";
+    private static final String ALGO = "AES";
     private static byte[] KeyValue = "aaaaaaaaaaaaaaaa".getBytes();
 
     public AESystem(String KeyValue) {

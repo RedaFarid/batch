@@ -1,17 +1,10 @@
-
 package com.batch.GUI.BatchWindow;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchOrders;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchParallelStepsModel;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchStepModel;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
-import com.batch.Database.Entities.Batch;
-import com.batch.Database.Entities.BatchControllerData;
-import com.batch.Database.Entities.Material;
-import com.batch.Database.Entities.Phase;
-import com.batch.Database.Entities.Recipe;
-import com.batch.Database.Entities.RecipeConf;
-import com.batch.Database.Entities.TreeViewItemsData;
+import com.batch.Database.Entities.*;
 import com.batch.Database.Repositories.MaterialsRepository;
 import com.batch.Database.Repositories.PhaseRepository;
 import com.batch.Database.Repositories.TreeViewItemsDataRepository;
@@ -21,17 +14,18 @@ import com.batch.Database.Services.RecipeConfigService;
 import com.batch.Database.Services.RecipeService;
 import com.batch.GUI.RecipeEditor.RecipeEditorController;
 import com.google.common.collect.Lists;
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 @Controller
 public class BatchesController {
@@ -46,6 +40,17 @@ public class BatchesController {
     private final BatchControllerDataService batchControllerDataService;
     private final RecipeEditorController recipeEditorController;
 
+    public BatchesController(final TreeViewItemsDataRepository treeViewItemsDataRepository, final RecipeService recipeService, final BatchesService batchesService, final RecipeConfigService recipeConfigService, final MaterialsRepository materialsRepository, final PhaseRepository phaseRepository, final BatchControllerDataService batchControllerDataService, final RecipeEditorController recipeEditorController) {
+        this.treeViewItemsDataRepository = treeViewItemsDataRepository;
+        this.recipeService = recipeService;
+        this.batchesService = batchesService;
+        this.recipeConfigService = recipeConfigService;
+        this.materialsRepository = materialsRepository;
+        this.phaseRepository = phaseRepository;
+        this.batchControllerDataService = batchControllerDataService;
+        this.recipeEditorController = recipeEditorController;
+    }
+
     public BatchesModel getModel() {
         return this.model;
     }
@@ -55,7 +60,7 @@ public class BatchesController {
     }
 
     public TreeViewItemsData saveTreeItem(TreeViewItemsData treeViewItemsData) {
-        return (TreeViewItemsData)this.treeViewItemsDataRepository.save(treeViewItemsData);
+        return this.treeViewItemsDataRepository.save(treeViewItemsData);
     }
 
     public Optional<TreeViewItemsData> getTreeItemById(Long id) {
@@ -110,7 +115,7 @@ public class BatchesController {
     public void onControlBatchStep(long batchID, int parallelStepNumber, int stepNumber, String control) {
         this.batchesService.findById(batchID).ifPresent((batch) -> {
             this.batchControllerDataService.updateLockGeneralControl(true, batch.getUnitName());
-            ((BatchStepModel)((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNumber)).getSteps().get(stepNumber)).setOrder(control);
+            batch.getModel().getParallelSteps().get(parallelStepNumber).getSteps().get(stepNumber).setOrder(control);
             this.batchesService.save(batch);
         });
     }
@@ -146,7 +151,7 @@ public class BatchesController {
 
     public Optional<String> parseRecipeToDetailsString(Recipe selectedRecipe) {
         try {
-            Optional<String> reduce = selectedRecipe.getModel().getParallelSteps().stream().flatMap((psm) -> psm.getSteps().stream()).filter((stepModel) -> stepModel.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " "))).map((sm) -> new RecipeDetails(sm.getPhaseID(), sm.getPhaseType(), sm.getPhaseName(), sm.getMaterialID(), (String)this.getMaterialByName(sm.getMaterialID()).map(Material::getName).orElse("not found material"), (Double)sm.getValueParametersData().get("Percentage %"))).map(RecipeDetails::getDetailsString).reduce((a, b) -> a + "\n" + b);
+            Optional<String> reduce = selectedRecipe.getModel().getParallelSteps().stream().flatMap((psm) -> psm.getSteps().stream()).filter((stepModel) -> stepModel.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " "))).map((sm) -> new RecipeDetails(sm.getPhaseID(), sm.getPhaseType(), sm.getPhaseName(), sm.getMaterialID(), this.getMaterialByName(sm.getMaterialID()).map(Material::getName).orElse("not found material"), sm.getValueParametersData().get("Percentage %"))).map(RecipeDetails::getDetailsString).reduce((a, b) -> a + "\n" + b);
             if (reduce.isEmpty()) {
                 reduce = Optional.of("No dose phases in this recipe");
             }
@@ -158,17 +163,6 @@ public class BatchesController {
         }
     }
 
-    public BatchesController(final TreeViewItemsDataRepository treeViewItemsDataRepository, final RecipeService recipeService, final BatchesService batchesService, final RecipeConfigService recipeConfigService, final MaterialsRepository materialsRepository, final PhaseRepository phaseRepository, final BatchControllerDataService batchControllerDataService, final RecipeEditorController recipeEditorController) {
-        this.treeViewItemsDataRepository = treeViewItemsDataRepository;
-        this.recipeService = recipeService;
-        this.batchesService = batchesService;
-        this.recipeConfigService = recipeConfigService;
-        this.materialsRepository = materialsRepository;
-        this.phaseRepository = phaseRepository;
-        this.batchControllerDataService = batchControllerDataService;
-        this.recipeEditorController = recipeEditorController;
-    }
-
     private static class RecipeDetails {
         private long recipeId;
         private String phaseType;
@@ -176,6 +170,18 @@ public class BatchesController {
         private long matId;
         private String matName;
         private double qty;
+
+        public RecipeDetails(final long recipeId, final String phaseType, final String phaseName, final long matId, final String matName, final double qty) {
+            this.recipeId = recipeId;
+            this.phaseType = phaseType;
+            this.phaseName = phaseName;
+            this.matId = matId;
+            this.matName = matName;
+            this.qty = qty;
+        }
+
+        public RecipeDetails() {
+        }
 
         public String getDetailsString() {
             return "ID = %-5d  PhaseType = %-15S  PhaseName = %-35S  MaterialID = %-5d  MaterialName = %-25S  Quantity = %-4f ".formatted(this.recipeId, this.phaseType, this.phaseName, this.matId, this.matName, this.qty);
@@ -185,44 +191,44 @@ public class BatchesController {
             return this.recipeId;
         }
 
-        public String getPhaseType() {
-            return this.phaseType;
-        }
-
-        public String getPhaseName() {
-            return this.phaseName;
-        }
-
-        public long getMatId() {
-            return this.matId;
-        }
-
-        public String getMatName() {
-            return this.matName;
-        }
-
-        public double getQty() {
-            return this.qty;
-        }
-
         public void setRecipeId(final long recipeId) {
             this.recipeId = recipeId;
+        }
+
+        public String getPhaseType() {
+            return this.phaseType;
         }
 
         public void setPhaseType(final String phaseType) {
             this.phaseType = phaseType;
         }
 
+        public String getPhaseName() {
+            return this.phaseName;
+        }
+
         public void setPhaseName(final String phaseName) {
             this.phaseName = phaseName;
+        }
+
+        public long getMatId() {
+            return this.matId;
         }
 
         public void setMatId(final long matId) {
             this.matId = matId;
         }
 
+        public String getMatName() {
+            return this.matName;
+        }
+
         public void setMatName(final String matName) {
             this.matName = matName;
+        }
+
+        public double getQty() {
+            return this.qty;
         }
 
         public void setQty(final double qty) {
@@ -232,10 +238,9 @@ public class BatchesController {
         public boolean equals(final Object o) {
             if (o == this) {
                 return true;
-            } else if (!(o instanceof RecipeDetails)) {
+            } else if (!(o instanceof RecipeDetails other)) {
                 return false;
             } else {
-                RecipeDetails other = (RecipeDetails)o;
                 if (!other.canEqual(this)) {
                     return false;
                 } else if (this.getRecipeId() != other.getRecipeId()) {
@@ -268,14 +273,8 @@ public class BatchesController {
                     Object this$matName = this.getMatName();
                     Object other$matName = other.getMatName();
                     if (this$matName == null) {
-                        if (other$matName != null) {
-                            return false;
-                        }
-                    } else if (!this$matName.equals(other$matName)) {
-                        return false;
-                    }
-
-                    return true;
+                        return other$matName == null;
+                    } else return this$matName.equals(other$matName);
                 }
             }
         }
@@ -288,11 +287,11 @@ public class BatchesController {
             int PRIME = 59;
             int result = 1;
             long $recipeId = this.getRecipeId();
-            result = result * 59 + (int)($recipeId >>> 32 ^ $recipeId);
+            result = result * 59 + (int) ($recipeId >>> 32 ^ $recipeId);
             long $matId = this.getMatId();
-            result = result * 59 + (int)($matId >>> 32 ^ $matId);
+            result = result * 59 + (int) ($matId >>> 32 ^ $matId);
             long $qty = Double.doubleToLongBits(this.getQty());
-            result = result * 59 + (int)($qty >>> 32 ^ $qty);
+            result = result * 59 + (int) ($qty >>> 32 ^ $qty);
             Object $phaseType = this.getPhaseType();
             result = result * 59 + ($phaseType == null ? 43 : $phaseType.hashCode());
             Object $phaseName = this.getPhaseName();
@@ -305,18 +304,6 @@ public class BatchesController {
         public String toString() {
             long var10000 = this.getRecipeId();
             return "BatchesController.RecipeDetails(recipeId=" + var10000 + ", phaseType=" + this.getPhaseType() + ", phaseName=" + this.getPhaseName() + ", matId=" + this.getMatId() + ", matName=" + this.getMatName() + ", qty=" + this.getQty() + ")";
-        }
-
-        public RecipeDetails(final long recipeId, final String phaseType, final String phaseName, final long matId, final String matName, final double qty) {
-            this.recipeId = recipeId;
-            this.phaseType = phaseType;
-            this.phaseName = phaseName;
-            this.matId = matId;
-            this.matName = matName;
-            this.qty = qty;
-        }
-
-        public RecipeDetails() {
         }
     }
 }

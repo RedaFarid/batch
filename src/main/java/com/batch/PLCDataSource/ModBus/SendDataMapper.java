@@ -1,25 +1,20 @@
-
 package com.batch.PLCDataSource.ModBus;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.Address;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.ValueObject;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.*;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Utilities.StringUtilsL;
-import java.nio.ByteBuffer;
-import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.ByteBuffer;
+import java.util.Map;
+
 class SendDataMapper implements Runnable {
     private static final Logger log = LogManager.getLogger(SendDataMapper.class);
-    private Map<String, RowDataDefinition> devices;
-    private Map<Integer, Byte> buffer;
     private final NotificationService loggingService;
+    private final Map<String, RowDataDefinition> devices;
+    private final Map<Integer, Byte> buffer;
 
     public SendDataMapper(Map<String, RowDataDefinition> definitions, Map<Integer, Byte> buffer, NotificationService loggingService) {
         this.devices = definitions;
@@ -32,7 +27,7 @@ class SendDataMapper implements Runnable {
             switch (type) {
                 case Boolean: {
                     boolean val = ((BooleanDataType) value).getValue();
-                    this.buffer.replace(address.getByteNumber(), this.setBit((Byte) this.buffer.get(address.getByteNumber()), address.getBitNumber(), val));
+                    this.buffer.replace(address.getByteNumber(), this.setBit(this.buffer.get(address.getByteNumber()), address.getBitNumber(), val));
                     break;
                 }
                 case Integer: {
@@ -56,11 +51,11 @@ class SendDataMapper implements Runnable {
     }
 
     private byte setBit(byte _byte, int bitPosition, boolean bitValue) {
-        return bitValue ? (byte)(_byte | 1 << bitPosition) : (byte)(_byte & ~(1 << bitPosition));
+        return bitValue ? (byte) (_byte | 1 << bitPosition) : (byte) (_byte & ~(1 << bitPosition));
     }
 
     private byte[] intToBytes(int data) {
-        return new byte[]{(byte)(data >> 8 & 255), (byte)(data & 255)};
+        return new byte[]{(byte) (data >> 8 & 255), (byte) (data & 255)};
     }
 
     private byte[] floatToBytes(float data) {
@@ -73,8 +68,8 @@ class SendDataMapper implements Runnable {
         try {
             this.devices.forEach((name, device) -> device.getAddresses().forEach((k, v) -> {
                 try {
-                    if (!(Boolean)device.getInOutIndecation().get(k)) {
-                        this.setValueToBuffer((EDT)device.getTypes().get(k), v, (ValueObject)device.getAllValues().get(k));
+                    if (!(Boolean) device.getInOutIndecation().get(k)) {
+                        this.setValueToBuffer(device.getTypes().get(k), v, device.getAllValues().get(k));
                     }
                 } catch (Exception e) {
                     log.fatal(e, e);

@@ -1,13 +1,12 @@
-
-
 package com.batch.PLCDataSource.ModBus;
 
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Utilities.StringUtilsL;
-import java.util.Map;
 import javafx.beans.property.BooleanProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Map;
 
 public class SendBufferCreator extends ModbusSystem {
     private static final Logger log = LogManager.getLogger(SendBufferCreator.class);
@@ -32,7 +31,7 @@ public class SendBufferCreator extends ModbusSystem {
             if (this.connectionStatus.getValue() && !this.bufferSynchronized.getValue()) {
                 this.buffer.clear();
 
-                for(this.j = 0; this.j < 4; ++this.j) {
+                for (this.j = 0; this.j < 4; ++this.j) {
                     this.taskProcedure(this.j * 120, 120);
                 }
 
@@ -48,7 +47,7 @@ public class SendBufferCreator extends ModbusSystem {
     protected void taskProcedure(int start, int quantity) throws Exception {
         int[] v = this.modbusClient.ReadHoldingRegisters(start, quantity);
 
-        for(this.i = 0; this.i < quantity; ++this.i) {
+        for (this.i = 0; this.i < quantity; ++this.i) {
             this.buffer.put(this.j * 120 * 2 + this.i * 2, this.intToBytes(v[this.i])[0]);
             this.buffer.put(this.j * 120 * 2 + this.i * 2 + 1, this.intToBytes(v[this.i])[1]);
         }
@@ -56,6 +55,6 @@ public class SendBufferCreator extends ModbusSystem {
     }
 
     private byte[] intToBytes(int data) {
-        return new byte[]{(byte)(data >> 8 & 255), (byte)(data & 255)};
+        return new byte[]{(byte) (data >> 8 & 255), (byte) (data & 255)};
     }
 }

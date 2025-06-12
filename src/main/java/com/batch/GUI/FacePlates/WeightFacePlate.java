@@ -1,5 +1,3 @@
-
-
 package com.batch.GUI.FacePlates;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
@@ -57,37 +55,37 @@ public class WeightFacePlate extends MeasurementFacePlate {
         this.Zero.setPromptText("0.0");
         this.Zero.setRestrict("[0-9].");
         this.Zero.setMaxLength(10);
-        this.Zero.setPrefWidth((double)200.0F);
+        this.Zero.setPrefWidth(200.0F);
         this.Span = new FaceplateTextField();
         this.Span.setPromptText("0.0");
         this.Span.setRestrict("[0-9].");
         this.Span.setMaxLength(10);
-        this.Span.setPrefWidth((double)200.0F);
+        this.Span.setPrefWidth(200.0F);
         this.LowWarning = new FaceplateTextField();
         this.LowWarning.setPromptText("0.0");
         this.LowWarning.setRestrict("[0-9].");
         this.LowWarning.setMaxLength(10);
-        this.LowWarning.setPrefWidth((double)200.0F);
+        this.LowWarning.setPrefWidth(200.0F);
         this.LowAlarm = new FaceplateTextField();
         this.LowAlarm.setPromptText("0.0");
         this.LowAlarm.setRestrict("[0-9].");
         this.LowAlarm.setMaxLength(10);
-        this.LowAlarm.setPrefWidth((double)200.0F);
+        this.LowAlarm.setPrefWidth(200.0F);
         this.HighWarning = new FaceplateTextField();
         this.HighWarning.setPromptText("0.0");
         this.HighWarning.setRestrict("[0-9].");
         this.HighWarning.setMaxLength(10);
-        this.HighWarning.setPrefWidth((double)200.0F);
+        this.HighWarning.setPrefWidth(200.0F);
         this.HighAlam = new FaceplateTextField();
         this.HighAlam.setPromptText("0.0");
         this.HighAlam.setRestrict("[0-9].");
         this.HighAlam.setMaxLength(10);
-        this.HighAlam.setPrefWidth((double)200.0F);
+        this.HighAlam.setPrefWidth(200.0F);
         this.coeffecient = new FaceplateTextField();
         this.HighAlam.setPromptText("0.0");
         this.HighAlam.setRestrict("[0-9].");
         this.HighAlam.setMaxLength(10);
-        this.HighAlam.setPrefWidth((double)200.0F);
+        this.HighAlam.setPrefWidth(200.0F);
         this.ZeroLabel = new Label("Zero ");
         this.SpanLabel = new Label("Span ");
         this.LowWarningLabel = new Label("Low warning ");
@@ -95,18 +93,18 @@ public class WeightFacePlate extends MeasurementFacePlate {
         this.LowAlarmLabel = new Label("Low alarm ");
         this.HighAlamLabel = new Label("High alarm ");
         this.coeffecientLabel = new Label("Coeffecient ");
-        this.ZeroLabel.setPrefWidth((double)100.0F);
-        this.SpanLabel.setPrefWidth((double)100.0F);
-        this.LowWarningLabel.setPrefWidth((double)100.0F);
-        this.HighWarningLabel.setPrefWidth((double)100.0F);
-        this.LowAlarmLabel.setPrefWidth((double)100.0F);
-        this.HighAlamLabel.setPrefWidth((double)100.0F);
-        this.Zero.setPrefWidth((double)150.0F);
-        this.Span.setPrefWidth((double)150.0F);
-        this.LowWarning.setPrefWidth((double)150.0F);
-        this.HighWarning.setPrefWidth((double)150.0F);
-        this.LowAlarm.setPrefWidth((double)150.0F);
-        this.HighAlam.setPrefWidth((double)150.0F);
+        this.ZeroLabel.setPrefWidth(100.0F);
+        this.SpanLabel.setPrefWidth(100.0F);
+        this.LowWarningLabel.setPrefWidth(100.0F);
+        this.HighWarningLabel.setPrefWidth(100.0F);
+        this.LowAlarmLabel.setPrefWidth(100.0F);
+        this.HighAlamLabel.setPrefWidth(100.0F);
+        this.Zero.setPrefWidth(150.0F);
+        this.Span.setPrefWidth(150.0F);
+        this.LowWarning.setPrefWidth(150.0F);
+        this.HighWarning.setPrefWidth(150.0F);
+        this.LowAlarm.setPrefWidth(150.0F);
+        this.HighAlam.setPrefWidth(150.0F);
         this.latchAlarmsTillReset = new CheckBox("Latch alarms till reset");
         this.enableLowPassFilter = new CheckBox("Enable low pass smoothing");
         configurationsContainer.add(this.latchAlarmsTillReset, 1, 0, 2, 1);
@@ -136,18 +134,18 @@ public class WeightFacePlate extends MeasurementFacePlate {
     protected void actionHandler(final RowDataDefinition dataModel) {
         this.latchAlarmsTillReset.selectedProperty().addListener(new ChangeListener<Boolean>() {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Latch_Alarms_Till_Reset)).setValue(newValue);
+                ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Latch_Alarms_Till_Reset)).setValue(newValue);
             }
         });
         this.enableLowPassFilter.selectedProperty().addListener(new ChangeListener<Boolean>() {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Enable_Low_Pass_Filter)).setValue(newValue);
+                ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Enable_Low_Pass_Filter)).setValue(newValue);
             }
         });
         this.Zero.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
                 if (WeightFacePlate.this.Zero.getText().length() > 0) {
-                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Zero)).setValue(Float.parseFloat(WeightFacePlate.this.Zero.getText()));
+                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Zero)).setValue(Float.parseFloat(WeightFacePlate.this.Zero.getText()));
                 }
 
                 return null;
@@ -156,7 +154,7 @@ public class WeightFacePlate extends MeasurementFacePlate {
         this.Span.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
                 if (WeightFacePlate.this.Span.getText().length() > 0) {
-                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Span)).setValue(Float.parseFloat(WeightFacePlate.this.Span.getText()));
+                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Span)).setValue(Float.parseFloat(WeightFacePlate.this.Span.getText()));
                 }
 
                 return null;
@@ -165,7 +163,7 @@ public class WeightFacePlate extends MeasurementFacePlate {
         this.LowWarning.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
                 if (WeightFacePlate.this.LowWarning.getText().length() > 0) {
-                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Warning_SP)).setValue(Float.parseFloat(WeightFacePlate.this.LowWarning.getText()));
+                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Warning_SP)).setValue(Float.parseFloat(WeightFacePlate.this.LowWarning.getText()));
                 }
 
                 return null;
@@ -174,7 +172,7 @@ public class WeightFacePlate extends MeasurementFacePlate {
         this.LowAlarm.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
                 if (WeightFacePlate.this.LowAlarm.getText().length() > 0) {
-                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Alarm_Sp)).setValue(Float.parseFloat(WeightFacePlate.this.LowAlarm.getText()));
+                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Alarm_Sp)).setValue(Float.parseFloat(WeightFacePlate.this.LowAlarm.getText()));
                 }
 
                 return null;
@@ -183,7 +181,7 @@ public class WeightFacePlate extends MeasurementFacePlate {
         this.HighWarning.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
                 if (WeightFacePlate.this.HighWarning.getText().length() > 0) {
-                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.High_Warning_SP)).setValue(Float.parseFloat(WeightFacePlate.this.HighWarning.getText()));
+                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Warning_SP)).setValue(Float.parseFloat(WeightFacePlate.this.HighWarning.getText()));
                 }
 
                 return null;
@@ -192,7 +190,7 @@ public class WeightFacePlate extends MeasurementFacePlate {
         this.HighAlam.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
                 if (WeightFacePlate.this.HighAlam.getText().length() > 0) {
-                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.High_Alarm_SP)).setValue(Float.parseFloat(WeightFacePlate.this.HighAlam.getText()));
+                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Alarm_SP)).setValue(Float.parseFloat(WeightFacePlate.this.HighAlam.getText()));
                 }
 
                 return null;
@@ -201,37 +199,37 @@ public class WeightFacePlate extends MeasurementFacePlate {
         this.coeffecient.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
                 if (WeightFacePlate.this.coeffecient.getText().length() > 0) {
-                    ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Pass_Coeffecient)).setValue(Float.parseFloat(WeightFacePlate.this.coeffecient.getText()));
+                    ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Pass_Coeffecient)).setValue(Float.parseFloat(WeightFacePlate.this.coeffecient.getText()));
                 }
 
                 return null;
             }
         });
-        ((BooleanDataType)dataModel.getAllValues().get(WeightInput.High_Alarm)).addListener((observable, oldValue, newValue) -> this.HighAlarmSignal.setSelected(newValue));
-        ((BooleanDataType)dataModel.getAllValues().get(WeightInput.High_Warning)).addListener((observable, oldValue, newValue) -> this.HighWarningSignal.setSelected(newValue));
-        ((BooleanDataType)dataModel.getAllValues().get(WeightInput.Low_Alarm)).addListener((observable, oldValue, newValue) -> this.lowAlarmSignal.setSelected(newValue));
-        ((BooleanDataType)dataModel.getAllValues().get(WeightInput.Low_Warning)).addListener((observable, oldValue, newValue) -> this.lowWarningSignal.setSelected(newValue));
+        ((BooleanDataType) dataModel.getAllValues().get(WeightInput.High_Alarm)).addListener((observable, oldValue, newValue) -> this.HighAlarmSignal.setSelected(newValue));
+        ((BooleanDataType) dataModel.getAllValues().get(WeightInput.High_Warning)).addListener((observable, oldValue, newValue) -> this.HighWarningSignal.setSelected(newValue));
+        ((BooleanDataType) dataModel.getAllValues().get(WeightInput.Low_Alarm)).addListener((observable, oldValue, newValue) -> this.lowAlarmSignal.setSelected(newValue));
+        ((BooleanDataType) dataModel.getAllValues().get(WeightInput.Low_Warning)).addListener((observable, oldValue, newValue) -> this.lowWarningSignal.setSelected(newValue));
     }
 
     protected void withFlasher(boolean flashTrigger) {
     }
 
     protected void checkDataForInitializingGraphics(RowDataDefinition dataModel) {
-        float zeroValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Zero)).getValue();
-        float spanValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Span)).getValue();
-        float lowWarnValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Warning_SP)).getValue();
-        float lowAlaValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Alarm_Sp)).getValue();
-        float highWarnValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.High_Warning_SP)).getValue();
-        float highAlaValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.High_Alarm_SP)).getValue();
-        boolean enableLowPass = ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Enable_Low_Pass_Filter)).getValue();
-        boolean enableSimulationR = ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Enable_Simulation)).getValue();
-        boolean enableLatchAlarms = ((BooleanDataType)dataModel.getAllValues().get(WeightOutput.Latch_Alarms_Till_Reset)).getValue();
-        float lowPassCoeffecient = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Low_Pass_Coeffecient)).getValue();
-        float simulationValue = ((RealDataType)dataModel.getAllValues().get(WeightOutput.Simulation_Value)).getValue();
-        boolean lowAlarmSig = ((BooleanDataType)dataModel.getAllValues().get(WeightInput.Low_Alarm)).getValue();
-        boolean lowWarningSig = ((BooleanDataType)dataModel.getAllValues().get(WeightInput.Low_Warning)).getValue();
-        boolean highAlarmSig = ((BooleanDataType)dataModel.getAllValues().get(WeightInput.High_Alarm)).getValue();
-        boolean highWarningSig = ((BooleanDataType)dataModel.getAllValues().get(WeightInput.High_Warning)).getValue();
+        float zeroValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Zero)).getValue();
+        float spanValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Span)).getValue();
+        float lowWarnValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Warning_SP)).getValue();
+        float lowAlaValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Alarm_Sp)).getValue();
+        float highWarnValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Warning_SP)).getValue();
+        float highAlaValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.High_Alarm_SP)).getValue();
+        boolean enableLowPass = ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Enable_Low_Pass_Filter)).getValue();
+        boolean enableSimulationR = ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Enable_Simulation)).getValue();
+        boolean enableLatchAlarms = ((BooleanDataType) dataModel.getAllValues().get(WeightOutput.Latch_Alarms_Till_Reset)).getValue();
+        float lowPassCoeffecient = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Low_Pass_Coeffecient)).getValue();
+        float simulationValue = ((RealDataType) dataModel.getAllValues().get(WeightOutput.Simulation_Value)).getValue();
+        boolean lowAlarmSig = ((BooleanDataType) dataModel.getAllValues().get(WeightInput.Low_Alarm)).getValue();
+        boolean lowWarningSig = ((BooleanDataType) dataModel.getAllValues().get(WeightInput.Low_Warning)).getValue();
+        boolean highAlarmSig = ((BooleanDataType) dataModel.getAllValues().get(WeightInput.High_Alarm)).getValue();
+        boolean highWarningSig = ((BooleanDataType) dataModel.getAllValues().get(WeightInput.High_Warning)).getValue();
         this.Zero.setText(String.valueOf(zeroValue));
         this.Span.setText(String.valueOf(spanValue));
         this.LowWarning.setText(String.valueOf(lowWarnValue));

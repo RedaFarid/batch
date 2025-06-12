@@ -1,15 +1,15 @@
-
 package com.batch.Database.Entities;
 
 import com.batch.DTO.RecipeSystemDataDefinitions.RecipeModel;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Table("RecipesDesign")
 public class Recipe {
@@ -61,6 +61,9 @@ public class Recipe {
         this.unitName = unitName;
     }
 
+    public Recipe() {
+    }
+
     public String toString() {
         return String.format("Recipe{id=%-10d, recipeName='%-10s', unitName='%-10s', creationDate=%-10s, lastUpdateDate=%-10s, creationTime=%-10s, lastUpdateTime=%-10s, version='%-10s', state='%-10s', model=%s}", this.id, this.recipeName, this.unitName, this.creationDate, this.lastUpdateDate, this.creationTime, this.lastUpdateTime, this.version, this.state, this.rowModel);
     }
@@ -69,84 +72,84 @@ public class Recipe {
         return this.id;
     }
 
-    public String getRecipeName() {
-        return this.recipeName;
-    }
-
-    public String getUnitName() {
-        return this.unitName;
-    }
-
-    public LocalDate getCreationDate() {
-        return this.creationDate;
-    }
-
-    public LocalDate getLastUpdateDate() {
-        return this.lastUpdateDate;
-    }
-
-    public LocalTime getCreationTime() {
-        return this.creationTime;
-    }
-
-    public LocalTime getLastUpdateTime() {
-        return this.lastUpdateTime;
-    }
-
-    public String getVersion() {
-        return this.version;
-    }
-
-    public String getState() {
-        return this.state;
-    }
-
-    public String getRowModel() {
-        return this.rowModel;
-    }
-
-    public RecipeModel getModel() {
-        return this.model;
-    }
-
     public void setId(final Long id) {
         this.id = id;
+    }
+
+    public String getRecipeName() {
+        return this.recipeName;
     }
 
     public void setRecipeName(final String recipeName) {
         this.recipeName = recipeName;
     }
 
+    public String getUnitName() {
+        return this.unitName;
+    }
+
     public void setUnitName(final String unitName) {
         this.unitName = unitName;
+    }
+
+    public LocalDate getCreationDate() {
+        return this.creationDate;
     }
 
     public void setCreationDate(final LocalDate creationDate) {
         this.creationDate = creationDate;
     }
 
+    public LocalDate getLastUpdateDate() {
+        return this.lastUpdateDate;
+    }
+
     public void setLastUpdateDate(final LocalDate lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public LocalTime getCreationTime() {
+        return this.creationTime;
     }
 
     public void setCreationTime(final LocalTime creationTime) {
         this.creationTime = creationTime;
     }
 
+    public LocalTime getLastUpdateTime() {
+        return this.lastUpdateTime;
+    }
+
     public void setLastUpdateTime(final LocalTime lastUpdateTime) {
         this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public String getVersion() {
+        return this.version;
     }
 
     public void setVersion(final String version) {
         this.version = version;
     }
 
+    public String getState() {
+        return this.state;
+    }
+
     public void setState(final String state) {
         this.state = state;
     }
 
+    public String getRowModel() {
+        return this.rowModel;
+    }
+
     public void setRowModel(final String rowModel) {
         this.rowModel = rowModel;
+    }
+
+    public RecipeModel getModel() {
+        return this.model;
     }
 
     public void setModel(final RecipeModel model) {
@@ -156,10 +159,9 @@ public class Recipe {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof Recipe)) {
+        } else if (!(o instanceof Recipe other)) {
             return false;
         } else {
-            Recipe other = (Recipe)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -266,14 +268,8 @@ public class Recipe {
                 Object this$model = this.getModel();
                 Object other$model = other.getModel();
                 if (this$model == null) {
-                    if (other$model != null) {
-                        return false;
-                    }
-                } else if (!this$model.equals(other$model)) {
-                    return false;
-                }
-
-                return true;
+                    return other$model == null;
+                } else return this$model.equals(other$model);
             }
         }
     }
@@ -308,8 +304,5 @@ public class Recipe {
         Object $model = this.getModel();
         result = result * 59 + ($model == null ? 43 : $model.hashCode());
         return result;
-    }
-
-    public Recipe() {
     }
 }

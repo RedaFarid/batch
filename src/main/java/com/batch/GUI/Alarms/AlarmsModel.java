@@ -1,5 +1,3 @@
-
-
 package com.batch.GUI.Alarms;
 
 import com.batch.Database.Entities.Log;
@@ -35,10 +33,9 @@ public class AlarmsModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof AlarmsModel)) {
+        } else if (!(o instanceof AlarmsModel other)) {
             return false;
         } else {
-            AlarmsModel other = (AlarmsModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -75,14 +72,8 @@ public class AlarmsModel {
                 Object this$airPressureHiAlarm = this.getAirPressureHiAlarm();
                 Object other$airPressureHiAlarm = other.getAirPressureHiAlarm();
                 if (this$airPressureHiAlarm == null) {
-                    if (other$airPressureHiAlarm != null) {
-                        return false;
-                    }
-                } else if (!this$airPressureHiAlarm.equals(other$airPressureHiAlarm)) {
-                    return false;
-                }
-
-                return true;
+                    return other$airPressureHiAlarm == null;
+                } else return this$airPressureHiAlarm.equals(other$airPressureHiAlarm);
             }
         }
     }

@@ -7,6 +7,7 @@ package com.batch.DTO.BatchSystemDataDefinitions;
 
 import com.batch.DTO.RecipeSystemDataDefinitions.StepModel;
 import com.batch.Database.Entities.Parameter;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,93 +37,110 @@ public class BatchStepModel {
         this.CheckParametersData.putAll(model.getCheckParametersData());
         this.ValueParametersData.putAll(model.getValueParametersData());
         this.parametersType.forEach((parameter) -> {
-            this.actualvalueParametersData.put(parameter.getName(), (double)0.0F);
+            this.actualvalueParametersData.put(parameter.getName(), (double) 0.0F);
             this.ActualCheckParametersData.put(parameter.getName(), false);
         });
+    }
+
+    public BatchStepModel() {
+    }
+
+    public BatchStepModel(final Long PhaseID, final String PhaseType, final String PhaseName, final String state, final String order, final Long MaterialID, final List<Parameter> parametersType, final Map<String, Double> ValueParametersData, final Map<String, Boolean> CheckParametersData, final Map<String, Double> actualvalueParametersData, final Map<String, Boolean> ActualCheckParametersData) {
+        this.PhaseID = PhaseID;
+        this.PhaseType = PhaseType;
+        this.PhaseName = PhaseName;
+        this.state = state;
+        this.order = order;
+        this.MaterialID = MaterialID;
+        this.parametersType = parametersType;
+        this.ValueParametersData = ValueParametersData;
+        this.CheckParametersData = CheckParametersData;
+        this.actualvalueParametersData = actualvalueParametersData;
+        this.ActualCheckParametersData = ActualCheckParametersData;
     }
 
     public Long getPhaseID() {
         return this.PhaseID;
     }
 
-    public String getPhaseType() {
-        return this.PhaseType;
-    }
-
-    public String getPhaseName() {
-        return this.PhaseName;
-    }
-
-    public String getState() {
-        return this.state;
-    }
-
-    public String getOrder() {
-        return this.order;
-    }
-
-    public Long getMaterialID() {
-        return this.MaterialID;
-    }
-
-    public List<Parameter> getParametersType() {
-        return this.parametersType;
-    }
-
-    public Map<String, Double> getValueParametersData() {
-        return this.ValueParametersData;
-    }
-
-    public Map<String, Boolean> getCheckParametersData() {
-        return this.CheckParametersData;
-    }
-
-    public Map<String, Double> getActualvalueParametersData() {
-        return this.actualvalueParametersData;
-    }
-
-    public Map<String, Boolean> getActualCheckParametersData() {
-        return this.ActualCheckParametersData;
-    }
-
     public void setPhaseID(final Long PhaseID) {
         this.PhaseID = PhaseID;
+    }
+
+    public String getPhaseType() {
+        return this.PhaseType;
     }
 
     public void setPhaseType(final String PhaseType) {
         this.PhaseType = PhaseType;
     }
 
+    public String getPhaseName() {
+        return this.PhaseName;
+    }
+
     public void setPhaseName(final String PhaseName) {
         this.PhaseName = PhaseName;
+    }
+
+    public String getState() {
+        return this.state;
     }
 
     public void setState(final String state) {
         this.state = state;
     }
 
+    public String getOrder() {
+        return this.order;
+    }
+
     public void setOrder(final String order) {
         this.order = order;
+    }
+
+    public Long getMaterialID() {
+        return this.MaterialID;
     }
 
     public void setMaterialID(final Long MaterialID) {
         this.MaterialID = MaterialID;
     }
 
+    public List<Parameter> getParametersType() {
+        return this.parametersType;
+    }
+
     public void setParametersType(final List<Parameter> parametersType) {
         this.parametersType = parametersType;
+    }
+
+    public Map<String, Double> getValueParametersData() {
+        return this.ValueParametersData;
     }
 
     public void setValueParametersData(final Map<String, Double> ValueParametersData) {
         this.ValueParametersData = ValueParametersData;
     }
 
+    public Map<String, Boolean> getCheckParametersData() {
+        return this.CheckParametersData;
+    }
+
     public void setCheckParametersData(final Map<String, Boolean> CheckParametersData) {
         this.CheckParametersData = CheckParametersData;
     }
 
+    public Map<String, Double> getActualvalueParametersData() {
+        return this.actualvalueParametersData;
+    }
+
     public void setActualvalueParametersData(final Map<String, Double> actualvalueParametersData) {
         this.actualvalueParametersData = actualvalueParametersData;
+    }
+
+    public Map<String, Boolean> getActualCheckParametersData() {
+        return this.ActualCheckParametersData;
     }
 
     public void setActualCheckParametersData(final Map<String, Boolean> ActualCheckParametersData) {
@@ -132,10 +150,9 @@ public class BatchStepModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof BatchStepModel)) {
+        } else if (!(o instanceof BatchStepModel other)) {
             return false;
         } else {
-            BatchStepModel other = (BatchStepModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -242,14 +259,8 @@ public class BatchStepModel {
                 Object this$ActualCheckParametersData = this.getActualCheckParametersData();
                 Object other$ActualCheckParametersData = other.getActualCheckParametersData();
                 if (this$ActualCheckParametersData == null) {
-                    if (other$ActualCheckParametersData != null) {
-                        return false;
-                    }
-                } else if (!this$ActualCheckParametersData.equals(other$ActualCheckParametersData)) {
-                    return false;
-                }
-
-                return true;
+                    return other$ActualCheckParametersData == null;
+                } else return this$ActualCheckParametersData.equals(other$ActualCheckParametersData);
             }
         }
     }
@@ -289,22 +300,5 @@ public class BatchStepModel {
     public String toString() {
         Long var10000 = this.getPhaseID();
         return "BatchStepModel(PhaseID=" + var10000 + ", PhaseType=" + this.getPhaseType() + ", PhaseName=" + this.getPhaseName() + ", state=" + this.getState() + ", order=" + this.getOrder() + ", MaterialID=" + this.getMaterialID() + ", parametersType=" + this.getParametersType() + ", ValueParametersData=" + this.getValueParametersData() + ", CheckParametersData=" + this.getCheckParametersData() + ", actualvalueParametersData=" + this.getActualvalueParametersData() + ", ActualCheckParametersData=" + this.getActualCheckParametersData() + ")";
-    }
-
-    public BatchStepModel() {
-    }
-
-    public BatchStepModel(final Long PhaseID, final String PhaseType, final String PhaseName, final String state, final String order, final Long MaterialID, final List<Parameter> parametersType, final Map<String, Double> ValueParametersData, final Map<String, Boolean> CheckParametersData, final Map<String, Double> actualvalueParametersData, final Map<String, Boolean> ActualCheckParametersData) {
-        this.PhaseID = PhaseID;
-        this.PhaseType = PhaseType;
-        this.PhaseName = PhaseName;
-        this.state = state;
-        this.order = order;
-        this.MaterialID = MaterialID;
-        this.parametersType = parametersType;
-        this.ValueParametersData = ValueParametersData;
-        this.CheckParametersData = CheckParametersData;
-        this.actualvalueParametersData = actualvalueParametersData;
-        this.ActualCheckParametersData = ActualCheckParametersData;
     }
 }

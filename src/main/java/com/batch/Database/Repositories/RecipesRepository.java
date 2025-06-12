@@ -1,4 +1,3 @@
-
 package com.batch.Database.Repositories;
 
 import com.batch.Database.Entities.Recipe;

@@ -1,4 +1,3 @@
-
 package com.batch.Database.Entities;
 
 import org.springframework.data.annotation.Id;
@@ -22,40 +21,51 @@ public class TreeViewItemsData {
         this.RecipeID = RecipeID;
     }
 
+    public TreeViewItemsData(final Long id, final String Name, final Long ParentID, final String ItemType, final long RecipeID) {
+        this.id = id;
+        this.Name = Name;
+        this.ParentID = ParentID;
+        this.ItemType = ItemType;
+        this.RecipeID = RecipeID;
+    }
+
+    public TreeViewItemsData() {
+    }
+
     public Long getId() {
         return this.id;
-    }
-
-    public String getName() {
-        return this.Name;
-    }
-
-    public Long getParentID() {
-        return this.ParentID;
-    }
-
-    public String getItemType() {
-        return this.ItemType;
-    }
-
-    public long getRecipeID() {
-        return this.RecipeID;
     }
 
     public void setId(final Long id) {
         this.id = id;
     }
 
+    public String getName() {
+        return this.Name;
+    }
+
     public void setName(final String Name) {
         this.Name = Name;
+    }
+
+    public Long getParentID() {
+        return this.ParentID;
     }
 
     public void setParentID(final Long ParentID) {
         this.ParentID = ParentID;
     }
 
+    public String getItemType() {
+        return this.ItemType;
+    }
+
     public void setItemType(final String ItemType) {
         this.ItemType = ItemType;
+    }
+
+    public long getRecipeID() {
+        return this.RecipeID;
     }
 
     public void setRecipeID(final long RecipeID) {
@@ -65,10 +75,9 @@ public class TreeViewItemsData {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof TreeViewItemsData)) {
+        } else if (!(o instanceof TreeViewItemsData other)) {
             return false;
         } else {
-            TreeViewItemsData other = (TreeViewItemsData)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.getRecipeID() != other.getRecipeID()) {
@@ -107,14 +116,8 @@ public class TreeViewItemsData {
                 Object this$ItemType = this.getItemType();
                 Object other$ItemType = other.getItemType();
                 if (this$ItemType == null) {
-                    if (other$ItemType != null) {
-                        return false;
-                    }
-                } else if (!this$ItemType.equals(other$ItemType)) {
-                    return false;
-                }
-
-                return true;
+                    return other$ItemType == null;
+                } else return this$ItemType.equals(other$ItemType);
             }
         }
     }
@@ -127,7 +130,7 @@ public class TreeViewItemsData {
         int PRIME = 59;
         int result = 1;
         long $RecipeID = this.getRecipeID();
-        result = result * 59 + (int)($RecipeID >>> 32 ^ $RecipeID);
+        result = result * 59 + (int) ($RecipeID >>> 32 ^ $RecipeID);
         Object $id = this.getId();
         result = result * 59 + ($id == null ? 43 : $id.hashCode());
         Object $ParentID = this.getParentID();
@@ -142,16 +145,5 @@ public class TreeViewItemsData {
     public String toString() {
         Long var10000 = this.getId();
         return "TreeViewItemsData(id=" + var10000 + ", Name=" + this.getName() + ", ParentID=" + this.getParentID() + ", ItemType=" + this.getItemType() + ", RecipeID=" + this.getRecipeID() + ")";
-    }
-
-    public TreeViewItemsData(final Long id, final String Name, final Long ParentID, final String ItemType, final long RecipeID) {
-        this.id = id;
-        this.Name = Name;
-        this.ParentID = ParentID;
-        this.ItemType = ItemType;
-        this.RecipeID = RecipeID;
-    }
-
-    public TreeViewItemsData() {
     }
 }

@@ -1,18 +1,8 @@
-
 package com.batch.Services.NotificationService.BackgroundServicesNotifier;
 
 import com.batch.Database.Entities.Notifications.NotificationDTO;
 import com.batch.Database.Services.Notifications.NotificationsDAO;
-import com.batch.Services.NotificationService.AcknowledgementObject;
-import com.batch.Services.NotificationService.BackGroundServices;
-import com.batch.Services.NotificationService.ErrorObject;
-import com.batch.Services.NotificationService.MessageObject;
-import com.batch.Services.NotificationService.NotificationService;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
+import com.batch.Services.NotificationService.*;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +13,12 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 @Service
 @BackGroundServices
@@ -57,7 +53,7 @@ public class BackGroundNotificationsService extends NotificationService {
         return new Task<Boolean>() {
             protected Boolean call() throws Exception {
                 try {
-                    BGAcknowledgementObject acknowledgementObject1 = (BGAcknowledgementObject)acknowledgementObject;
+                    BGAcknowledgementObject acknowledgementObject1 = (BGAcknowledgementObject) acknowledgementObject;
                     BackGroundNotificationsService.this.notificationsDAO.deleteSelected(acknowledgementObject1.getServiceName(), acknowledgementObject1.getFamilyName());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -92,7 +88,7 @@ public class BackGroundNotificationsService extends NotificationService {
 
     @EventListener
     public void atInit(ContextRefreshedEvent event) {
-        this.notificationsDAO.createTable();
+//        this.notificationsDAO.createTable();
     }
 
     public void errorsListenerToGenerateAlarms() {
@@ -121,7 +117,7 @@ public class BackGroundNotificationsService extends NotificationService {
             if (this == o) {
                 return true;
             } else if (o != null && this.getClass() == o.getClass()) {
-                CompareObject that = (CompareObject)o;
+                CompareObject that = (CompareObject) o;
                 return com.google.common.base.Objects.equal(this.serviceName, that.serviceName) && com.google.common.base.Objects.equal(this.familyName, that.familyName) && com.google.common.base.Objects.equal(this.errorMessage, that.errorMessage);
             } else {
                 return false;
@@ -129,27 +125,27 @@ public class BackGroundNotificationsService extends NotificationService {
         }
 
         public int hashCode() {
-            return com.google.common.base.Objects.hashCode(new Object[]{this.serviceName, this.familyName, this.errorMessage});
+            return com.google.common.base.Objects.hashCode(this.serviceName, this.familyName, this.errorMessage);
         }
 
         public String getServiceName() {
             return this.serviceName;
         }
 
-        public String getFamilyName() {
-            return this.familyName;
-        }
-
-        public String getErrorMessage() {
-            return this.errorMessage;
-        }
-
         public void setServiceName(final String serviceName) {
             this.serviceName = serviceName;
         }
 
+        public String getFamilyName() {
+            return this.familyName;
+        }
+
         public void setFamilyName(final String familyName) {
             this.familyName = familyName;
+        }
+
+        public String getErrorMessage() {
+            return this.errorMessage;
         }
 
         public void setErrorMessage(final String errorMessage) {

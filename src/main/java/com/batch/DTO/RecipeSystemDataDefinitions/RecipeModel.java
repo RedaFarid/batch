@@ -1,10 +1,9 @@
-
 package com.batch.DTO.RecipeSystemDataDefinitions;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class RecipeModel {
@@ -12,6 +11,13 @@ public class RecipeModel {
 
     public RecipeModel(ParallelStepsModel... firstParallelStepsModel) {
         Collections.addAll(this.parallelSteps, firstParallelStepsModel);
+    }
+
+    public RecipeModel(final List<ParallelStepsModel> parallelSteps) {
+        this.parallelSteps = parallelSteps;
+    }
+
+    public RecipeModel() {
     }
 
     public List<ParallelStepsModel> getParallelSteps() {
@@ -25,24 +31,17 @@ public class RecipeModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof RecipeModel)) {
+        } else if (!(o instanceof RecipeModel other)) {
             return false;
         } else {
-            RecipeModel other = (RecipeModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
                 Object this$parallelSteps = this.getParallelSteps();
                 Object other$parallelSteps = other.getParallelSteps();
                 if (this$parallelSteps == null) {
-                    if (other$parallelSteps != null) {
-                        return false;
-                    }
-                } else if (!this$parallelSteps.equals(other$parallelSteps)) {
-                    return false;
-                }
-
-                return true;
+                    return other$parallelSteps == null;
+                } else return this$parallelSteps.equals(other$parallelSteps);
             }
         }
     }
@@ -61,12 +60,5 @@ public class RecipeModel {
 
     public String toString() {
         return "RecipeModel(parallelSteps=" + this.getParallelSteps() + ")";
-    }
-
-    public RecipeModel(final List<ParallelStepsModel> parallelSteps) {
-        this.parallelSteps = parallelSteps;
-    }
-
-    public RecipeModel() {
     }
 }

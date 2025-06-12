@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType.Batches;
 
 import com.batch.ApplicationContext;
@@ -8,26 +7,22 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.Alarming;
 import com.batch.PLCDataSource.PLC.ComplexDataType.Logging;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowAttripute;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.Address;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.*;
 import com.batch.Utilities.LogIdentefires;
 import com.google.common.collect.Lists;
 
 public class BatchPhasesDataDefinition extends RowDataDefinition {
+    private final PhaseRepository phaseRepository;
     private int InAddressTemp = 2;
     private int OutAddressTemp = 2;
     private int bitIncrement = 0;
     private String StepNo;
     private String unit = "";
-    private final PhaseRepository phaseRepository;
 
     public BatchPhasesDataDefinition(String name, String unit) {
         super(name, 6, 6);
         this.unit = unit;
-        this.phaseRepository = (PhaseRepository)ApplicationContext.applicationContext.getBean(PhaseRepository.class);
+        this.phaseRepository = ApplicationContext.applicationContext.getBean(PhaseRepository.class);
     }
 
     public void createNewDeviceDataModel(int InAddress, int OutAddress) {

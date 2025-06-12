@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 import java.util.Collections;
@@ -9,6 +8,15 @@ public class PLCDataDefinition {
     private Map<String, RowDataDefinition> allDevices = Collections.synchronizedMap(new LinkedHashMap());
     private int InLastAddress;
     private int OutLastAddress = 0;
+
+    public PLCDataDefinition(final Map<String, RowDataDefinition> allDevices, final int InLastAddress, final int OutLastAddress) {
+        this.allDevices = allDevices;
+        this.InLastAddress = InLastAddress;
+        this.OutLastAddress = OutLastAddress;
+    }
+
+    public PLCDataDefinition() {
+    }
 
     public void addDevice(String name, RowDataDefinition device) {
         this.allDevices.put(name, device);
@@ -41,10 +49,9 @@ public class PLCDataDefinition {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof PLCDataDefinition)) {
+        } else if (!(o instanceof PLCDataDefinition other)) {
             return false;
         } else {
-            PLCDataDefinition other = (PLCDataDefinition)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.getInLastAddress() != other.getInLastAddress()) {
@@ -55,14 +62,8 @@ public class PLCDataDefinition {
                 Object this$allDevices = this.getAllDevices();
                 Object other$allDevices = other.getAllDevices();
                 if (this$allDevices == null) {
-                    if (other$allDevices != null) {
-                        return false;
-                    }
-                } else if (!this$allDevices.equals(other$allDevices)) {
-                    return false;
-                }
-
-                return true;
+                    return other$allDevices == null;
+                } else return this$allDevices.equals(other$allDevices);
             }
         }
     }
@@ -84,14 +85,5 @@ public class PLCDataDefinition {
     public String toString() {
         Map var10000 = this.getAllDevices();
         return "PLCDataDefinition(allDevices=" + var10000 + ", InLastAddress=" + this.getInLastAddress() + ", OutLastAddress=" + this.getOutLastAddress() + ")";
-    }
-
-    public PLCDataDefinition(final Map<String, RowDataDefinition> allDevices, final int InLastAddress, final int OutLastAddress) {
-        this.allDevices = allDevices;
-        this.InLastAddress = InLastAddress;
-        this.OutLastAddress = OutLastAddress;
-    }
-
-    public PLCDataDefinition() {
     }
 }

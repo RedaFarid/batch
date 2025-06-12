@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ElementaryDefinitions;
 
 import javafx.beans.property.SimpleFloatProperty;

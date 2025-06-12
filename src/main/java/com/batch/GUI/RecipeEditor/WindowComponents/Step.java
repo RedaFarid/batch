@@ -1,4 +1,3 @@
-
 package com.batch.GUI.RecipeEditor.WindowComponents;
 
 import com.batch.ApplicationContext;
@@ -9,68 +8,58 @@ import com.batch.Database.Entities.Material;
 import com.batch.Database.Entities.Parameter;
 import com.batch.Database.Entities.Phase;
 import com.batch.GUI.RecipeEditor.RecipeEditorController;
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Step extends VBox {
+    private final LocalTime time;
+    private final RecipeEditorController controller;
     private Label phaseTypeLabel;
     private Label Name;
     private Stage mainWindow;
-    private Stage stepDetails = new Stage();
-    private BorderPane root = new BorderPane();
-    private GridPane detailsContainer = new GridPane();
-    private HBox bottomContainer = new HBox();
-    private HBox labelHBox = new HBox();
-    private Scene scene;
-    private DropShadow shadow;
-    private Map<String, Color> colors;
+    private final Stage stepDetails = new Stage();
+    private final BorderPane root = new BorderPane();
+    private final GridPane detailsContainer = new GridPane();
+    private final HBox bottomContainer = new HBox();
+    private final HBox labelHBox = new HBox();
+    private final Scene scene;
+    private final DropShadow shadow;
+    private final Map<String, Color> colors;
     private Color selectedColor;
     private boolean tool;
-    private int detailedContainerX;
+    private final int detailedContainerX;
     private int detailedContainerY;
     private StepModel model;
     private String var;
     private Tooltip tip;
-    private final LocalTime time;
-    private final RecipeEditorController controller;
 
     public Step(String text, boolean tool, Stage window) {
         this.scene = new Scene(this.root);
-        this.shadow = new DropShadow((double)5.0F, (double)3.0F, (double)3.0F, Color.GRAY);
+        this.shadow = new DropShadow(5.0F, 3.0F, 3.0F, Color.GRAY);
         this.colors = new HashMap();
         this.detailedContainerX = 0;
         this.detailedContainerY = 0;
         this.var = "";
         this.time = LocalTime.now();
         this.model = new StepModel(text);
-        this.controller = (RecipeEditorController)ApplicationContext.applicationContext.getBean(RecipeEditorController.class);
+        this.controller = ApplicationContext.applicationContext.getBean(RecipeEditorController.class);
         List<Phase> list = this.controller.getAllPhases();
         list.add(new Phase(-1L, "Start", "", "Start", null));
         list.add(new Phase(-1L, "End", "", "End", null));
@@ -96,16 +85,16 @@ public class Step extends VBox {
     }
 
     private void initialization(String type) {
-        this.selectedColor = (Color)this.colors.get(type);
-        this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(this.selectedColor, CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.selectedColor = this.colors.get(type);
+        this.setBackground(new Background(new BackgroundFill(this.selectedColor, CornerRadii.EMPTY, Insets.EMPTY)));
         this.setEffect(this.shadow);
-        this.getChildren().addAll(new Node[]{this.phaseTypeLabel, this.labelHBox});
-        this.setPrefSize((double)300.0F, (double)60.0F);
-        this.setMinWidth((double)225.0F);
-        this.setSpacing((double)5.0F);
+        this.getChildren().addAll(this.phaseTypeLabel, this.labelHBox);
+        this.setPrefSize(300.0F, 60.0F);
+        this.setMinWidth(225.0F);
+        this.setSpacing(5.0F);
         this.setAlignment(Pos.CENTER);
-        this.setPadding(new Insets((double)10.0F));
-        this.setPadding(new Insets((double)10.0F));
+        this.setPadding(new Insets(10.0F));
+        this.setPadding(new Insets(10.0F));
         this.setOnMouseClicked((action) -> {
             if (this.model != null) {
                 this.fillParametersInConfigurationWindow();
@@ -128,24 +117,24 @@ public class Step extends VBox {
             Tooltip.uninstall(this, this.tip);
             this.tip = new Tooltip(this.getTooltipString());
             Tooltip.install(this, this.tip);
-            this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(this.selectedColor.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
+            this.setBackground(new Background(new BackgroundFill(this.selectedColor.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
         });
-        this.setOnMouseExited((action) -> this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(this.selectedColor.brighter(), CornerRadii.EMPTY, Insets.EMPTY)})));
+        this.setOnMouseExited((action) -> this.setBackground(new Background(new BackgroundFill(this.selectedColor.brighter(), CornerRadii.EMPTY, Insets.EMPTY))));
         this.createConfigurationWindow();
     }
 
     private void createConfigurationWindow() {
         this.root.setCenter(this.detailsContainer);
-        this.root.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
-        this.root.setPadding(new Insets((double)5.0F));
+        this.root.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
+        this.root.setPadding(new Insets(5.0F));
         this.root.setBottom(this.bottomContainer);
-        this.root.setPrefWidth((double)500.0F);
-        this.detailsContainer.setVgap((double)5.0F);
-        this.detailsContainer.setHgap((double)5.0F);
-        this.detailsContainer.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)}));
-        this.detailsContainer.setPadding(new Insets((double)10.0F));
-        this.bottomContainer.setSpacing((double)10.0F);
-        this.bottomContainer.setPadding(new Insets((double)5.0F));
+        this.root.setPrefWidth(500.0F);
+        this.detailsContainer.setVgap(5.0F);
+        this.detailsContainer.setHgap(5.0F);
+        this.detailsContainer.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+        this.detailsContainer.setPadding(new Insets(10.0F));
+        this.bottomContainer.setSpacing(10.0F);
+        this.bottomContainer.setPadding(new Insets(5.0F));
         this.bottomContainer.setAlignment(Pos.CENTER);
         this.stepDetails.initOwner(this.mainWindow);
         this.stepDetails.initModality(Modality.WINDOW_MODAL);
@@ -153,8 +142,8 @@ public class Step extends VBox {
         this.stepDetails.setScene(this.scene);
         this.stepDetails.setTitle(this.Name.getText());
         this.stepDetails.setResizable(false);
-        this.labelHBox.getChildren().addAll(new Node[]{this.Name});
-        this.labelHBox.setSpacing((double)5.0F);
+        this.labelHBox.getChildren().addAll(this.Name);
+        this.labelHBox.setSpacing(5.0F);
         this.labelHBox.setAlignment(Pos.CENTER);
         this.phaseTypeLabel.setStyle("-fx-font-weight:bold;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:16;");
         this.Name.setStyle("-fx-font-weight:normal;-fx-font-style:normal;-fx-text-fill:white;-fx-font-size:16;");
@@ -169,28 +158,28 @@ public class Step extends VBox {
             types.stream().sorted((t, t1) -> t1.getType().compareTo(t.getType())).forEach((parameter) -> {
                 if (parameter.getType().equals(PhaseParameterType.Check.name())) {
                     CheckBox box = new CheckBox(parameter.getName());
-                    box.setSelected((Boolean)checksValues.get(parameter.getName()));
+                    box.setSelected(checksValues.get(parameter.getName()));
                     box.selectedProperty().addListener((observable, oldValue, newValue) -> checksValues.replace(parameter.getName(), newValue));
-                    box.setPrefWidth((double)400.0F);
+                    box.setPrefWidth(400.0F);
                     this.detailsContainer.add(box, this.detailedContainerX, this.detailedContainerY++);
                 } else if (parameter.getType().equals(PhaseParameterType.Value.name())) {
                     Label label = new Label(parameter.getName());
-                    label.setPrefWidth((double)150.0F);
+                    label.setPrefWidth(150.0F);
                     TextField field = new TextField(String.valueOf(AnalogValues.get(parameter.getName())));
-                    field.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)}));
+                    field.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
                     field.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
                         if (KeyCode.ENTER.equals(event.getCode())) {
                             try {
                                 AnalogValues.replace(parameter.getName(), Double.parseDouble(field.getText()));
-                                field.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)}));
+                                field.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
                             } catch (Exception var5) {
-                                field.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.ORANGERED, CornerRadii.EMPTY, Insets.EMPTY)}));
+                                field.setBackground(new Background(new BackgroundFill(Color.ORANGERED, CornerRadii.EMPTY, Insets.EMPTY)));
                             }
                         }
 
                     });
-                    field.textProperty().addListener((observable, oldValue, newValue) -> field.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.ORANGE, CornerRadii.EMPTY, Insets.EMPTY)})));
-                    field.setPrefWidth((double)350.0F);
+                    field.textProperty().addListener((observable, oldValue, newValue) -> field.setBackground(new Background(new BackgroundFill(Color.ORANGE, CornerRadii.EMPTY, Insets.EMPTY))));
+                    field.setPrefWidth(350.0F);
                     this.detailsContainer.add(label, this.detailedContainerX, this.detailedContainerY);
                     this.detailsContainer.add(field, this.detailedContainerX + 1, this.detailedContainerY++);
                 }
@@ -198,13 +187,13 @@ public class Step extends VBox {
             });
             if (this.phaseTypeLabel.getText().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
                 Label label = new Label("Material name ");
-                label.setPrefWidth((double)150.0F);
+                label.setPrefWidth(150.0F);
                 ComboBox<Material> field = new ComboBox();
                 field.getItems().addAll(this.controller.getAllMaterials());
                 field.setStyle("-fx-font-family: monospace;-fx-font-size: 12px;");
                 field.valueProperty().addListener((observable, oldValue, newValue) -> this.model.setMaterialID(newValue.getId()));
                 this.controller.getMaterialById(this.model.getMaterialID()).ifPresent((material) -> field.getSelectionModel().select(material));
-                field.setPrefWidth((double)350.0F);
+                field.setPrefWidth(350.0F);
                 this.detailsContainer.add(label, this.detailedContainerX, this.detailedContainerY);
                 this.detailsContainer.add(field, this.detailedContainerX + 1, this.detailedContainerY++);
             }

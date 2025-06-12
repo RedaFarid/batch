@@ -1,5 +1,3 @@
-
-
 package com.batch.GUI.Controls;
 
 import javafx.geometry.Insets;
@@ -8,11 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import org.controlsfx.tools.Borders;
@@ -26,15 +20,15 @@ public class DataEntryPartition extends VBox {
         this.partitionLabel.setAlignment(Pos.BASELINE_LEFT);
         this.partitionLabel.setTextAlignment(TextAlignment.LEFT);
         this.partitionLabel.prefWidthProperty().bind(this.widthProperty());
-        this.partitionLabel.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.valueOf("61a2b1"), new CornerRadii((double)0.0F), new Insets((double)0.0F))}));
-        this.partitionLabel.setPadding(new Insets((double)3.0F, (double)0.0F, (double)0.0F, (double)10.0F));
+        this.partitionLabel.setBackground(new Background(new BackgroundFill(Color.valueOf("61a2b1"), new CornerRadii(0.0F), new Insets(0.0F))));
+        this.partitionLabel.setPadding(new Insets(3.0F, 0.0F, 0.0F, 10.0F));
         this.partitionLabel.setEffect(new DropShadow(BlurType.GAUSSIAN, Color.GRAY, 0.1, 0.1, 0.1, 0.1));
         this.partitionLabel.setStyle("-fx-text-fill:white;");
-        this.pane.setVgap((double)2.0F);
-        this.pane.setHgap((double)5.0F);
+        this.pane.setVgap(2.0F);
+        this.pane.setHgap(5.0F);
         this.pane.prefHeightProperty().bindBidirectional(this.prefHeightProperty());
-        Node calculateBorder2 = Borders.wrap(this.pane).lineBorder().radius((double)0.0F).thickness((double)1.5F).color(Color.valueOf("61a2b1")).title(label).innerPadding((double)5.0F).buildAll();
-        this.getChildren().addAll(new Node[]{calculateBorder2});
+        Node calculateBorder2 = Borders.wrap(this.pane).lineBorder().radius(0.0F).thickness(1.5F).color(Color.valueOf("61a2b1")).title(label).innerPadding(5.0F).buildAll();
+        this.getChildren().addAll(calculateBorder2);
     }
 
     public final void add(Node node, int i, int i1) {

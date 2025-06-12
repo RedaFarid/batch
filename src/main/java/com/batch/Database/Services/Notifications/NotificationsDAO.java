@@ -1,14 +1,14 @@
-
 package com.batch.Database.Services.Notifications;
 
 import com.batch.Database.Entities.Notifications.NotificationDTO;
 import com.batch.Database.Repositories.Notifactions.NotificationRepository;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class NotificationsDAO {
@@ -22,7 +22,7 @@ public class NotificationsDAO {
 
     @Async
     public CompletableFuture<NotificationDTO> save(NotificationDTO entity) {
-        return CompletableFuture.completedFuture((NotificationDTO)this.notificationRepository.save(entity));
+        return CompletableFuture.completedFuture(this.notificationRepository.save(entity));
     }
 
     @Async
@@ -32,7 +32,7 @@ public class NotificationsDAO {
 
     @Async
     public CompletableFuture<NotificationDTO> findById(Long along) {
-        return CompletableFuture.completedFuture((NotificationDTO)this.notificationRepository.findById(along).get());
+        return CompletableFuture.completedFuture(this.notificationRepository.findById(along).get());
     }
 
     @Async

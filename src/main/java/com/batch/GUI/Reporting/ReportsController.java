@@ -1,4 +1,3 @@
-
 package com.batch.GUI.Reporting;
 
 import com.batch.Database.Entities.Batch;
@@ -7,6 +6,19 @@ import com.batch.Database.Repositories.MaterialsRepository;
 import com.batch.Database.Services.BatchesService;
 import com.batch.GUI.Reporting.Reports.ReportModel;
 import com.batch.GUI.Reporting.Reports.ReportTableDataModel;
+import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Controller;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.time.chrono.ChronoLocalDate;
@@ -16,27 +28,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Controller;
 
 @Controller
 public class ReportsController {
@@ -45,6 +36,12 @@ public class ReportsController {
     private final BatchesService batchesService;
     private final TaskExecutor executor;
     private final ReportsModel model = new ReportsModel();
+
+    public ReportsController(final MaterialsRepository materialsRepository, final BatchesService batchesService, final TaskExecutor executor) {
+        this.materialsRepository = materialsRepository;
+        this.batchesService = batchesService;
+        this.executor = executor;
+    }
 
     public ReportsModel getModel() {
         return this.model;
@@ -61,7 +58,7 @@ public class ReportsController {
             protected Boolean call() throws Exception {
                 ObservableList<Batch> dataList = ReportsController.this.model.getList();
                 List<Batch> dataBaseList = function.apply(ReportsController.this.batchesService.findAll());
-                Platform.runLater(() -> dataList.removeAll((Collection)((ObservableList)dataBaseList.stream().filter((item) -> !dataList.contains(item)).collect(() -> dataList, List::add, List::addAll)).stream().filter((tableListItem) -> dataBaseList.stream().noneMatch((dataBaseItem) -> dataBaseItem.equals(tableListItem))).collect(Collectors.toList())));
+                Platform.runLater(() -> dataList.removeAll((Collection) ((ObservableList) dataBaseList.stream().filter((item) -> !dataList.contains(item)).collect(() -> dataList, List::add, List::addAll)).stream().filter((tableListItem) -> dataBaseList.stream().noneMatch((dataBaseItem) -> dataBaseItem.equals(tableListItem))).collect(Collectors.toList())));
                 return true;
             }
         };
@@ -70,7 +67,7 @@ public class ReportsController {
     public ReadOnlyBooleanProperty onFilterByDate() {
         if (this.model.getFromDate().getValue() != null && this.model.getToDate().getValue() != null) {
             this.model.getList().clear();
-            return this.update(list -> list.stream().filter((item) -> item.getCreationDate().isAfter((ChronoLocalDate)this.model.getFromDate().getValue())).filter((item) -> item.getCreationDate().isBefore((ChronoLocalDate)this.model.getToDate().get())).sorted(Comparator.comparing(Batch::getId).reversed()).collect(Collectors.toList()));
+            return this.update(list -> list.stream().filter((item) -> item.getCreationDate().isAfter(this.model.getFromDate().getValue())).filter((item) -> item.getCreationDate().isBefore(this.model.getToDate().get())).sorted(Comparator.comparing(Batch::getId).reversed()).collect(Collectors.toList()));
         } else {
             return new SimpleBooleanProperty(false);
         }
@@ -124,7 +121,7 @@ public class ReportsController {
                     batchIdLabel.setCellValue("Batch ID ");
                     batchIdLabel.setCellStyle(cellStyle);
                     XSSFCell batchId = batchIdLabelRow.createCell(1, CellType.NUMERIC);
-                    batchId.setCellValue((double)model.getBatchID());
+                    batchId.setCellValue((double) model.getBatchID());
                     batchId.setCellStyle(valueCellStyle);
                     XSSFRow productLabelRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
                     XSSFCell productLabel = productLabelRow.createCell(0, CellType.STRING);
@@ -170,16 +167,16 @@ public class ReportsController {
                     endTime.setCellStyle(valueCellStyle);
                     firstSheet.createRow(firstSheet.getLastRowNum() + 1);
                     XSSFRow headerRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    headerRow.setHeight((short)400);
+                    headerRow.setHeight((short) 400);
 
-                    for(int column = 0; column < ReportsController.InHeader.values().length; ++column) {
+                    for (int column = 0; column < ReportsController.InHeader.values().length; ++column) {
                         XSSFCell cell = headerRow.createCell(column, CellType.STRING);
                         cell.setCellValue(String.valueOf(ReportsController.InHeader.values()[column]));
                         cell.setAsActiveCell();
                         cell.setCellStyle(cellStyle);
                     }
 
-                    for(ReportTableDataModel component : model.getData()) {
+                    for (ReportTableDataModel component : model.getData()) {
                         XSSFRow newRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
                         XSSFCell cell0 = newRow.createCell(0, CellType.NUMERIC);
                         cell0.setCellValue(String.valueOf(component.getNumber()));
@@ -204,7 +201,7 @@ public class ReportsController {
                         cell6.setCellStyle(valueCellStyle);
                     }
 
-                    for(int i = 0; i < ReportsController.InHeader.values().length; ++i) {
+                    for (int i = 0; i < ReportsController.InHeader.values().length; ++i) {
                         firstSheet.autoSizeColumn(i);
                     }
 
@@ -219,19 +216,13 @@ public class ReportsController {
 
     }
 
-    public ReportsController(final MaterialsRepository materialsRepository, final BatchesService batchesService, final TaskExecutor executor) {
-        this.materialsRepository = materialsRepository;
-        this.batchesService = batchesService;
-        this.executor = executor;
-    }
-
-    private static enum InHeader {
+    private enum InHeader {
         Number,
         MaterialName,
         Required,
         Loaded,
         Error,
         RequiredPercentage,
-        ActualPercentage;
+        ActualPercentage
     }
 }

@@ -1,20 +1,24 @@
-
 package com.batch.Services.NotificationService;
 
 public class MessageObject {
     private String message;
     private boolean Original;
 
+    public MessageObject(final String message, final boolean Original) {
+        this.message = message;
+        this.Original = Original;
+    }
+
     public String getMessage() {
         return this.message;
     }
 
-    public boolean isOriginal() {
-        return this.Original;
-    }
-
     public void setMessage(final String message) {
         this.message = message;
+    }
+
+    public boolean isOriginal() {
+        return this.Original;
     }
 
     public void setOriginal(final boolean Original) {
@@ -24,10 +28,9 @@ public class MessageObject {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof MessageObject)) {
+        } else if (!(o instanceof MessageObject other)) {
             return false;
         } else {
-            MessageObject other = (MessageObject)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.isOriginal() != other.isOriginal()) {
@@ -36,14 +39,8 @@ public class MessageObject {
                 Object this$message = this.getMessage();
                 Object other$message = other.getMessage();
                 if (this$message == null) {
-                    if (other$message != null) {
-                        return false;
-                    }
-                } else if (!this$message.equals(other$message)) {
-                    return false;
-                }
-
-                return true;
+                    return other$message == null;
+                } else return this$message.equals(other$message);
             }
         }
     }
@@ -64,10 +61,5 @@ public class MessageObject {
     public String toString() {
         String var10000 = this.getMessage();
         return "MessageObject(message=" + var10000 + ", Original=" + this.isOriginal() + ")";
-    }
-
-    public MessageObject(final String message, final boolean Original) {
-        this.message = message;
-        this.Original = Original;
     }
 }

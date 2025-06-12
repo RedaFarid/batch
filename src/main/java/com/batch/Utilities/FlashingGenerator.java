@@ -9,11 +9,11 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 public class FlashingGenerator implements Runnable {
-    private BooleanProperty flasher = new SimpleBooleanProperty();
     private static volatile FlashingGenerator singelton = null;
+    private final BooleanProperty flasher = new SimpleBooleanProperty();
 
     public static FlashingGenerator getSystem() {
-        synchronized(FlashingGenerator.class) {
+        synchronized (FlashingGenerator.class) {
             if (singelton == null) {
                 singelton = new FlashingGenerator();
             }

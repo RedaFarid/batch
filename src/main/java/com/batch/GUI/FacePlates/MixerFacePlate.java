@@ -1,4 +1,3 @@
-
 package com.batch.GUI.FacePlates;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.MixerInput;
@@ -7,9 +6,6 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.google.common.io.Resources;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Collectors;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -23,6 +19,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class MixerFacePlate extends ControlFacePlate {
     private Button Start;
@@ -50,14 +50,14 @@ public class MixerFacePlate extends ControlFacePlate {
         this.getImageView().setImage(image);
         this.Start = new Button("Start Mixer");
         this.Stop = new Button("Stop Mixer");
-        this.Start.setPrefWidth((double)200.0F);
-        this.Stop.setPrefWidth((double)200.0F);
+        this.Start.setPrefWidth(200.0F);
+        this.Stop.setPrefWidth(200.0F);
         this.mode = new ComboBox();
         this.source = new ComboBox();
-        this.mode.getItems().addAll(FXCollections.observableArrayList((Collection)Arrays.stream(Mode.values()).map(Enum::name).collect(Collectors.toList())));
-        this.source.getItems().addAll(FXCollections.observableArrayList((Collection)Arrays.stream(Source.values()).map(Enum::name).collect(Collectors.toList())));
-        this.mode.setPrefWidth((double)125.0F);
-        this.source.setPrefWidth((double)125.0F);
+        this.mode.getItems().addAll(FXCollections.observableArrayList((Collection) Arrays.stream(Mode.values()).map(Enum::name).collect(Collectors.toList())));
+        this.source.getItems().addAll(FXCollections.observableArrayList((Collection) Arrays.stream(Source.values()).map(Enum::name).collect(Collectors.toList())));
+        this.mode.setPrefWidth(125.0F);
+        this.source.setPrefWidth(125.0F);
         this.QControl = new CheckBox("Q output");
         this.Fault = new CheckBox("Fault ");
         this.QControl.setMouseTransparent(true);
@@ -66,26 +66,26 @@ public class MixerFacePlate extends ControlFacePlate {
         this.Speed.setPromptText("0.0");
         this.Speed.setRestrict("[0-9].");
         this.Speed.setMaxLength(10);
-        this.Speed.setPrefWidth((double)80.0F);
+        this.Speed.setPrefWidth(80.0F);
         this.FinalSpeed = new FaceplateTextField();
         this.FinalSpeed.setPromptText("0.0");
         this.FinalSpeed.setRestrict("[0-9].");
         this.FinalSpeed.setMaxLength(10);
-        this.FinalSpeed.setPrefWidth((double)120.0F);
+        this.FinalSpeed.setPrefWidth(120.0F);
         this.FinalSpeed.setEditable(false);
         this.Ampere = new FaceplateTextField();
         this.Ampere.setPromptText("0.0");
         this.Ampere.setRestrict("[0-9].");
         this.Ampere.setMaxLength(10);
-        this.Ampere.setPrefWidth((double)120.0F);
+        this.Ampere.setPrefWidth(120.0F);
         this.Ampere.setEditable(false);
         this.modeLbael = new Label("Mode");
         this.sourceLabel = new Label("Source");
         this.SpeedLabel = new Label("Setpoint");
         this.FinalSpeedLabel = new Label("Output Speed");
         this.AmpereLabel = new Label("Motor Current");
-        this.modeLbael.setPrefWidth((double)70.0F);
-        this.sourceLabel.setPrefWidth((double)70.0F);
+        this.modeLbael.setPrefWidth(70.0F);
+        this.sourceLabel.setPrefWidth(70.0F);
         controlContainer.add(this.modeLbael, 1, 1);
         controlContainer.add(this.mode, 2, 1);
         controlContainer.add(this.sourceLabel, 1, 2);
@@ -112,9 +112,9 @@ public class MixerFacePlate extends ControlFacePlate {
         this.mode.valueProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if (newValue.equals(Mode.Automatic.name())) {
-                    ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Mode)).setValue(true);
+                    ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Mode)).setValue(true);
                 } else if (newValue.equals(Mode.Manual.name())) {
-                    ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Mode)).setValue(false);
+                    ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Mode)).setValue(false);
                 }
 
             }
@@ -122,9 +122,9 @@ public class MixerFacePlate extends ControlFacePlate {
         this.source.valueProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if (newValue.equals(Source.Remote.name())) {
-                    ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Source)).setValue(true);
+                    ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Source)).setValue(true);
                 } else if (newValue.equals(Source.Local.name())) {
-                    ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Source)).setValue(false);
+                    ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Source)).setValue(false);
                 }
 
             }
@@ -132,18 +132,18 @@ public class MixerFacePlate extends ControlFacePlate {
         this.Speed.onEneterKeyPressed(new Callback<String, Double>() {
             public Double call(String param) {
                 if (MixerFacePlate.this.Speed.getText().length() > 0) {
-                    ((RealDataType)dataModel.getAllValues().get(MixerOutput.Speed_Setpoint)).setValue(Float.parseFloat(MixerFacePlate.this.Speed.getText()));
+                    ((RealDataType) dataModel.getAllValues().get(MixerOutput.Speed_Setpoint)).setValue(Float.parseFloat(MixerFacePlate.this.Speed.getText()));
                 }
 
                 return null;
             }
         });
-        ((RealDataType)dataModel.getAllValues().get(MixerInput.Output_Speed)).addListener((observable, oldValue, newValue) -> this.FinalSpeed.setText(String.valueOf(newValue)));
-        ((RealDataType)dataModel.getAllValues().get(MixerInput.Ampere_Reading)).addListener((observable, oldValue, newValue) -> this.Ampere.setText(String.valueOf(newValue)));
-        ((BooleanDataType)dataModel.getAllValues().get(MixerInput.Running)).addListener((observable, oldValue, newValue) -> this.setOnRunningChange(dataModel));
-        ((BooleanDataType)dataModel.getAllValues().get(MixerInput.Fault)).addListener((observable, oldValue, newValue) -> this.setOnFaultChange(dataModel));
-        ((BooleanDataType)dataModel.getAllValues().get(MixerInput.QControl)).addListener((observable, oldValue, newValue) -> this.QControl.setSelected(newValue));
-        ((BooleanDataType)dataModel.getAllValues().get(MixerInput.Fault)).addListener((observable, oldValue, newValue) -> this.Fault.setSelected(newValue));
+        ((RealDataType) dataModel.getAllValues().get(MixerInput.Output_Speed)).addListener((observable, oldValue, newValue) -> this.FinalSpeed.setText(String.valueOf(newValue)));
+        ((RealDataType) dataModel.getAllValues().get(MixerInput.Ampere_Reading)).addListener((observable, oldValue, newValue) -> this.Ampere.setText(String.valueOf(newValue)));
+        ((BooleanDataType) dataModel.getAllValues().get(MixerInput.Running)).addListener((observable, oldValue, newValue) -> this.setOnRunningChange(dataModel));
+        ((BooleanDataType) dataModel.getAllValues().get(MixerInput.Fault)).addListener((observable, oldValue, newValue) -> this.setOnFaultChange(dataModel));
+        ((BooleanDataType) dataModel.getAllValues().get(MixerInput.QControl)).addListener((observable, oldValue, newValue) -> this.QControl.setSelected(newValue));
+        ((BooleanDataType) dataModel.getAllValues().get(MixerInput.Fault)).addListener((observable, oldValue, newValue) -> this.Fault.setSelected(newValue));
     }
 
     protected void withFlasher(boolean flashTrigger) {
@@ -158,11 +158,11 @@ public class MixerFacePlate extends ControlFacePlate {
     }
 
     protected void checkDataForInitializingGraphics(RowDataDefinition dataModel) {
-        boolean actualMode = ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Mode)).getValue();
-        boolean actualSource = ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Source)).getValue();
-        double AmpereReading = (double)((RealDataType)dataModel.getAllValues().get(MixerInput.Ampere_Reading)).getValue();
-        double SpeedReading = (double)((RealDataType)dataModel.getAllValues().get(MixerOutput.Speed_Setpoint)).getValue();
-        double outputSpeed = (double)((RealDataType)dataModel.getAllValues().get(MixerInput.Output_Speed)).getValue();
+        boolean actualMode = ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Mode)).getValue();
+        boolean actualSource = ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Source)).getValue();
+        double AmpereReading = (double) ((RealDataType) dataModel.getAllValues().get(MixerInput.Ampere_Reading)).getValue();
+        double SpeedReading = (double) ((RealDataType) dataModel.getAllValues().get(MixerOutput.Speed_Setpoint)).getValue();
+        double outputSpeed = (double) ((RealDataType) dataModel.getAllValues().get(MixerInput.Output_Speed)).getValue();
         if (actualMode) {
             this.mode.getSelectionModel().select(Mode.Automatic.name());
         } else {
@@ -175,34 +175,34 @@ public class MixerFacePlate extends ControlFacePlate {
             this.source.getSelectionModel().select(Source.Local.name());
         }
 
-        this.QControl.setSelected(((BooleanDataType)dataModel.getAllValues().get(MixerInput.QControl)).getValue());
+        this.QControl.setSelected(((BooleanDataType) dataModel.getAllValues().get(MixerInput.QControl)).getValue());
         this.Ampere.setText(String.valueOf(AmpereReading));
         this.Speed.setText(String.valueOf(SpeedReading));
         this.FinalSpeed.setText(String.valueOf(outputSpeed));
-        this.Fault.setSelected(((BooleanDataType)dataModel.getAllValues().get(MixerInput.Fault)).getValue());
-        this.QControl.setSelected(((BooleanDataType)dataModel.getAllValues().get(MixerInput.QControl)).getValue());
+        this.Fault.setSelected(((BooleanDataType) dataModel.getAllValues().get(MixerInput.Fault)).getValue());
+        this.QControl.setSelected(((BooleanDataType) dataModel.getAllValues().get(MixerInput.QControl)).getValue());
         this.setOnRunningChange(dataModel);
         this.setOnFaultChange(dataModel);
     }
 
     private void onStartPressed(RowDataDefinition dataModel) {
-        ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Start)).setValue(Boolean.TRUE);
+        ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Start)).setValue(Boolean.TRUE);
     }
 
     private void onStartReleased(RowDataDefinition dataModel) {
-        ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Start)).setValue(Boolean.FALSE);
+        ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Start)).setValue(Boolean.FALSE);
     }
 
     private void onStopPressed(RowDataDefinition dataModel) {
-        ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Stop)).setValue(Boolean.TRUE);
+        ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Stop)).setValue(Boolean.TRUE);
     }
 
     private void onStopReleased(RowDataDefinition dataModel) {
-        ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Stop)).setValue(Boolean.FALSE);
+        ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Stop)).setValue(Boolean.FALSE);
     }
 
     private void setOnRunningChange(RowDataDefinition dataModel) {
-        boolean newValue = ((BooleanDataType)dataModel.getAllValues().get(MixerInput.Running)).getValue();
+        boolean newValue = ((BooleanDataType) dataModel.getAllValues().get(MixerInput.Running)).getValue();
         if (newValue) {
             this.changeStatus("Running", Color.GREEN);
             this.changeColorOfImageView(Color.GREEN);
@@ -214,16 +214,16 @@ public class MixerFacePlate extends ControlFacePlate {
     }
 
     private void setOnFaultChange(RowDataDefinition dataModel) {
-        boolean x = ((BooleanDataType)dataModel.getAllValues().get(MixerInput.Fault)).getValue();
+        boolean x = ((BooleanDataType) dataModel.getAllValues().get(MixerInput.Fault)).getValue();
         this.faultCondition = x;
         this.setOnRunningChange(dataModel);
     }
 
     protected void onResetPressed(MouseEvent action, RowDataDefinition dataModel) {
-        ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Reset)).setValue(Boolean.TRUE);
+        ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Reset)).setValue(Boolean.TRUE);
     }
 
     protected void onResetReleased(MouseEvent action, RowDataDefinition dataModel) {
-        ((BooleanDataType)dataModel.getAllValues().get(MixerOutput.Reset)).setValue(Boolean.FALSE);
+        ((BooleanDataType) dataModel.getAllValues().get(MixerOutput.Reset)).setValue(Boolean.FALSE);
     }
 }

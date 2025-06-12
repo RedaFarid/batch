@@ -1,4 +1,3 @@
-
 package com.batch.GUI.PhasesWindow;
 
 import com.batch.DTO.RecipeSystemDataDefinitions.PhaseInformationDTO;
@@ -7,28 +6,27 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
 
 public class PhasesModel {
-    private TreeItem<PhaseInformationDTO> rootItem;
     private final ObservableList<PhaseInformationDTO> list = FXCollections.observableArrayList();
+    private TreeItem<PhaseInformationDTO> rootItem;
 
     public TreeItem<PhaseInformationDTO> getRootItem() {
         return this.rootItem;
-    }
-
-    public ObservableList<PhaseInformationDTO> getList() {
-        return this.list;
     }
 
     public void setRootItem(final TreeItem<PhaseInformationDTO> rootItem) {
         this.rootItem = rootItem;
     }
 
+    public ObservableList<PhaseInformationDTO> getList() {
+        return this.list;
+    }
+
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof PhasesModel)) {
+        } else if (!(o instanceof PhasesModel other)) {
             return false;
         } else {
-            PhasesModel other = (PhasesModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -45,14 +43,8 @@ public class PhasesModel {
                 Object this$list = this.getList();
                 Object other$list = other.getList();
                 if (this$list == null) {
-                    if (other$list != null) {
-                        return false;
-                    }
-                } else if (!this$list.equals(other$list)) {
-                    return false;
-                }
-
-                return true;
+                    return other$list == null;
+                } else return this$list.equals(other$list);
             }
         }
     }

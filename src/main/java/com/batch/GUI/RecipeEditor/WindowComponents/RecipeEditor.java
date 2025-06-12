@@ -1,4 +1,3 @@
-
 package com.batch.GUI.RecipeEditor.WindowComponents;
 
 import com.batch.ApplicationContext;
@@ -11,18 +10,9 @@ import com.batch.Database.Entities.Recipe;
 import com.batch.Database.Entities.RecipeConf;
 import com.batch.Database.Entities.TreeViewItemsData;
 import com.batch.GUI.RecipeEditor.RecipeEditorController;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -32,39 +22,21 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.*;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.controlsfx.dialog.ExceptionDialog;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RecipeEditor extends Stage {
     private static volatile RecipeEditor singleton = null;
@@ -88,15 +60,15 @@ public class RecipeEditor extends Stage {
     private final ScrollPane scrollPane;
     private final SplitPane splitPane;
     private final StringProperty editorMode;
+    private final RecipeEditorController controller;
+    private final ObjectProperty<Cursor> CURSOR_DEFAULT;
+    private final ObjectProperty<Cursor> CURSOR_WAIT;
     private long SelectedItemID;
     private RecipeModel recipeModel;
     private Recipe selectedRecipe;
     private String draggedStepPhaseName;
     private String returnData;
     private String unit;
-    private final RecipeEditorController controller;
-    private final ObjectProperty<Cursor> CURSOR_DEFAULT;
-    private final ObjectProperty<Cursor> CURSOR_WAIT;
 
     private RecipeEditor(Stage ownerWindow) {
         this.root = new RecipeTreeItem("System", TreeItemType.Folder);
@@ -113,7 +85,7 @@ public class RecipeEditor extends Stage {
         this.stepsScrollPane = new ScrollPane(this.flowPane);
         this.pane = new VBox();
         this.scrollPane = new ScrollPane(this.pane);
-        this.splitPane = new SplitPane(new Node[]{this.treeView, this.scrollPane, this.stepsScrollPane});
+        this.splitPane = new SplitPane(this.treeView, this.scrollPane, this.stepsScrollPane);
         this.editorMode = new SimpleStringProperty();
         this.SelectedItemID = -1L;
         this.recipeModel = new RecipeModel();
@@ -122,13 +94,13 @@ public class RecipeEditor extends Stage {
         this.CURSOR_WAIT = new SimpleObjectProperty(Cursor.WAIT);
         this.mainWindow = this;
         this.ownerWindow = ownerWindow;
-        this.controller = (RecipeEditorController)ApplicationContext.applicationContext.getBean(RecipeEditorController.class);
+        this.controller = ApplicationContext.applicationContext.getBean(RecipeEditorController.class);
         this.graphicsBuilder();
         this.actionHandler();
     }
 
     public static RecipeEditor getWindow(Stage ownerWindow) {
-        synchronized(RecipeEditor.class) {
+        synchronized (RecipeEditor.class) {
             if (singleton == null) {
                 singleton = new RecipeEditor(ownerWindow);
             }
@@ -139,13 +111,13 @@ public class RecipeEditor extends Stage {
 
     private void graphicsBuilder() {
         this.editorMode.setValue("Default");
-        this.maximize.setPrefWidth((double)150.0F);
-        this.save.setPrefWidth((double)200.0F);
-        this.edit.setPrefWidth((double)200.0F);
-        this.discard.setPrefWidth((double)200.0F);
-        this.launch.setPrefWidth((double)200.0F);
-        this.validate.setPrefWidth((double)200.0F);
-        this.cancel.setPrefWidth((double)200.0F);
+        this.maximize.setPrefWidth(150.0F);
+        this.save.setPrefWidth(200.0F);
+        this.edit.setPrefWidth(200.0F);
+        this.discard.setPrefWidth(200.0F);
+        this.launch.setPrefWidth(200.0F);
+        this.validate.setPrefWidth(200.0F);
+        this.cancel.setPrefWidth(200.0F);
         this.save.setDisable(true);
         this.edit.setDisable(true);
         this.discard.setDisable(true);
@@ -155,29 +127,29 @@ public class RecipeEditor extends Stage {
         this.scrollPane.prefHeightProperty().bind(this.heightProperty());
         this.flowPane.prefHeightProperty().bind(this.heightProperty());
         this.flowPane.prefWidthProperty().bind(this.stepsScrollPane.widthProperty());
-        this.stepsScrollPane.setMaxWidth((double)800.0F);
+        this.stepsScrollPane.setMaxWidth(800.0F);
         this.scrollPane.setPannable(true);
-        this.flowPane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)}));
-        this.flowPane.setVgap((double)5.0F);
-        this.flowPane.setHgap((double)15.0F);
-        this.flowPane.setPadding(new Insets((double)5.0F));
+        this.flowPane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+        this.flowPane.setVgap(5.0F);
+        this.flowPane.setHgap(15.0F);
+        this.flowPane.setPadding(new Insets(5.0F));
         this.flowPane.setAlignment(Pos.TOP_CENTER);
-        this.pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.pane.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
         this.pane.setAlignment(Pos.CENTER);
-        this.pane.setSpacing((double)5.0F);
-        this.pane.setPadding(new Insets((double)20.0F));
+        this.pane.setSpacing(5.0F);
+        this.pane.setPadding(new Insets(20.0F));
         this.pane.minHeightProperty().bind(this.scrollPane.heightProperty());
         this.pane.prefWidthProperty().bind(this.scrollPane.widthProperty());
-        this.treeView.setPrefWidth((double)300.0F);
-        this.treeView.setMaxWidth((double)600.0F);
+        this.treeView.setPrefWidth(300.0F);
+        this.treeView.setMaxWidth(600.0F);
         this.treeView.setRoot(this.root);
-        this.treeView.setPadding(new Insets((double)0.0F, (double)0.0F, (double)20.0F, (double)0.0F));
-        this.toolBar.getItems().addAll(new Node[]{this.maximize, new Separator(), new Separator(), this.edit, this.discard, this.validate, this.save, this.cancel});
-        this.statusBar.getItems().addAll(new Node[]{new Label("Batch interface status")});
+        this.treeView.setPadding(new Insets(0.0F, 0.0F, 20.0F, 0.0F));
+        this.toolBar.getItems().addAll(this.maximize, new Separator(), new Separator(), this.edit, this.discard, this.validate, this.save, this.cancel);
+        this.statusBar.getItems().addAll(new Label("Batch interface status"));
         this.rootPane.setCenter(this.splitPane);
         this.rootPane.setTop(this.toolBar);
         this.rootPane.setBottom(this.statusBar);
-        this.splitPane.setDividerPositions(new double[]{0.1, 0.6, 0.3});
+        this.splitPane.setDividerPositions(0.1, 0.6, 0.3);
         this.setTitle("Recipe editor");
         this.setScene(new Scene(this.rootPane));
         this.initOwner(this.ownerWindow);
@@ -204,7 +176,7 @@ public class RecipeEditor extends Stage {
             MenuItem cut = new MenuItem("Cut");
             MenuItem paste = new MenuItem("Paste");
             MenuItem rename = new MenuItem("Rename");
-            menu.getItems().addAll(new MenuItem[]{createFolder, createRecipe, new SeparatorMenuItem(), refresh, loadRecipe, new SeparatorMenuItem(), delete, copy, cut, paste, new SeparatorMenuItem(), rename});
+            menu.getItems().addAll(createFolder, createRecipe, new SeparatorMenuItem(), refresh, loadRecipe, new SeparatorMenuItem(), delete, copy, cut, paste, new SeparatorMenuItem(), rename);
             createFolder.setOnAction(this::onCreateFolder);
             createRecipe.setOnAction(this::onCreateRecipe);
             refresh.setOnAction(this::onRefresh);
@@ -218,7 +190,7 @@ public class RecipeEditor extends Stage {
         });
         this.treeView.setOnMouseClicked(this::onLoadRecipeAtClick);
         this.editorMode.addListener(this::onModeChange);
-        this.pane.heightProperty().addListener((observable, oldValue, newValue) -> this.scrollPane.setHvalue((Double)newValue));
+        this.pane.heightProperty().addListener((observable, oldValue, newValue) -> this.scrollPane.setHvalue((Double) newValue));
     }
 
     public void refreshAndUpdateAndShow(String unit) {
@@ -269,7 +241,7 @@ public class RecipeEditor extends Stage {
             }
 
         });
-        parallelSteps.setOnDragEntered((action) -> parallelSteps.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY)})));
+        parallelSteps.setOnDragEntered((action) -> parallelSteps.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN.darker(), CornerRadii.EMPTY, Insets.EMPTY))));
         parallelSteps.setOnDragExited((action) -> parallelSteps.setBackground(this.pane.getBackground()));
         parallelSteps.setOnDragDropped((action) -> {
             RecipeConf recipeConfigurations = this.controller.getRecipeConfigurations();
@@ -312,7 +284,7 @@ public class RecipeEditor extends Stage {
             newStep.setOnContextMenuRequested((action3) -> {
                 ContextMenu menu = new ContextMenu();
                 MenuItem delete = new MenuItem("Delete            ");
-                menu.getItems().addAll(new MenuItem[]{delete});
+                menu.getItems().addAll(delete);
                 menu.show(this.mainWindow, action3.getScreenX(), action3.getScreenY());
                 delete.setOnAction((action4) -> {
                     ownerParallelStep.getChildren().remove(newStep);
@@ -333,7 +305,7 @@ public class RecipeEditor extends Stage {
     }
 
     private void onCreateFolder(ActionEvent action) {
-        RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+        RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
         if (parent != null && !parent.getItemType().equals(TreeItemType.Recipe)) {
             String ret = this.createNameWindow("Name of the Folder");
             if (!ret.equalsIgnoreCase("Cancel")) {
@@ -349,7 +321,7 @@ public class RecipeEditor extends Stage {
     }
 
     private void onCreateRecipe(ActionEvent action) {
-        RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+        RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
         if (parent != null && parent.getItemType().equals(TreeItemType.Folder)) {
             String ret = this.createNameWindow("Name of the Recipe");
             if (!ret.equalsIgnoreCase("Cancel")) {
@@ -376,7 +348,7 @@ public class RecipeEditor extends Stage {
     }
 
     private void onLoadRecipe(ActionEvent action) {
-        RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+        RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
         if (parent != null && parent.isLeaf() && parent.getItemType().equals(TreeItemType.Recipe)) {
             Recipe recipe = parent.getRecipe();
             if (recipe.getUnitName().equals(this.unit)) {
@@ -393,7 +365,7 @@ public class RecipeEditor extends Stage {
     }
 
     private void onDelete(ActionEvent action) {
-        RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+        RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
         if (!parent.equals(this.root)) {
             this.DeleteTreeItemInDBRecursiveAction(parent);
             parent.getParent().getChildren().remove(parent);
@@ -406,7 +378,7 @@ public class RecipeEditor extends Stage {
     }
 
     private void onCut(ActionEvent action) {
-        RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+        RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
         if (parent != null) {
             this.SelectedItemID = parent.getItemID();
         }
@@ -414,7 +386,7 @@ public class RecipeEditor extends Stage {
     }
 
     private void onPaste(ActionEvent action) {
-        RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+        RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
         if (parent != null && this.SelectedItemID > 0L && parent.getItemType().equals(TreeItemType.Folder) && this.notOneOfItsChild(this.SelectedItemID, parent.getItemID())) {
             this.controller.getTreeItemById(this.SelectedItemID).ifPresentOrElse((copied) -> {
                 copied.setParentID(parent.getItemID());
@@ -438,8 +410,8 @@ public class RecipeEditor extends Stage {
     }
 
     private void onValidateClicked(MouseEvent action) {
-        double total = (Double)this.recipeModel.getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> (Double)item.getValueParametersData().get("Percentage %")).reduce((double)0.0F, Double::sum);
-        if ((!(total > 99.9) || !(total < 100.1)) && total != (double)0.0F) {
+        double total = this.recipeModel.getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> item.getValueParametersData().get("Percentage %")).reduce((double) 0.0F, Double::sum);
+        if ((!(total > 99.9) || !(total < 100.1)) && total != (double) 0.0F) {
             this.showErrorWindow("Error validating recipe", "Total percentages are not equal to 100% \nThe total equals to " + total);
         } else {
             List<String> phasesNames = this.controller.getAllPhases().stream().map(Phase::getName).collect(Collectors.toList());
@@ -493,7 +465,7 @@ public class RecipeEditor extends Stage {
     private void onLoadRecipeAtClick(MouseEvent action) {
         try {
             if (action.getButton().equals(MouseButton.PRIMARY) && action.getClickCount() == 2) {
-                RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+                RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
                 if (parent != null && parent.isLeaf() && parent.getItemType().equals(TreeItemType.Recipe)) {
                     Recipe recipe = parent.getRecipe();
                     if (recipe.getUnitName().equals(this.unit)) {
@@ -517,7 +489,7 @@ public class RecipeEditor extends Stage {
     private void onModeChange(ObservableValue<? extends String> observable, String oldValue, String newValue) {
         switch (newValue.toLowerCase().trim()) {
             case "edit":
-                this.pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTCORAL, CornerRadii.EMPTY, Insets.EMPTY)}));
+                this.pane.setBackground(new Background(new BackgroundFill(Color.LIGHTCORAL, CornerRadii.EMPTY, Insets.EMPTY)));
                 this.save.setDisable(true);
                 this.edit.setDisable(true);
                 this.discard.setDisable(false);
@@ -526,7 +498,7 @@ public class RecipeEditor extends Stage {
                 this.cancel.setDisable(false);
                 break;
             case "monitor":
-                this.pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)}));
+                this.pane.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
                 this.save.setDisable(true);
                 this.edit.setDisable(false);
                 this.discard.setDisable(true);
@@ -535,7 +507,7 @@ public class RecipeEditor extends Stage {
                 this.cancel.setDisable(true);
                 break;
             case "save":
-                this.pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)}));
+                this.pane.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
                 this.save.setDisable(true);
                 this.edit.setDisable(false);
                 this.discard.setDisable(true);
@@ -544,7 +516,7 @@ public class RecipeEditor extends Stage {
                 this.cancel.setDisable(true);
                 break;
             case "validate":
-                this.pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)}));
+                this.pane.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
                 this.save.setDisable(false);
                 this.edit.setDisable(false);
                 this.discard.setDisable(true);
@@ -553,7 +525,7 @@ public class RecipeEditor extends Stage {
                 this.cancel.setDisable(false);
                 break;
             case "launch":
-                this.pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)}));
+                this.pane.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
                 this.save.setDisable(true);
                 this.edit.setDisable(true);
                 this.discard.setDisable(true);
@@ -562,7 +534,7 @@ public class RecipeEditor extends Stage {
                 this.cancel.setDisable(true);
                 break;
             case "discard":
-                this.pane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)}));
+                this.pane.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
                 this.save.setDisable(true);
                 this.edit.setDisable(false);
                 this.discard.setDisable(true);
@@ -590,7 +562,7 @@ public class RecipeEditor extends Stage {
     }
 
     private void onRename(ActionEvent action) {
-        RecipeTreeItem parent = (RecipeTreeItem)this.treeView.getSelectionModel().getSelectedItem();
+        RecipeTreeItem parent = (RecipeTreeItem) this.treeView.getSelectionModel().getSelectedItem();
         if (parent != null && parent.getItemType().equals(TreeItemType.Recipe)) {
             String ret = this.createNameWindow("New Recipe name");
             if (!ret.equalsIgnoreCase("Cancel")) {
@@ -618,7 +590,7 @@ public class RecipeEditor extends Stage {
     }
 
     private void DeleteTreeItemInDBRecursiveAction(RecipeTreeItem item) {
-        item.getChildren().forEach((subItem) -> this.DeleteTreeItemInDBRecursiveAction((RecipeTreeItem)subItem));
+        item.getChildren().forEach((subItem) -> this.DeleteTreeItemInDBRecursiveAction((RecipeTreeItem) subItem));
         this.controller.deleteTreeItemById(item.getItemID());
     }
 
@@ -660,11 +632,11 @@ public class RecipeEditor extends Stage {
     private void LoadRecipeToGraphicsWithoutEdit() {
         this.pane.getChildren().clear();
 
-        for(ParallelStepsModel pSM : this.recipeModel.getParallelSteps()) {
+        for (ParallelStepsModel pSM : this.recipeModel.getParallelSteps()) {
             ParallelSteps parallelStepTemp = new ParallelSteps();
             this.pane.getChildren().add(parallelStepTemp);
 
-            for(StepModel sm : pSM.getSteps()) {
+            for (StepModel sm : pSM.getSteps()) {
                 Step step = new Step(sm.getPhaseName(), false, this.mainWindow);
                 step.setModel(sm);
                 parallelStepTemp.getChildren().add(step);
@@ -677,13 +649,13 @@ public class RecipeEditor extends Stage {
         this.pane.getChildren().clear();
         ParallelSteps parallelStepTemp = new ParallelSteps();
 
-        for(ParallelStepsModel pSM : this.recipeModel.getParallelSteps()) {
+        for (ParallelStepsModel pSM : this.recipeModel.getParallelSteps()) {
             if (pSM.getSteps().stream().noneMatch((a) -> a.getPhaseName().equals("End"))) {
                 parallelStepTemp = this.adjustDragDropActionsForReceivingContainer(parallelStepTemp);
                 parallelStepTemp.setModel(pSM);
                 this.pane.getChildren().add(parallelStepTemp);
 
-                for(StepModel sm : pSM.getSteps()) {
+                for (StepModel sm : pSM.getSteps()) {
                     Step step = new Step(sm.getPhaseName(), true, this.mainWindow);
                     step.setModel(sm);
                     parallelStepTemp.getChildren().add(step);
@@ -701,13 +673,13 @@ public class RecipeEditor extends Stage {
     private boolean notOneOfItsChild(long SelectedItem, long destination) {
         RecipeEditorController.ReturnData<LinkedHashMap<Long, List<TreeViewItemsData>>> recipesMap = this.controller.getRecipesMap();
         this.rootPane.cursorProperty().bind(Bindings.when(recipesMap.readOnlyBooleanProperty()).then(this.CURSOR_WAIT).otherwise(this.CURSOR_DEFAULT));
-        Map<Long, List<TreeViewItemsData>> groupedItemsByParentID = (Map)recipesMap.object();
+        Map<Long, List<TreeViewItemsData>> groupedItemsByParentID = recipesMap.object();
         return !this.notOneOfItsChildRecursiveCheck(destination, SelectedItem, groupedItemsByParentID);
     }
 
     private boolean notOneOfItsChildRecursiveCheck(long destination, long SelectedItem, Map<Long, List<TreeViewItemsData>> groupedItemsByParentID) {
         if (groupedItemsByParentID.get(SelectedItem) != null) {
-            for(TreeViewItemsData item : groupedItemsByParentID.get(SelectedItem)) {
+            for (TreeViewItemsData item : groupedItemsByParentID.get(SelectedItem)) {
                 if (item.getId() == destination) {
                     return true;
                 }
@@ -730,7 +702,7 @@ public class RecipeEditor extends Stage {
         startPane.getChildren().add(startStep);
         startPane.getModel().getSteps().add(startStep.getModel());
         this.pane.getChildren().clear();
-        this.pane.getChildren().addAll(new Node[]{startPane, ParallelStepsZero});
+        this.pane.getChildren().addAll(startPane, ParallelStepsZero);
         this.recipeModel.getParallelSteps().add(startPane.getModel());
         this.recipeModel.getParallelSteps().add(ParallelStepsZero.getModel());
         ParallelStepsZero.getChildren().clear();
@@ -742,25 +714,25 @@ public class RecipeEditor extends Stage {
         Label label = new Label(labelString);
         final TextField field = new TextField();
         field.setPromptText("Please enter the name ");
-        field.setPrefWidth((double)350.0F);
+        field.setPrefWidth(350.0F);
         Button Cancel = new Button("Cancel");
         Button Ok = new Button("Ok");
-        Cancel.setPrefWidth((double)150.0F);
-        Ok.setPrefWidth((double)150.0F);
+        Cancel.setPrefWidth(150.0F);
+        Ok.setPrefWidth(150.0F);
         HBox buttonsContainer = new HBox();
-        buttonsContainer.getChildren().addAll(new Node[]{Ok, Cancel});
-        buttonsContainer.setSpacing((double)10.0F);
-        buttonsContainer.setPadding(new Insets((double)5.0F));
+        buttonsContainer.getChildren().addAll(Ok, Cancel);
+        buttonsContainer.setSpacing(10.0F);
+        buttonsContainer.setPadding(new Insets(5.0F));
         GridPane container = new GridPane();
         container.add(field, 0, 0);
-        container.setPadding(new Insets((double)5.0F));
-        container.setVgap((double)5.0F);
-        container.setHgap((double)5.0F);
+        container.setPadding(new Insets(5.0F));
+        container.setVgap(5.0F);
+        container.setHgap(5.0F);
         BorderPane root = new BorderPane();
         root.setBottom(buttonsContainer);
         root.setCenter(container);
         root.setTop(label);
-        root.setPadding(new Insets((double)15.0F));
+        root.setPadding(new Insets(15.0F));
         Scene scene = new Scene(root);
         final Stage stage = new Stage();
         stage.setTitle("Please enter name ");
@@ -838,7 +810,7 @@ public class RecipeEditor extends Stage {
         Platform.runLater(() -> {
             ExceptionDialog exceptionDialog = new ExceptionDialog(e);
             exceptionDialog.setHeaderText(header);
-            exceptionDialog.getDialogPane().setMaxWidth((double)500.0F);
+            exceptionDialog.getDialogPane().setMaxWidth(500.0F);
             exceptionDialog.initOwner(this.mainWindow);
             exceptionDialog.initModality(Modality.WINDOW_MODAL);
             exceptionDialog.initStyle(StageStyle.UTILITY);

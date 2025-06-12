@@ -1,13 +1,12 @@
-
 package com.batch.Database.Repositories;
 
 import com.batch.Database.Entities.BatchControllerData;
-import java.util.Optional;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public interface BatchControllerDataRepository extends CrudRepository<BatchControllerData, Long> {

@@ -1,5 +1,3 @@
-
-
 package com.batch.GUI.PhasesWindow;
 
 import com.batch.DTO.RecipeSystemDataDefinitions.PhaseInformationDTO;
@@ -9,10 +7,6 @@ import com.batch.Database.Entities.Unit;
 import com.batch.Database.Repositories.PhaseRepository;
 import com.batch.Database.Repositories.UnitsRepository;
 import com.google.common.collect.Lists;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,12 +16,22 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Controller
 public class PhasesController {
     private static final Logger log = LogManager.getLogger(PhasesController.class);
     private final PhasesModel model = new PhasesModel();
     private final PhaseRepository phaseRepository;
     private final UnitsRepository unitsRepository;
+
+    public PhasesController(final PhaseRepository phaseRepository, final UnitsRepository unitsRepository) {
+        this.phaseRepository = phaseRepository;
+        this.unitsRepository = unitsRepository;
+    }
 
     public PhasesModel getModel() {
         return this.model;
@@ -49,7 +53,7 @@ public class PhasesController {
     }
 
     public ObservableList<String> getUnitsName() {
-        return FXCollections.observableArrayList((Collection)Lists.newArrayList(this.unitsRepository.findAll()).stream().map(Unit::getName).collect(Collectors.toList()));
+        return FXCollections.observableArrayList((Collection) Lists.newArrayList(this.unitsRepository.findAll()).stream().map(Unit::getName).collect(Collectors.toList()));
     }
 
     public List<Phase> findAllPhases() {
@@ -91,10 +95,5 @@ public class PhasesController {
 
     public void createNewPhase(Phase phase) {
         this.phaseRepository.save(phase);
-    }
-
-    public PhasesController(final PhaseRepository phaseRepository, final UnitsRepository unitsRepository) {
-        this.phaseRepository = phaseRepository;
-        this.unitsRepository = unitsRepository;
     }
 }

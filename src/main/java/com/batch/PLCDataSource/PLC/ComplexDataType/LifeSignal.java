@@ -1,5 +1,3 @@
-
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.Address;

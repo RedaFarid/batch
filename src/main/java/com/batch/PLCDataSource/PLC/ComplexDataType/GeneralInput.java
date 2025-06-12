@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 public enum GeneralInput implements RowAttripute {
@@ -14,5 +13,5 @@ public enum GeneralInput implements RowAttripute {
     HI_Air_Pressure_Alarm,
     Lo_Air_Pressure_Alarm,
     Over_Under_Voltage_Alarm,
-    ESD_Alarm;
+    ESD_Alarm
 }

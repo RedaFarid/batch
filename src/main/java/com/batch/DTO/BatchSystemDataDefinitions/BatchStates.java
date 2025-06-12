@@ -1,4 +1,3 @@
-
 package com.batch.DTO.BatchSystemDataDefinitions;
 
 public enum BatchStates {
@@ -7,5 +6,5 @@ public enum BatchStates {
     Running,
     Held,
     Aborted,
-    Finished;
+    Finished
 }

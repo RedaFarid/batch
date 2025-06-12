@@ -1,7 +1,7 @@
-
 package com.batch.PLCDataSource.ModBus;
 
 import com.batch.PLCDataSource.ModBus.Exceptions.PacketShiftException;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,14 +10,16 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ModbusClientUpdated {
-    private AtomicInteger transactionIdentifierCounter = new AtomicInteger(0);
-    private Socket tcpClientSocket = new Socket();
+    public byte[] receiveData;
+    public byte[] sendData;
     protected String ipAddress = "190.168.0.1";
     protected int port = 502;
+    private final AtomicInteger transactionIdentifierCounter = new AtomicInteger(0);
+    private Socket tcpClientSocket = new Socket();
     private byte[] transactionIdentifier = new byte[2];
     private byte[] protocolIdentifier = new byte[2];
     private byte[] length = new byte[2];
-    private byte[] crc = new byte[2];
+    private final byte[] crc = new byte[2];
     private byte unitIdentifier = 1;
     private byte functionCode;
     private byte[] startingAddress = new byte[2];
@@ -26,12 +28,15 @@ public class ModbusClientUpdated {
     private int connectTimeout = 500;
     private InputStream inStream;
     private DataOutputStream outStream;
-    public byte[] receiveData;
-    public byte[] sendData;
 
     public ModbusClientUpdated(String ipAddress, int port) {
         this.ipAddress = ipAddress;
         this.port = port;
+    }
+
+    public static byte[] toByteArray(int value) {
+        byte[] result = new byte[]{(byte) value, (byte) (value >> 8)};
+        return result;
     }
 
     public void Connect() throws Exception {
@@ -77,7 +82,7 @@ public class ModbusClientUpdated {
                 } else if (data[7] == 131 & data[8] == 4) {
                     throw new Exception("Error reading");
                 } else {
-                    for(int var8 = 0; var8 < quantity; ++var8) {
+                    for (int var8 = 0; var8 < quantity; ++var8) {
                         byte[] bytes = new byte[]{data[9 + var8 * 2], data[9 + var8 * 2 + 1]};
                         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
                         response[var8] = byteBuffer.getShort();
@@ -102,7 +107,7 @@ public class ModbusClientUpdated {
             this.length = toByteArray(6);
             this.functionCode = 6;
             this.startingAddress = toByteArray(startingAddress);
-            registerValue = toByteArray((short)value);
+            registerValue = toByteArray((short) value);
             byte[] data = new byte[]{this.transactionIdentifier[1], this.transactionIdentifier[0], this.protocolIdentifier[1], this.protocolIdentifier[0], this.length[1], this.length[0], this.unitIdentifier, this.functionCode, this.startingAddress[1], this.startingAddress[0], registerValue[1], registerValue[0], this.crc[0], this.crc[1]};
             if (this.tcpClientSocket.isConnected()) {
                 this.outStream.write(data, 0, data.length - 2);
@@ -128,7 +133,7 @@ public class ModbusClientUpdated {
     }
 
     public synchronized void WriteMultipleRegisters(int startingAddress, int[] values) throws Exception {
-        byte byteCount = (byte)(values.length * 2);
+        byte byteCount = (byte) (values.length * 2);
         byte[] quantityOfOutputs = toByteArray(values.length);
         if (this.tcpClientSocket == null & !this.udpFlag) {
             throw new Exception("connection error");
@@ -153,7 +158,7 @@ public class ModbusClientUpdated {
             data[11] = quantityOfOutputs[0];
             data[12] = byteCount;
 
-            for(int i = 0; i < values.length; ++i) {
+            for (int i = 0; i < values.length; ++i) {
                 byte[] singleRegisterValue = toByteArray(values[i]);
                 data[13 + i * 2] = singleRegisterValue[1];
                 data[14 + i * 2] = singleRegisterValue[0];
@@ -198,11 +203,6 @@ public class ModbusClientUpdated {
         this.tcpClientSocket = null;
     }
 
-    public static byte[] toByteArray(int value) {
-        byte[] result = new byte[]{(byte)value, (byte)(value >> 8)};
-        return result;
-    }
-
     public boolean isConnected() {
         if (this.tcpClientSocket == null) {
             return false;
@@ -243,11 +243,11 @@ public class ModbusClientUpdated {
         this.connectTimeout = connectionTimeout;
     }
 
-    public void setUnitIdentifier(byte unitIdentifier) {
-        this.unitIdentifier = unitIdentifier;
-    }
-
     public byte getUnitIdentifier() {
         return this.unitIdentifier;
+    }
+
+    public void setUnitIdentifier(byte unitIdentifier) {
+        this.unitIdentifier = unitIdentifier;
     }
 }

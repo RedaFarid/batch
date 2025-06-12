@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 public enum ValveInput implements RowAttripute {
@@ -7,5 +6,5 @@ public enum ValveInput implements RowAttripute {
     QClose,
     FB_Open,
     FB_Close,
-    Fault;
+    Fault
 }

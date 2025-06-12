@@ -1,5 +1,3 @@
-
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 public enum MixerOutput implements RowAttripute {
@@ -8,5 +6,5 @@ public enum MixerOutput implements RowAttripute {
     Mode,
     Source,
     Reset,
-    Speed_Setpoint;
+    Speed_Setpoint
 }

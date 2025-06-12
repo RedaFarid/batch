@@ -1,16 +1,16 @@
-
 package com.batch.Database.Entities;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchModel;
 import com.google.common.base.Objects;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Table("batches")
 public class Batch {
@@ -73,130 +73,6 @@ public class Batch {
         this.model = model;
     }
 
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else if (o != null && this.getClass() == o.getClass()) {
-            Batch batch = (Batch)o;
-            return Objects.equal(this.id, batch.id);
-        } else {
-            return false;
-        }
-    }
-
-    public int hashCode() {
-        return Objects.hashCode(new Object[]{this.id});
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getUnitName() {
-        return this.unitName;
-    }
-
-    public String getBatchName() {
-        return this.batchName;
-    }
-
-    public LocalDate getCreationDate() {
-        return this.creationDate;
-    }
-
-    public LocalTime getCreationTime() {
-        return this.creationTime;
-    }
-
-    public String getState() {
-        return this.state;
-    }
-
-    public String getOrder() {
-        return this.order;
-    }
-
-    public String getComment() {
-        return this.comment;
-    }
-
-    public String getRowModel() {
-        return this.rowModel;
-    }
-
-    public LocalDateTime getEndTime() {
-        return this.endTime;
-    }
-
-    public String getClient() {
-        return this.client;
-    }
-
-    public String getProduct() {
-        return this.product;
-    }
-
-    public BatchModel getModel() {
-        return this.model;
-    }
-
-    public void setId(final Long id) {
-        this.id = id;
-    }
-
-    public void setUnitName(final String unitName) {
-        this.unitName = unitName;
-    }
-
-    public void setBatchName(final String batchName) {
-        this.batchName = batchName;
-    }
-
-    public void setCreationDate(final LocalDate creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public void setCreationTime(final LocalTime creationTime) {
-        this.creationTime = creationTime;
-    }
-
-    public void setState(final String state) {
-        this.state = state;
-    }
-
-    public void setOrder(final String order) {
-        this.order = order;
-    }
-
-    public void setComment(final String comment) {
-        this.comment = comment;
-    }
-
-    public void setRowModel(final String rowModel) {
-        this.rowModel = rowModel;
-    }
-
-    public void setEndTime(final LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public void setClient(final String client) {
-        this.client = client;
-    }
-
-    public void setProduct(final String product) {
-        this.product = product;
-    }
-
-    public void setModel(final BatchModel model) {
-        this.model = model;
-    }
-
-    public String toString() {
-        Long var10000 = this.getId();
-        return "Batch(id=" + var10000 + ", unitName=" + this.getUnitName() + ", batchName=" + this.getBatchName() + ", creationDate=" + this.getCreationDate() + ", creationTime=" + this.getCreationTime() + ", state=" + this.getState() + ", order=" + this.getOrder() + ", comment=" + this.getComment() + ", rowModel=" + this.getRowModel() + ", endTime=" + this.getEndTime() + ", client=" + this.getClient() + ", product=" + this.getProduct() + ", model=" + this.getModel() + ")";
-    }
-
     public Batch(final Long id, final String unitName, final String batchName, final LocalDate creationDate, final LocalTime creationTime, final String state, final String order, final String comment, final String rowModel, final LocalDateTime endTime, final String client, final String product, final BatchModel model) {
         this.id = id;
         this.unitName = unitName;
@@ -214,5 +90,129 @@ public class Batch {
     }
 
     public Batch() {
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o != null && this.getClass() == o.getClass()) {
+            Batch batch = (Batch) o;
+            return Objects.equal(this.id, batch.id);
+        } else {
+            return false;
+        }
+    }
+
+    public int hashCode() {
+        return Objects.hashCode(this.id);
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(final Long id) {
+        this.id = id;
+    }
+
+    public String getUnitName() {
+        return this.unitName;
+    }
+
+    public void setUnitName(final String unitName) {
+        this.unitName = unitName;
+    }
+
+    public String getBatchName() {
+        return this.batchName;
+    }
+
+    public void setBatchName(final String batchName) {
+        this.batchName = batchName;
+    }
+
+    public LocalDate getCreationDate() {
+        return this.creationDate;
+    }
+
+    public void setCreationDate(final LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public LocalTime getCreationTime() {
+        return this.creationTime;
+    }
+
+    public void setCreationTime(final LocalTime creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public String getState() {
+        return this.state;
+    }
+
+    public void setState(final String state) {
+        this.state = state;
+    }
+
+    public String getOrder() {
+        return this.order;
+    }
+
+    public void setOrder(final String order) {
+        this.order = order;
+    }
+
+    public String getComment() {
+        return this.comment;
+    }
+
+    public void setComment(final String comment) {
+        this.comment = comment;
+    }
+
+    public String getRowModel() {
+        return this.rowModel;
+    }
+
+    public void setRowModel(final String rowModel) {
+        this.rowModel = rowModel;
+    }
+
+    public LocalDateTime getEndTime() {
+        return this.endTime;
+    }
+
+    public void setEndTime(final LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getClient() {
+        return this.client;
+    }
+
+    public void setClient(final String client) {
+        this.client = client;
+    }
+
+    public String getProduct() {
+        return this.product;
+    }
+
+    public void setProduct(final String product) {
+        this.product = product;
+    }
+
+    public BatchModel getModel() {
+        return this.model;
+    }
+
+    public void setModel(final BatchModel model) {
+        this.model = model;
+    }
+
+    public String toString() {
+        Long var10000 = this.getId();
+        return "Batch(id=" + var10000 + ", unitName=" + this.getUnitName() + ", batchName=" + this.getBatchName() + ", creationDate=" + this.getCreationDate() + ", creationTime=" + this.getCreationTime() + ", state=" + this.getState() + ", order=" + this.getOrder() + ", comment=" + this.getComment() + ", rowModel=" + this.getRowModel() + ", endTime=" + this.getEndTime() + ", client=" + this.getClient() + ", product=" + this.getProduct() + ", model=" + this.getModel() + ")";
     }
 }

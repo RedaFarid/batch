@@ -1,5 +1,3 @@
-
-
 package com.batch.GUI.MaterialsWindow;
 
 import com.batch.ApplicationContext;
@@ -9,12 +7,7 @@ import com.batch.Utilities.RestrictiveTextField;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
@@ -28,33 +21,33 @@ public class MaterialsWindow extends Stage {
     private final VBox root = new VBox();
     private final VBox vbox = new VBox();
     private final ToolBar hbox = new ToolBar();
-    private Stage mainWindow = null;
-    private TableView<Material> table = new TableView();
-    private TableColumn<Material, String> NameColumn = new TableColumn("ID");
-    private TableColumn<Material, String> LicenceNumberColumn = new TableColumn("Name");
-    private TableColumn<Material, String> LicenceExpirationDateColumn = new TableColumn("Comment");
-    private Button Insert = new Button("Create new material");
-    private Button Delete = new Button("Delete selected material");
-    private Button Update = new Button("Update selected material");
-    private Label idLabel = new Label("ID");
-    private Label nameLabel = new Label("Name");
-    private Label commentLabel = new Label("Comment");
-    private RestrictiveTextField idField = new RestrictiveTextField();
-    private RestrictiveTextField nameField = new RestrictiveTextField();
-    private RestrictiveTextField commentField = new RestrictiveTextField();
     private final MaterialsController controller;
     private final MaterialsModel model;
+    private Stage mainWindow = null;
+    private final TableView<Material> table = new TableView();
+    private final TableColumn<Material, String> NameColumn = new TableColumn("ID");
+    private final TableColumn<Material, String> LicenceNumberColumn = new TableColumn("Name");
+    private final TableColumn<Material, String> LicenceExpirationDateColumn = new TableColumn("Comment");
+    private final Button Insert = new Button("Create new material");
+    private final Button Delete = new Button("Delete selected material");
+    private final Button Update = new Button("Update selected material");
+    private final Label idLabel = new Label("ID");
+    private final Label nameLabel = new Label("Name");
+    private final Label commentLabel = new Label("Comment");
+    private final RestrictiveTextField idField = new RestrictiveTextField();
+    private final RestrictiveTextField nameField = new RestrictiveTextField();
+    private final RestrictiveTextField commentField = new RestrictiveTextField();
 
     private MaterialsWindow(Stage Window) {
         this.mainWindow = Window;
-        this.controller = (MaterialsController)ApplicationContext.applicationContext.getBean(MaterialsController.class);
+        this.controller = ApplicationContext.applicationContext.getBean(MaterialsController.class);
         this.model = this.controller.getModel();
         this.graphicsBuilder();
         this.actionHandling();
     }
 
     public static MaterialsWindow getMaterialsWindow(Stage Window) {
-        synchronized(MaterialsWindow.class) {
+        synchronized (MaterialsWindow.class) {
             if (Singleton == null) {
                 Singleton = new MaterialsWindow(Window);
             }
@@ -64,15 +57,15 @@ public class MaterialsWindow extends Stage {
     }
 
     private void graphicsBuilder() {
-        this.Insert.setPrefWidth((double)150.0F);
-        this.Delete.setPrefWidth((double)150.0F);
-        this.Update.setPrefWidth((double)150.0F);
-        this.idLabel.setPrefWidth((double)150.0F);
-        this.nameLabel.setPrefWidth((double)150.0F);
-        this.commentLabel.setPrefWidth((double)150.0F);
-        this.idField.setPrefWidth((double)250.0F);
-        this.nameField.setPrefWidth((double)250.0F);
-        this.commentField.setPrefWidth((double)250.0F);
+        this.Insert.setPrefWidth(150.0F);
+        this.Delete.setPrefWidth(150.0F);
+        this.Update.setPrefWidth(150.0F);
+        this.idLabel.setPrefWidth(150.0F);
+        this.nameLabel.setPrefWidth(150.0F);
+        this.commentLabel.setPrefWidth(150.0F);
+        this.idField.setPrefWidth(250.0F);
+        this.nameField.setPrefWidth(250.0F);
+        this.commentField.setPrefWidth(250.0F);
         this.idField.setDisable(true);
         this.dataEntryPartition.add(this.idLabel, 1, 2);
         this.dataEntryPartition.add(this.nameLabel, 3, 2);
@@ -83,22 +76,22 @@ public class MaterialsWindow extends Stage {
         this.NameColumn.setCellValueFactory(new PropertyValueFactory("id"));
         this.LicenceNumberColumn.setCellValueFactory(new PropertyValueFactory("name"));
         this.LicenceExpirationDateColumn.setCellValueFactory(new PropertyValueFactory("Comment"));
-        this.table.getColumns().addAll(new TableColumn[]{this.NameColumn, this.LicenceNumberColumn, this.LicenceExpirationDateColumn});
+        this.table.getColumns().addAll(this.NameColumn, this.LicenceNumberColumn, this.LicenceExpirationDateColumn);
         this.table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         this.table.prefHeightProperty().bind(this.root.heightProperty().subtract(this.vbox.heightProperty()));
         this.table.setItems(this.model.getList());
-        this.hbox.getItems().addAll(new Node[]{this.Insert, this.Update, this.Delete});
-        this.hbox.setPadding(new Insets((double)10.0F, (double)10.0F, (double)10.0F, (double)10.0F));
-        this.vbox.getChildren().addAll(new Node[]{this.dataEntryPartition, this.hbox});
-        this.vbox.setPadding(new Insets((double)10.0F, (double)10.0F, (double)10.0F, (double)10.0F));
-        this.vbox.setSpacing((double)10.0F);
+        this.hbox.getItems().addAll(this.Insert, this.Update, this.Delete);
+        this.hbox.setPadding(new Insets(10.0F, 10.0F, 10.0F, 10.0F));
+        this.vbox.getChildren().addAll(this.dataEntryPartition, this.hbox);
+        this.vbox.setPadding(new Insets(10.0F, 10.0F, 10.0F, 10.0F));
+        this.vbox.setSpacing(10.0F);
         this.root.getChildren().add(this.vbox);
         this.root.getChildren().add(this.table);
-        this.root.setPadding(new Insets((double)10.0F));
+        this.root.setPadding(new Insets(10.0F));
         this.initOwner(this.mainWindow);
         this.initModality(Modality.WINDOW_MODAL);
         this.initStyle(StageStyle.UTILITY);
-        this.setScene(new Scene(this.root, (double)700.0F, (double)800.0F));
+        this.setScene(new Scene(this.root, 700.0F, 800.0F));
         this.setTitle("Materials manager");
     }
 
@@ -136,7 +129,7 @@ public class MaterialsWindow extends Stage {
         this.table.setOnMousePressed((action) -> {
             if (action.getClickCount() == 1 && this.table.getItems().size() > 0 && !this.table.getSelectionModel().isEmpty()) {
                 try {
-                    Material selected = (Material)this.table.getSelectionModel().getSelectedItem();
+                    Material selected = this.table.getSelectionModel().getSelectedItem();
                     this.idField.setText(String.valueOf(selected.getId()));
                     this.nameField.setText(selected.getName());
                     this.commentField.setText(selected.getComment());

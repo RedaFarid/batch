@@ -1,4 +1,3 @@
-
 package com.batch.Database.Entities;
 
 import org.springframework.data.annotation.Id;
@@ -15,24 +14,33 @@ public class RecipeConf {
     @Column("MaxBatchSize")
     private double maxBatchSize;
 
+    public RecipeConf(final int maxParallelSteps, final int acceptedErrorInDosePhases, final double maxBatchSize) {
+        this.maxParallelSteps = maxParallelSteps;
+        this.acceptedErrorInDosePhases = acceptedErrorInDosePhases;
+        this.maxBatchSize = maxBatchSize;
+    }
+
+    public RecipeConf() {
+    }
+
     public int getMaxParallelSteps() {
         return this.maxParallelSteps;
-    }
-
-    public int getAcceptedErrorInDosePhases() {
-        return this.acceptedErrorInDosePhases;
-    }
-
-    public double getMaxBatchSize() {
-        return this.maxBatchSize;
     }
 
     public void setMaxParallelSteps(final int maxParallelSteps) {
         this.maxParallelSteps = maxParallelSteps;
     }
 
+    public int getAcceptedErrorInDosePhases() {
+        return this.acceptedErrorInDosePhases;
+    }
+
     public void setAcceptedErrorInDosePhases(final int acceptedErrorInDosePhases) {
         this.acceptedErrorInDosePhases = acceptedErrorInDosePhases;
+    }
+
+    public double getMaxBatchSize() {
+        return this.maxBatchSize;
     }
 
     public void setMaxBatchSize(final double maxBatchSize) {
@@ -42,10 +50,9 @@ public class RecipeConf {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof RecipeConf)) {
+        } else if (!(o instanceof RecipeConf other)) {
             return false;
         } else {
-            RecipeConf other = (RecipeConf)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.getMaxParallelSteps() != other.getMaxParallelSteps()) {
@@ -68,21 +75,12 @@ public class RecipeConf {
         result = result * 59 + this.getMaxParallelSteps();
         result = result * 59 + this.getAcceptedErrorInDosePhases();
         long $maxBatchSize = Double.doubleToLongBits(this.getMaxBatchSize());
-        result = result * 59 + (int)($maxBatchSize >>> 32 ^ $maxBatchSize);
+        result = result * 59 + (int) ($maxBatchSize >>> 32 ^ $maxBatchSize);
         return result;
     }
 
     public String toString() {
         int var10000 = this.getMaxParallelSteps();
         return "RecipeConf(maxParallelSteps=" + var10000 + ", acceptedErrorInDosePhases=" + this.getAcceptedErrorInDosePhases() + ", maxBatchSize=" + this.getMaxBatchSize() + ")";
-    }
-
-    public RecipeConf(final int maxParallelSteps, final int acceptedErrorInDosePhases, final double maxBatchSize) {
-        this.maxParallelSteps = maxParallelSteps;
-        this.acceptedErrorInDosePhases = acceptedErrorInDosePhases;
-        this.maxBatchSize = maxBatchSize;
-    }
-
-    public RecipeConf() {
     }
 }

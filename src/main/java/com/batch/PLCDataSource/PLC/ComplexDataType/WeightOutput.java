@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 public enum WeightOutput implements RowAttripute {
@@ -12,5 +11,5 @@ public enum WeightOutput implements RowAttripute {
     High_Warning_SP,
     High_Alarm_SP,
     Zero,
-    Span;
+    Span
 }

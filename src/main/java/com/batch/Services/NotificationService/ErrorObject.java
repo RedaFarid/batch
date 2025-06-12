@@ -1,20 +1,20 @@
-
 package com.batch.Services.NotificationService;
 
 import com.google.common.base.Objects;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ErrorObject {
     private final ResetEvent resetEvent;
     private final AddErrorEvent addErrorEvent;
+    private final ObservableSet<String> errorMessage = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new String[0]));
     private String serviceName;
     private String errorFamily;
-    private final ObservableSet<String> errorMessage = FXCollections.synchronizedObservableSet(FXCollections.observableSet(new String[0]));
     private long errorCount = 0L;
     private LocalDateTime creationDate;
 
@@ -95,7 +95,7 @@ public class ErrorObject {
         if (this == o) {
             return true;
         } else if (o != null && this.getClass() == o.getClass()) {
-            ErrorObject that = (ErrorObject)o;
+            ErrorObject that = (ErrorObject) o;
             return this.errorCount == that.errorCount && Objects.equal(this.serviceName, that.serviceName) && Objects.equal(this.errorFamily, that.errorFamily) && Objects.equal(this.errorMessage, that.errorMessage);
         } else {
             return false;
@@ -103,7 +103,7 @@ public class ErrorObject {
     }
 
     public int hashCode() {
-        return Objects.hashCode(new Object[]{this.serviceName, this.errorFamily, this.errorMessage, this.errorCount});
+        return Objects.hashCode(this.serviceName, this.errorFamily, this.errorMessage, this.errorCount);
     }
 
     public String toString() {

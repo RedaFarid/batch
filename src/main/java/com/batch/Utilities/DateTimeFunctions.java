@@ -5,17 +5,18 @@
 
 package com.batch.Utilities;
 
+import javafx.scene.control.DatePicker;
+
 import java.sql.Date;
 import java.sql.Time;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import javafx.scene.control.DatePicker;
 
 public class DateTimeFunctions {
     public static Date fromDatePicker(DatePicker datpicker) {
-        LocalDate localdate = (LocalDate)datpicker.getValue();
+        LocalDate localdate = datpicker.getValue();
         Instant instant = Instant.from(localdate.atStartOfDay(ZoneId.systemDefault()));
         java.util.Date date = java.util.Date.from(instant);
         Date sqldte = new Date(date.getTime());
@@ -35,7 +36,7 @@ public class DateTimeFunctions {
     }
 
     public static LocalTime getFromSQLTime(Time time) {
-        return LocalTime.ofSecondOfDay((long)time.getSeconds());
+        return LocalTime.ofSecondOfDay(time.getSeconds());
     }
 
     public static Date getCurrentDate() {

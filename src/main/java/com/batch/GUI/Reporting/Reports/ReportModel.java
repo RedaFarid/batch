@@ -1,5 +1,3 @@
-
-
 package com.batch.GUI.Reporting.Reports;
 
 import java.time.LocalDate;
@@ -19,72 +17,87 @@ public class ReportModel {
     private String comment;
     private List<ReportTableDataModel> data = new LinkedList();
 
+    public ReportModel(final long batchID, final String batchName, final LocalDate creationDate, final LocalTime creationTime, final LocalDateTime endTime, final String product, final String client, final String comment, final List<ReportTableDataModel> data) {
+        this.batchID = batchID;
+        this.batchName = batchName;
+        this.creationDate = creationDate;
+        this.creationTime = creationTime;
+        this.endTime = endTime;
+        this.product = product;
+        this.client = client;
+        this.comment = comment;
+        this.data = data;
+    }
+
+    public ReportModel() {
+    }
+
     public long getBatchID() {
         return this.batchID;
-    }
-
-    public String getBatchName() {
-        return this.batchName;
-    }
-
-    public LocalDate getCreationDate() {
-        return this.creationDate;
-    }
-
-    public LocalTime getCreationTime() {
-        return this.creationTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return this.endTime;
-    }
-
-    public String getProduct() {
-        return this.product;
-    }
-
-    public String getClient() {
-        return this.client;
-    }
-
-    public String getComment() {
-        return this.comment;
-    }
-
-    public List<ReportTableDataModel> getData() {
-        return this.data;
     }
 
     public void setBatchID(final long batchID) {
         this.batchID = batchID;
     }
 
+    public String getBatchName() {
+        return this.batchName;
+    }
+
     public void setBatchName(final String batchName) {
         this.batchName = batchName;
+    }
+
+    public LocalDate getCreationDate() {
+        return this.creationDate;
     }
 
     public void setCreationDate(final LocalDate creationDate) {
         this.creationDate = creationDate;
     }
 
+    public LocalTime getCreationTime() {
+        return this.creationTime;
+    }
+
     public void setCreationTime(final LocalTime creationTime) {
         this.creationTime = creationTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return this.endTime;
     }
 
     public void setEndTime(final LocalDateTime endTime) {
         this.endTime = endTime;
     }
 
+    public String getProduct() {
+        return this.product;
+    }
+
     public void setProduct(final String product) {
         this.product = product;
+    }
+
+    public String getClient() {
+        return this.client;
     }
 
     public void setClient(final String client) {
         this.client = client;
     }
 
+    public String getComment() {
+        return this.comment;
+    }
+
     public void setComment(final String comment) {
         this.comment = comment;
+    }
+
+    public List<ReportTableDataModel> getData() {
+        return this.data;
     }
 
     public void setData(final List<ReportTableDataModel> data) {
@@ -94,10 +107,9 @@ public class ReportModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof ReportModel)) {
+        } else if (!(o instanceof ReportModel other)) {
             return false;
         } else {
-            ReportModel other = (ReportModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.getBatchID() != other.getBatchID()) {
@@ -176,14 +188,8 @@ public class ReportModel {
                 Object this$data = this.getData();
                 Object other$data = other.getData();
                 if (this$data == null) {
-                    if (other$data != null) {
-                        return false;
-                    }
-                } else if (!this$data.equals(other$data)) {
-                    return false;
-                }
-
-                return true;
+                    return other$data == null;
+                } else return this$data.equals(other$data);
             }
         }
     }
@@ -196,7 +202,7 @@ public class ReportModel {
         int PRIME = 59;
         int result = 1;
         long $batchID = this.getBatchID();
-        result = result * 59 + (int)($batchID >>> 32 ^ $batchID);
+        result = result * 59 + (int) ($batchID >>> 32 ^ $batchID);
         Object $batchName = this.getBatchName();
         result = result * 59 + ($batchName == null ? 43 : $batchName.hashCode());
         Object $creationDate = this.getCreationDate();
@@ -219,20 +225,5 @@ public class ReportModel {
     public String toString() {
         long var10000 = this.getBatchID();
         return "ReportModel(batchID=" + var10000 + ", batchName=" + this.getBatchName() + ", creationDate=" + this.getCreationDate() + ", creationTime=" + this.getCreationTime() + ", endTime=" + this.getEndTime() + ", product=" + this.getProduct() + ", client=" + this.getClient() + ", comment=" + this.getComment() + ", data=" + this.getData() + ")";
-    }
-
-    public ReportModel(final long batchID, final String batchName, final LocalDate creationDate, final LocalTime creationTime, final LocalDateTime endTime, final String product, final String client, final String comment, final List<ReportTableDataModel> data) {
-        this.batchID = batchID;
-        this.batchName = batchName;
-        this.creationDate = creationDate;
-        this.creationTime = creationTime;
-        this.endTime = endTime;
-        this.product = product;
-        this.client = client;
-        this.comment = comment;
-        this.data = data;
-    }
-
-    public ReportModel() {
     }
 }

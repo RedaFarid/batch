@@ -1,7 +1,7 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType.Batches;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowAttripute;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ public class PhasesAttributes {
 
     public static PhasesAttributes getAttributes() {
         if (singleton == null) {
-            synchronized(PhasesAttributes.class) {
+            synchronized (PhasesAttributes.class) {
                 singleton = new PhasesAttributes();
             }
         }
@@ -27,14 +27,14 @@ public class PhasesAttributes {
 
     public void addNewPhase(String step, String phase) {
         Map<String, RowAttripute> newParametersCollection = Collections.synchronizedMap(new LinkedHashMap());
-        ((Map)this.phasesAttributes.get(step)).put(phase, newParametersCollection);
+        ((Map) this.phasesAttributes.get(step)).put(phase, newParametersCollection);
     }
 
     public void addAttributeForPhaseAndParameter(String step, String phase, String parameter, RowAttripute attribute) {
-        ((Map)((Map)this.phasesAttributes.get(step)).get(phase)).put(parameter, attribute);
+        ((Map) ((Map) this.phasesAttributes.get(step)).get(phase)).put(parameter, attribute);
     }
 
     public RowAttripute getAttributeForPhaseAndParameter(String step, String phase, String parameter) {
-        return (RowAttripute)((Map)((Map)this.phasesAttributes.get(step)).get(phase)).get(parameter);
+        return (RowAttripute) ((Map) ((Map) this.phasesAttributes.get(step)).get(phase)).get(parameter);
     }
 }

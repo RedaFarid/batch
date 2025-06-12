@@ -1,21 +1,13 @@
-
-
 package com.batch.GUI.BatchWindow.WindowComponents;
 
 import com.batch.ApplicationContext;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchOrders;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchParallelStepsModel;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchStates;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchStepModel;
-import com.batch.DTO.BatchSystemDataDefinitions.EventOnBatchCloseCallBack;
+import com.batch.DTO.BatchSystemDataDefinitions.*;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
 import com.batch.Database.Entities.Batch;
 import com.batch.Database.Entities.BatchControllerData;
 import com.batch.GUI.BatchWindow.BatchesController;
 import com.batch.GUI.BatchWindow.BatchesModel;
 import com.batch.GUI.RecipeEditor.WindowComponents.ParallelSteps;
-import java.util.Map;
-import java.util.Optional;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -26,40 +18,21 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.chart.PieChart;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Tab;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.controlsfx.dialog.ExceptionDialog;
 
+import java.util.Map;
+import java.util.Optional;
+
 public class BatchObserver extends Tab {
     private static volatile BatchObserver singleton = null;
-    private BorderPane rootPane = new BorderPane();
-    private Stage mainWindow;
-    private ToolBar toolBar = new ToolBar();
-    private ToolBar statusBar = new ToolBar();
-    private Label batchState = new Label();
-    private StringProperty batchMode = new SimpleStringProperty();
     private final Button start = new Button("Start");
     private final Button abort = new Button("Abort");
     private final Button hold = new Button("Hold");
@@ -71,9 +44,6 @@ public class BatchObserver extends Tab {
     private final VBox piePane = new VBox();
     private final ScrollPane scrollPane;
     private final Batch batch;
-    private EventOnBatchCloseCallBack eventOnClose;
-    private int i;
-    private int j;
     private final BatchesController controller;
     private final BatchesModel model;
     private final Background IDLE_FILL;
@@ -82,18 +52,27 @@ public class BatchObserver extends Tab {
     private final Background HELD_FILL;
     private final Background ABORTED_FILL;
     private final Background FINISHED_FILL;
+    private final BorderPane rootPane = new BorderPane();
+    private final Stage mainWindow;
+    private final ToolBar toolBar = new ToolBar();
+    private final ToolBar statusBar = new ToolBar();
+    private final Label batchState = new Label();
+    private final StringProperty batchMode = new SimpleStringProperty();
+    private EventOnBatchCloseCallBack eventOnClose;
+    private int i;
+    private int j;
 
     public BatchObserver(Stage stage, Batch batch) {
         this.scrollPane = new ScrollPane(this.pane);
-        this.IDLE_FILL = new Background(new BackgroundFill[]{new BackgroundFill(Color.GRAY, new CornerRadii((double)5.0F), Insets.EMPTY)});
-        this.CREATED_FILL = new Background(new BackgroundFill[]{new BackgroundFill(Color.DARKGRAY, new CornerRadii((double)5.0F), Insets.EMPTY)});
-        this.RUNNING_FILL = new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTGREEN, new CornerRadii((double)5.0F), Insets.EMPTY)});
-        this.HELD_FILL = new Background(new BackgroundFill[]{new BackgroundFill(Color.YELLOW, new CornerRadii((double)5.0F), Insets.EMPTY)});
-        this.ABORTED_FILL = new Background(new BackgroundFill[]{new BackgroundFill(Color.VIOLET, new CornerRadii((double)5.0F), Insets.EMPTY)});
-        this.FINISHED_FILL = new Background(new BackgroundFill[]{new BackgroundFill(Color.DARKGREEN, new CornerRadii((double)5.0F), Insets.EMPTY)});
+        this.IDLE_FILL = new Background(new BackgroundFill(Color.GRAY, new CornerRadii(5.0F), Insets.EMPTY));
+        this.CREATED_FILL = new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(5.0F), Insets.EMPTY));
+        this.RUNNING_FILL = new Background(new BackgroundFill(Color.LIGHTGREEN, new CornerRadii(5.0F), Insets.EMPTY));
+        this.HELD_FILL = new Background(new BackgroundFill(Color.YELLOW, new CornerRadii(5.0F), Insets.EMPTY));
+        this.ABORTED_FILL = new Background(new BackgroundFill(Color.VIOLET, new CornerRadii(5.0F), Insets.EMPTY));
+        this.FINISHED_FILL = new Background(new BackgroundFill(Color.DARKGREEN, new CornerRadii(5.0F), Insets.EMPTY));
         this.mainWindow = stage;
         this.batch = batch;
-        this.controller = (BatchesController)ApplicationContext.applicationContext.getBean(BatchesController.class);
+        this.controller = ApplicationContext.applicationContext.getBean(BatchesController.class);
         this.model = this.controller.getModel();
         this.graphicsBuilder();
         this.actionHandler();
@@ -102,7 +81,7 @@ public class BatchObserver extends Tab {
     }
 
     public static BatchObserver getWindow(Stage stage, Batch batch) {
-        synchronized(BatchObserver.class) {
+        synchronized (BatchObserver.class) {
             if (singleton == null) {
                 singleton = new BatchObserver(stage, batch);
             }
@@ -112,31 +91,31 @@ public class BatchObserver extends Tab {
     }
 
     private void graphicsBuilder() {
-        this.mainContainer.getChildren().addAll(new Node[]{this.piePane, this.scrollPane});
-        this.batchState.setPrefWidth((double)300.0F);
-        this.batchState.setPadding(new Insets((double)10.0F));
+        this.mainContainer.getChildren().addAll(this.piePane, this.scrollPane);
+        this.batchState.setPrefWidth(300.0F);
+        this.batchState.setPadding(new Insets(10.0F));
         this.batchState.setAlignment(Pos.CENTER);
-        this.start.setPrefWidth((double)150.0F);
-        this.abort.setPrefWidth((double)150.0F);
-        this.hold.setPrefWidth((double)150.0F);
-        this.resume.setPrefWidth((double)150.0F);
-        this.close.setPrefWidth((double)150.0F);
-        this.terminate.setPrefWidth((double)250.0F);
+        this.start.setPrefWidth(150.0F);
+        this.abort.setPrefWidth(150.0F);
+        this.hold.setPrefWidth(150.0F);
+        this.resume.setPrefWidth(150.0F);
+        this.close.setPrefWidth(150.0F);
+        this.terminate.setPrefWidth(250.0F);
         this.scrollPane.prefWidthProperty().bind(this.rootPane.widthProperty().divide(3).multiply(2));
         this.scrollPane.setStyle("-fx-background-color:white; -fx-focus-color: white;-fx-control-inner-background:white;");
-        this.scrollPane.setBorder(new Border(new BorderStroke[]{new BorderStroke(Color.WHITE, BorderStrokeStyle.NONE, CornerRadii.EMPTY, new BorderWidths((double)0.0F))}));
+        this.scrollPane.setBorder(new Border(new BorderStroke(Color.WHITE, BorderStrokeStyle.NONE, CornerRadii.EMPTY, new BorderWidths(0.0F))));
         this.pane.setAlignment(Pos.CENTER);
-        this.pane.setSpacing((double)5.0F);
-        this.pane.setPadding(new Insets((double)20.0F));
+        this.pane.setSpacing(5.0F);
+        this.pane.setPadding(new Insets(20.0F));
         this.pane.prefWidthProperty().bind(this.scrollPane.widthProperty().subtract(20));
-        this.piePane.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)}));
+        this.piePane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         this.piePane.setAlignment(Pos.CENTER);
-        this.piePane.setSpacing((double)5.0F);
-        this.piePane.setPadding(new Insets((double)20.0F));
+        this.piePane.setSpacing(5.0F);
+        this.piePane.setPadding(new Insets(20.0F));
         this.piePane.prefHeightProperty().bind(this.rootPane.heightProperty());
         this.piePane.prefWidthProperty().bind(this.rootPane.widthProperty().divide(3));
-        this.toolBar.getItems().addAll(new Node[]{this.start, this.hold, this.resume, this.abort, new Separator(), this.close, new Separator(), this.terminate, new Separator(), this.batchState});
-        this.statusBar.getItems().addAll(new Node[]{new Label("Batch interfece status")});
+        this.toolBar.getItems().addAll(this.start, this.hold, this.resume, this.abort, new Separator(), this.close, new Separator(), this.terminate, new Separator(), this.batchState);
+        this.statusBar.getItems().addAll(new Label("Batch interfece status"));
         this.rootPane.setCenter(this.mainContainer);
         this.rootPane.setTop(this.toolBar);
         this.rootPane.setBottom(this.statusBar);
@@ -373,12 +352,12 @@ public class BatchObserver extends Tab {
             int parallelStepNo = 0;
             this.pane.getChildren().clear();
 
-            for(BatchParallelStepsModel pSM : this.batch.getModel().getParallelSteps()) {
+            for (BatchParallelStepsModel pSM : this.batch.getModel().getParallelSteps()) {
                 ParallelSteps parallelStepTemp = new ParallelSteps();
                 this.pane.getChildren().add(parallelStepTemp);
                 stepNo = 0;
 
-                for(BatchStepModel sm : pSM.getSteps()) {
+                for (BatchStepModel sm : pSM.getSteps()) {
                     BatchStep step = new BatchStep(this.batch.getId(), parallelStepNo, stepNo, sm, sm.getPhaseName(), this.mainWindow);
                     parallelStepTemp.getChildren().add(step);
                     ++stepNo;
@@ -395,7 +374,7 @@ public class BatchObserver extends Tab {
     private void createPieChart() {
         try {
             ObservableList<PieChart.Data> chartData = FXCollections.observableArrayList();
-            this.batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).forEach((item) -> this.controller.getMaterialByName(item.getMaterialID()).ifPresentOrElse((material) -> chartData.add(new PieChart.Data(material.getName(), (Double)item.getValueParametersData().get("Percentage %"))), () -> chartData.add(new PieChart.Data("Unknown", (Double)item.getValueParametersData().get("Percentage %")))));
+            this.batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).forEach((item) -> this.controller.getMaterialByName(item.getMaterialID()).ifPresentOrElse((material) -> chartData.add(new PieChart.Data(material.getName(), item.getValueParametersData().get("Percentage %"))), () -> chartData.add(new PieChart.Data("Unknown", item.getValueParametersData().get("Percentage %")))));
             if (chartData.isEmpty()) {
                 this.piePane.getChildren().add(new Label("Process batch, does not have any components"));
                 return;
@@ -426,7 +405,7 @@ public class BatchObserver extends Tab {
 
     private synchronized void updateBatch() {
         try {
-            this.pane.getChildren().stream().map((parallelStepNode) -> (ParallelSteps)parallelStepNode).forEachOrdered((PS) -> PS.getChildren().stream().map((stepNode) -> (BatchStep)stepNode).forEachOrdered(BatchStep::run));
+            this.pane.getChildren().stream().map((parallelStepNode) -> (ParallelSteps) parallelStepNode).forEachOrdered((PS) -> PS.getChildren().stream().map((stepNode) -> (BatchStep) stepNode).forEachOrdered(BatchStep::run));
             this.batchMode.setValue(this.batch.getState());
             if (this.batch.getState().equals(BatchStates.Created.name())) {
                 this.setStyle("-fx-background-color: DARKGRAY;-fx-border-color: darkblue; -fx-border-width:0.1;");
@@ -452,17 +431,17 @@ public class BatchObserver extends Tab {
             if (loadedBatch != null) {
                 batch.setState(loadedBatch.getState());
 
-                for(this.i = 0; this.i < batch.getModel().getParallelSteps().size(); ++this.i) {
-                    for(this.j = 0; this.j < ((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(this.i)).getSteps().size(); ++this.j) {
-                        ((BatchStepModel)((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(this.i)).getSteps().get(this.j)).setState(((BatchStepModel)((BatchParallelStepsModel)loadedBatch.getModel().getParallelSteps().get(this.i)).getSteps().get(this.j)).getState());
-                        Map<String, Boolean> checkActualData = ((BatchStepModel)((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(this.i)).getSteps().get(this.j)).getActualCheckParametersData();
-                        Map<String, Double> valueActualData = ((BatchStepModel)((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(this.i)).getSteps().get(this.j)).getActualvalueParametersData();
+                for (this.i = 0; this.i < batch.getModel().getParallelSteps().size(); ++this.i) {
+                    for (this.j = 0; this.j < batch.getModel().getParallelSteps().get(this.i).getSteps().size(); ++this.j) {
+                        batch.getModel().getParallelSteps().get(this.i).getSteps().get(this.j).setState(loadedBatch.getModel().getParallelSteps().get(this.i).getSteps().get(this.j).getState());
+                        Map<String, Boolean> checkActualData = batch.getModel().getParallelSteps().get(this.i).getSteps().get(this.j).getActualCheckParametersData();
+                        Map<String, Double> valueActualData = batch.getModel().getParallelSteps().get(this.i).getSteps().get(this.j).getActualvalueParametersData();
                         checkActualData.forEach((paraName, paraValue) -> {
-                            boolean value = (Boolean)((BatchStepModel)((BatchParallelStepsModel)loadedBatch.getModel().getParallelSteps().get(this.i)).getSteps().get(this.j)).getActualCheckParametersData().get(paraName);
+                            boolean value = loadedBatch.getModel().getParallelSteps().get(this.i).getSteps().get(this.j).getActualCheckParametersData().get(paraName);
                             checkActualData.replace(paraName, value);
                         });
                         valueActualData.forEach((paraName, paraValue) -> {
-                            double value = (Double)((BatchStepModel)((BatchParallelStepsModel)loadedBatch.getModel().getParallelSteps().get(this.i)).getSteps().get(this.j)).getActualvalueParametersData().get(paraName);
+                            double value = loadedBatch.getModel().getParallelSteps().get(this.i).getSteps().get(this.j).getActualvalueParametersData().get(paraName);
                             valueActualData.replace(paraName, value);
                         });
                     }
@@ -506,7 +485,7 @@ public class BatchObserver extends Tab {
         Platform.runLater(() -> {
             ExceptionDialog exceptionDialog = new ExceptionDialog(e);
             exceptionDialog.setHeaderText(header);
-            exceptionDialog.getDialogPane().setMaxWidth((double)500.0F);
+            exceptionDialog.getDialogPane().setMaxWidth(500.0F);
             exceptionDialog.initOwner(this.mainWindow);
             exceptionDialog.initModality(Modality.WINDOW_MODAL);
             exceptionDialog.initStyle(StageStyle.UTILITY);

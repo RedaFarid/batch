@@ -1,4 +1,3 @@
-
 package com.batch.GUI.Alarms;
 
 import com.batch.ApplicationContext;
@@ -8,13 +7,6 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.batch.Services.LoggingService.LoggingService;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,13 +18,26 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Controller
 public class AlarmsController {
     private static final Logger log = LogManager.getLogger(AlarmsController.class);
-    private Map<String, RowDataDefinition> allDevices;
     private final AlarmsModel model = new AlarmsModel();
     private final PLCDataDefinitionFactory plcDataDefinitionFactory;
     private final LoggingService loggingService;
+    private Map<String, RowDataDefinition> allDevices;
+
+    public AlarmsController(final PLCDataDefinitionFactory plcDataDefinitionFactory, final LoggingService loggingService) {
+        this.plcDataDefinitionFactory = plcDataDefinitionFactory;
+        this.loggingService = loggingService;
+    }
 
     public AlarmsModel getModel() {
         return this.model;
@@ -45,7 +50,7 @@ public class AlarmsController {
         if (this.model.getIsShown().getValue()) {
             List<Log> allLogs = this.loggingService.getAllLogs();
             ObservableList<Log> tableList = this.model.getAllAlarmsList();
-            tableList.removeAll((Collection)((ObservableList)allLogs.stream().filter((item) -> !tableList.contains(item)).collect(() -> tableList, List::add, List::addAll)).stream().filter((tableListItem) -> allLogs.stream().noneMatch((dataBaseItem) -> dataBaseItem.equals(tableListItem))).collect(Collectors.toList()));
+            tableList.removeAll((Collection) ((ObservableList) allLogs.stream().filter((item) -> !tableList.contains(item)).collect(() -> tableList, List::add, List::addAll)).stream().filter((tableListItem) -> allLogs.stream().noneMatch((dataBaseItem) -> dataBaseItem.equals(tableListItem))).collect(Collectors.toList()));
             Platform.runLater(() -> FXCollections.sort(tableList, (o1, o2) -> {
                 try {
                     LocalDate date1 = o1.getDate();
@@ -72,13 +77,13 @@ public class AlarmsController {
     public void afterStarted(ContextStartedEvent event) {
         this.updateHiPressureValue();
         this.updateLoPressureValue();
-        ((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).addListener((observable, oldValue, newValue) -> this.updateHiPressureValue());
-        ((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).addListener((observable, oldValue, newValue) -> this.updateLoPressureValue());
+        ((RealDataType) this.allDevices.get("General").getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).addListener((observable, oldValue, newValue) -> this.updateHiPressureValue());
+        ((RealDataType) this.allDevices.get("General").getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).addListener((observable, oldValue, newValue) -> this.updateLoPressureValue());
     }
 
     private void updateLoPressureValue() {
         try {
-            Platform.runLater(() -> this.model.getAirPressureLoAlarm().setValue(String.valueOf(((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).getValue())));
+            Platform.runLater(() -> this.model.getAirPressureLoAlarm().setValue(String.valueOf(((RealDataType) this.allDevices.get("General").getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).getValue())));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -87,7 +92,7 @@ public class AlarmsController {
 
     private void updateHiPressureValue() {
         try {
-            Platform.runLater(() -> this.model.getAirPressureHiAlarm().setValue(String.valueOf(((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).getValue())));
+            Platform.runLater(() -> this.model.getAirPressureHiAlarm().setValue(String.valueOf(((RealDataType) this.allDevices.get("General").getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).getValue())));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -96,16 +101,11 @@ public class AlarmsController {
 
     @Async
     public void highPressureLimitCommit() {
-        ((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).setValue(Float.parseFloat(this.model.getAirPressureHiAlarm().getValue()));
+        ((RealDataType) this.allDevices.get("General").getAllValues().get(GeneralOutput.HI_Air_Pressure_Limit)).setValue(Float.parseFloat(this.model.getAirPressureHiAlarm().getValue()));
     }
 
     @Async
     public void lowPressureLimitCommit() {
-        ((RealDataType)((RowDataDefinition)this.allDevices.get("General")).getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).setValue(Float.parseFloat(this.model.getAirPressureLoAlarm().getValue()));
-    }
-
-    public AlarmsController(final PLCDataDefinitionFactory plcDataDefinitionFactory, final LoggingService loggingService) {
-        this.plcDataDefinitionFactory = plcDataDefinitionFactory;
-        this.loggingService = loggingService;
+        ((RealDataType) this.allDevices.get("General").getAllValues().get(GeneralOutput.LO_Air_Pressure_Limit)).setValue(Float.parseFloat(this.model.getAirPressureLoAlarm().getValue()));
     }
 }

@@ -1,5 +1,3 @@
-
-
 package com.batch.Services.BatchController;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchOrders;
@@ -14,43 +12,53 @@ import com.batch.Database.Services.BatchControllerDataService;
 import com.batch.Database.Services.BatchesService;
 import com.batch.Database.Services.RecipeConfigService;
 import com.batch.PLCDataSource.ModBus.ModBusService;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.BatchControl;
+import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.PhasesAttributes;
 import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowAttripute;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
-import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.BatchControl;
-import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.PhasesAttributes;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.batch.Services.NotificationService.BackGroundServices;
 import com.batch.Services.NotificationService.NotificationService;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class BatchService {
     private static final Logger log = LogManager.getLogger(BatchService.class);
-    private int counter;
-    private int batchHeight = 0;
-    private int currentParallelStep = 0;
-    private long currentBatchId = 0L;
-    private String unitName;
-    private boolean controlBit = false;
     private final ModBusService modBusService;
     private final BatchesService batchesService;
     private final BatchControllerDataService batchControllerDataService;
     private final RecipeConfigService recipeConfigService;
     private final PhaseRepository phaseRepository;
     private final PLCDataDefinitionFactory plcDataDefinitionFactory;
+    private int counter;
+    private int batchHeight = 0;
+    private int currentParallelStep = 0;
+    private long currentBatchId = 0L;
+    private String unitName;
+    private boolean controlBit = false;
     @Autowired
     @BackGroundServices
     private NotificationService notificationService;
+
+    public BatchService(final ModBusService modBusService, final BatchesService batchesService, final BatchControllerDataService batchControllerDataService, final RecipeConfigService recipeConfigService, final PhaseRepository phaseRepository, final PLCDataDefinitionFactory plcDataDefinitionFactory) {
+        this.modBusService = modBusService;
+        this.batchesService = batchesService;
+        this.batchControllerDataService = batchControllerDataService;
+        this.recipeConfigService = recipeConfigService;
+        this.phaseRepository = phaseRepository;
+        this.plcDataDefinitionFactory = plcDataDefinitionFactory;
+    }
 
     @Scheduled(
             initialDelay = 10000L,
@@ -59,7 +67,7 @@ public class BatchService {
     public void run() {
         try {
             if (this.modBusService.getConnectionStatus().getValue()) {
-                for(BatchControllerData data : this.batchControllerDataService.findAll()) {
+                for (BatchControllerData data : this.batchControllerDataService.findAll()) {
                     try {
                         this.currentParallelStep = data.getCurrentParallelStepsNo();
                         this.currentBatchId = data.getRunningBatchID();
@@ -71,10 +79,10 @@ public class BatchService {
                                 if (this.batchHeight > this.currentParallelStep + 1) {
                                     if (this.currentParallelStep == 0) {
                                         this.updateCurrentBatchFromPLC(onLineBatch, 1, this.unitName);
-                                        List<BatchStepModel> currentBatchSteps = ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(1)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
+                                        List<BatchStepModel> currentBatchSteps = onLineBatch.getModel().getParallelSteps().get(1).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
                                         this.closeSteps(currentBatchSteps);
                                         this.updatePLCFromCurrentBatch(onLineBatch, 1, this.unitName);
-                                        boolean idle = ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(1)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
+                                        boolean idle = onLineBatch.getModel().getParallelSteps().get(1).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
                                         if (idle) {
                                             data.setCurrentParallelStepsNo(1);
                                             data.setRunningBatchID(this.currentBatchId);
@@ -86,7 +94,7 @@ public class BatchService {
 
                                     this.updateCurrentBatchFromPLC(onLineBatch, this.currentParallelStep, this.unitName);
                                     if (!data.isLockGeneralControl()) {
-                                        List<BatchStepModel> currentBatchSteps = ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(this.currentParallelStep)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
+                                        List<BatchStepModel> currentBatchSteps = onLineBatch.getModel().getParallelSteps().get(this.currentParallelStep).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
                                         boolean finished = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Finished.name()));
                                         boolean idle = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
                                         boolean created = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Created.name()));
@@ -109,7 +117,7 @@ public class BatchService {
                                             }
                                         }
                                     } else {
-                                        List<BatchStepModel> currentBatchSteps = ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(this.currentParallelStep)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
+                                        List<BatchStepModel> currentBatchSteps = onLineBatch.getModel().getParallelSteps().get(this.currentParallelStep).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).collect(Collectors.toList());
                                         boolean finished = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Finished.name()));
                                         boolean idle = currentBatchSteps.stream().map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
                                         if (finished) {
@@ -181,7 +189,7 @@ public class BatchService {
     }
 
     private void closeStepsOfRegardingParallelStepNo(Batch onLineBatch, int currentParallelStep) {
-        ((BatchParallelStepsModel)onLineBatch.getModel().getParallelSteps().get(currentParallelStep)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).forEach((step) -> step.setOrder(BatchOrders.Close.name()));
+        onLineBatch.getModel().getParallelSteps().get(currentParallelStep).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).forEach((step) -> step.setOrder(BatchOrders.Close.name()));
     }
 
     private void adjustBatchState(Batch Batch, int parallelStepsNo, int batchHeight) {
@@ -190,10 +198,10 @@ public class BatchService {
         boolean idle = false;
         boolean finished = false;
         if (parallelStepsNo + 1 <= batchHeight) {
-            aborted = ((BatchParallelStepsModel)Batch.getModel().getParallelSteps().get(parallelStepsNo)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Aborted.name()));
-            held = ((BatchParallelStepsModel)Batch.getModel().getParallelSteps().get(parallelStepsNo)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Held.name()) || item.equals(BatchStates.Finished.name()));
-            idle = ((BatchParallelStepsModel)Batch.getModel().getParallelSteps().get(parallelStepsNo)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
-            finished = ((BatchParallelStepsModel)Batch.getModel().getParallelSteps().get(parallelStepsNo)).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Finished.name()));
+            aborted = Batch.getModel().getParallelSteps().get(parallelStepsNo).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Aborted.name()));
+            held = Batch.getModel().getParallelSteps().get(parallelStepsNo).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Held.name()) || item.equals(BatchStates.Finished.name()));
+            idle = Batch.getModel().getParallelSteps().get(parallelStepsNo).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Idle.name()));
+            finished = Batch.getModel().getParallelSteps().get(parallelStepsNo).getSteps().stream().filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Finished.name()));
         }
 
         boolean allFinished = Batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).map(BatchStepModel::getState).allMatch((item) -> item.equals(BatchStates.Finished.name()));
@@ -218,26 +226,26 @@ public class BatchService {
             int maxNumberOfParallelSteps = recipeConfig.getMaxParallelSteps();
             if (maxNumberOfParallelSteps > 0) {
                 this.counter = 1;
-                ((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNo)).getSteps().forEach((step) -> {
+                batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().forEach((step) -> {
                     if (this.counter <= maxNumberOfParallelSteps) {
-                        RowDataDefinition dataDefinition = (RowDataDefinition)this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unitName + " [" + this.counter + "]");
+                        RowDataDefinition dataDefinition = this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unitName + " [" + this.counter + "]");
                         String batchPhaseName = step.getPhaseName();
                         step.getParametersType().forEach((batchParameter) -> {
                             try {
                                 String batchParameterName = batchParameter.getName();
                                 RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unitName + " [" + this.counter + "]", batchPhaseName, batchParameterName + "IN");
                                 if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                                    boolean value = ((BooleanDataType)dataDefinition.getAllValues().get(attribute)).getValue();
+                                    boolean value = ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).getValue();
                                     step.getActualCheckParametersData().replace(batchParameterName, value);
                                 } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                                    double value = (double)((RealDataType)dataDefinition.getAllValues().get(attribute)).getValue();
+                                    double value = (double) ((RealDataType) dataDefinition.getAllValues().get(attribute)).getValue();
                                     step.getActualvalueParametersData().replace(batchParameterName, value);
                                 } else {
                                     System.err.println("DataType error   ");
                                 }
 
-                                int phaseNumber = ((IntegerDataType)dataDefinition.getAllValues().get(BatchControl.PhaseIn)).getValue();
-                                int status = ((IntegerDataType)dataDefinition.getAllValues().get(BatchControl.Status)).getValue();
+                                int phaseNumber = ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseIn)).getValue();
+                                int status = ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Status)).getValue();
                                 step.setState(this.getStatusToStep(status));
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -259,25 +267,25 @@ public class BatchService {
             int maxNumberOfParallelSteps = recipeConfig.getMaxParallelSteps();
             if (maxNumberOfParallelSteps > 0) {
                 this.counter = 1;
-                ((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNo)).getSteps().forEach((step) -> {
+                batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().forEach((step) -> {
                     if (this.counter <= maxNumberOfParallelSteps) {
-                        RowDataDefinition dataDefinition = (RowDataDefinition)this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unitName + " [" + this.counter + "]");
+                        RowDataDefinition dataDefinition = this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unitName + " [" + this.counter + "]");
                         String batchPhaseName = step.getPhaseName();
                         step.getParametersType().forEach((batchParameter) -> {
                             String batchParameterName = batchParameter.getName();
                             RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unitName + " [" + this.counter + "]", batchPhaseName, batchParameterName + "OUT");
                             if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                                boolean value = (Boolean)step.getCheckParametersData().get(batchParameterName);
-                                ((BooleanDataType)dataDefinition.getAllValues().get(attribute)).setValue(value);
+                                boolean value = step.getCheckParametersData().get(batchParameterName);
+                                ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(value);
                             } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                                double value = (Double)step.getValueParametersData().get(batchParameterName);
-                                ((RealDataType)dataDefinition.getAllValues().get(attribute)).setValue(value);
+                                double value = step.getValueParametersData().get(batchParameterName);
+                                ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(value);
                             } else {
                                 System.err.println("DataType error   ");
                             }
 
-                            ((IntegerDataType)dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(step.getPhaseID());
-                            ((IntegerDataType)dataDefinition.getAllValues().get(BatchControl.Order)).setValue(this.getOrderFromStep(step.getOrder()));
+                            ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(step.getPhaseID());
+                            ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(this.getOrderFromStep(step.getOrder()));
                         });
                         ++this.counter;
                     }
@@ -292,20 +300,20 @@ public class BatchService {
         this.recipeConfigService.findAll().stream().findAny().ifPresent((recipeConfig) -> {
             int maxNumberOfParallelSteps = recipeConfig.getMaxParallelSteps();
             if (maxNumberOfParallelSteps > 0) {
-                for(this.counter = 1; this.counter <= maxNumberOfParallelSteps; ++this.counter) {
-                    RowDataDefinition dataDefinition = (RowDataDefinition)this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + this.counter + "]");
+                for (this.counter = 1; this.counter <= maxNumberOfParallelSteps; ++this.counter) {
+                    RowDataDefinition dataDefinition = this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + this.counter + "]");
                     if (dataDefinition != null) {
-                        ((IntegerDataType)dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
-                        ((IntegerDataType)dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
+                        ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
+                        ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
                         Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((Phase) -> Phase.getUnit().equals(unit)).forEachOrdered((phase) -> {
                             String batchPhaseName = phase.getName();
                             phase.getParameters().forEach((batchParameter) -> {
                                 String batchParameterName = batchParameter.getName();
                                 RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + this.counter + "]", batchPhaseName, batchParameterName + "OUT");
                                 if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                                    ((BooleanDataType)dataDefinition.getAllValues().get(attribute)).setValue(false);
+                                    ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
                                 } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                                    ((RealDataType)dataDefinition.getAllValues().get(attribute)).setValue(0.0F);
+                                    ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0F);
                                 } else {
                                     System.err.println("DataType error   ");
                                 }
@@ -323,17 +331,17 @@ public class BatchService {
         this.recipeConfigService.findAll().stream().findAny().ifPresent((recipeConfig) -> {
             int maxNumberOfParallelSteps = recipeConfig.getMaxParallelSteps();
             if (maxNumberOfParallelSteps > 0) {
-                for(this.counter = 1; this.counter <= ((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNo)).getSteps().size(); ++this.counter) {
-                    RowDataDefinition dataDefinition = (RowDataDefinition)this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + this.counter + "]");
-                    Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((Phase) -> Phase.getUnit().equals(unit)).filter((Phase) -> !(((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNo)).getSteps().stream().map(BatchStepModel::getPhaseName).collect(Collectors.toList())).contains(Phase.getName())).forEachOrdered((phase) -> {
+                for (this.counter = 1; this.counter <= batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().size(); ++this.counter) {
+                    RowDataDefinition dataDefinition = this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + this.counter + "]");
+                    Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((Phase) -> Phase.getUnit().equals(unit)).filter((Phase) -> !(batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().stream().map(BatchStepModel::getPhaseName).collect(Collectors.toList())).contains(Phase.getName())).forEachOrdered((phase) -> {
                         String batchPhaseName = phase.getName();
                         phase.getParameters().forEach((batchParameter) -> {
                             String batchParameterName = batchParameter.getName();
                             RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + this.counter + "]", batchPhaseName, batchParameterName + "OUT");
                             if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                                ((BooleanDataType)dataDefinition.getAllValues().get(attribute)).setValue(false);
+                                ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
                             } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                                ((RealDataType)dataDefinition.getAllValues().get(attribute)).setValue(0.0F);
+                                ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0F);
                             } else {
                                 System.err.println("DataType error   ");
                             }
@@ -342,19 +350,19 @@ public class BatchService {
                     });
                 }
 
-                for(this.counter = ((BatchParallelStepsModel)batch.getModel().getParallelSteps().get(parallelStepNo)).getSteps().size() + 1; this.counter <= maxNumberOfParallelSteps; ++this.counter) {
-                    RowDataDefinition dataDefinition = (RowDataDefinition)this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + this.counter + "]");
-                    ((IntegerDataType)dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
-                    ((IntegerDataType)dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
+                for (this.counter = batch.getModel().getParallelSteps().get(parallelStepNo).getSteps().size() + 1; this.counter <= maxNumberOfParallelSteps; ++this.counter) {
+                    RowDataDefinition dataDefinition = this.plcDataDefinitionFactory.getAllDevicesDataModel().get(unit + " [" + this.counter + "]");
+                    ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.PhaseOut)).setValue(0);
+                    ((IntegerDataType) dataDefinition.getAllValues().get(BatchControl.Order)).setValue(0);
                     Lists.newArrayList(this.phaseRepository.findAll()).stream().filter((Phase) -> Phase.getUnit().equals(unit)).forEachOrdered((phase) -> {
                         String batchPhaseName = phase.getName();
                         phase.getParameters().forEach((batchParameter) -> {
                             String batchParameterName = batchParameter.getName();
                             RowAttripute attribute = PhasesAttributes.getAttributes().getAttributeForPhaseAndParameter(unit + " [" + this.counter + "]", batchPhaseName, batchParameterName + "OUT");
                             if (batchParameter.getType().equals(PhaseParameterType.Check.name())) {
-                                ((BooleanDataType)dataDefinition.getAllValues().get(attribute)).setValue(false);
+                                ((BooleanDataType) dataDefinition.getAllValues().get(attribute)).setValue(false);
                             } else if (batchParameter.getType().equals(PhaseParameterType.Value.name())) {
-                                ((RealDataType)dataDefinition.getAllValues().get(attribute)).setValue(0.0F);
+                                ((RealDataType) dataDefinition.getAllValues().get(attribute)).setValue(0.0F);
                             } else {
                                 System.err.println("DataType error   ");
                             }
@@ -400,14 +408,5 @@ public class BatchService {
         }
 
         return var10000;
-    }
-
-    public BatchService(final ModBusService modBusService, final BatchesService batchesService, final BatchControllerDataService batchControllerDataService, final RecipeConfigService recipeConfigService, final PhaseRepository phaseRepository, final PLCDataDefinitionFactory plcDataDefinitionFactory) {
-        this.modBusService = modBusService;
-        this.batchesService = batchesService;
-        this.batchControllerDataService = batchControllerDataService;
-        this.recipeConfigService = recipeConfigService;
-        this.phaseRepository = phaseRepository;
-        this.plcDataDefinitionFactory = plcDataDefinitionFactory;
     }
 }

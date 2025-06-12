@@ -1,4 +1,3 @@
-
 package com.batch.Utilities;
 
 public enum OperationStatus {
@@ -6,5 +5,5 @@ public enum OperationStatus {
     Started,
     Held,
     InProgress,
-    Finished;
+    Finished
 }

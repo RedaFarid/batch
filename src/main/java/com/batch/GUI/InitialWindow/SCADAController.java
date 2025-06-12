@@ -1,15 +1,25 @@
-
 package com.batch.GUI.InitialWindow;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class SCADAController {
+    private static final Map<String, ImageView> valves = new LinkedHashMap();
+    private static final Map<String, ImageView> pumps = new LinkedHashMap();
+    private static final Map<String, ImageView> mixers = new LinkedHashMap();
+    private static final Map<String, Pane> levelBars = new LinkedHashMap();
+    private static final Map<String, Label> levelLabels = new LinkedHashMap();
+    private static Map<String, Label> weightLabels = new LinkedHashMap();
+    private static Pane waterLevel;
+    private static AnchorPane Parent;
+    private static Pane WaterPress;
+    private static Pane AirPress;
     @FXML
     private AnchorPane BackGround;
     @FXML
@@ -132,16 +142,50 @@ public class SCADAController {
     private Pane Air_Press;
     @FXML
     private Pane Water_Level;
-    private static Map<String, ImageView> valves = new LinkedHashMap();
-    private static Map<String, ImageView> pumps = new LinkedHashMap();
-    private static Map<String, ImageView> mixers = new LinkedHashMap();
-    private static Map<String, Pane> levelBars = new LinkedHashMap();
-    private static Map<String, Label> levelLabels = new LinkedHashMap();
-    private static Map<String, Label> weightLabels = new LinkedHashMap();
-    private static Pane waterLevel;
-    private static AnchorPane Parent;
-    private static Pane WaterPress;
-    private static Pane AirPress;
+
+    public static Map<String, ImageView> getValves() {
+        return valves;
+    }
+
+    public static Map<String, ImageView> getPumps() {
+        return pumps;
+    }
+
+    public static Map<String, ImageView> getMixers() {
+        return mixers;
+    }
+
+    public static Map<String, Pane> getLevelBars() {
+        return levelBars;
+    }
+
+    public static Map<String, Label> getLevelLabels() {
+        return levelLabels;
+    }
+
+    public static Map<String, Label> getWeightLabels() {
+        return weightLabels;
+    }
+
+    public static void setWeightLabels(Map<String, Label> weightLabels) {
+        SCADAController.weightLabels = weightLabels;
+    }
+
+    public static AnchorPane getParent() {
+        return Parent;
+    }
+
+    public static Pane getWaterPress() {
+        return WaterPress;
+    }
+
+    public static Pane getAirPress() {
+        return AirPress;
+    }
+
+    public static Pane getWaterLevel() {
+        return waterLevel;
+    }
 
     @FXML
     void initialize() {
@@ -205,49 +249,5 @@ public class SCADAController {
             e.printStackTrace();
         }
 
-    }
-
-    public static Map<String, ImageView> getValves() {
-        return valves;
-    }
-
-    public static Map<String, ImageView> getPumps() {
-        return pumps;
-    }
-
-    public static Map<String, ImageView> getMixers() {
-        return mixers;
-    }
-
-    public static Map<String, Pane> getLevelBars() {
-        return levelBars;
-    }
-
-    public static Map<String, Label> getLevelLabels() {
-        return levelLabels;
-    }
-
-    public static Map<String, Label> getWeightLabels() {
-        return weightLabels;
-    }
-
-    public static void setWeightLabels(Map<String, Label> weightLabels) {
-        SCADAController.weightLabels = weightLabels;
-    }
-
-    public static AnchorPane getParent() {
-        return Parent;
-    }
-
-    public static Pane getWaterPress() {
-        return WaterPress;
-    }
-
-    public static Pane getAirPress() {
-        return AirPress;
-    }
-
-    public static Pane getWaterLevel() {
-        return waterLevel;
     }
 }

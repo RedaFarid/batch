@@ -1,12 +1,11 @@
-
-
 package com.batch.Database.Entities;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Table("TagLog")
 public class TagLog {
@@ -26,48 +25,60 @@ public class TagLog {
         this.value = value;
     }
 
+    public TagLog(final Long id, final String name, final String attribute, final double value, final LocalTime time, final LocalDate Date) {
+        this.id = id;
+        this.name = name;
+        this.attribute = attribute;
+        this.value = value;
+        this.time = time;
+        this.Date = Date;
+    }
+
+    public TagLog() {
+    }
+
     public Long getId() {
         return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getAttribute() {
-        return this.attribute;
-    }
-
-    public double getValue() {
-        return this.value;
-    }
-
-    public LocalTime getTime() {
-        return this.time;
-    }
-
-    public LocalDate getDate() {
-        return this.Date;
     }
 
     public void setId(final Long id) {
         this.id = id;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
     public void setName(final String name) {
         this.name = name;
+    }
+
+    public String getAttribute() {
+        return this.attribute;
     }
 
     public void setAttribute(final String attribute) {
         this.attribute = attribute;
     }
 
+    public double getValue() {
+        return this.value;
+    }
+
     public void setValue(final double value) {
         this.value = value;
     }
 
+    public LocalTime getTime() {
+        return this.time;
+    }
+
     public void setTime(final LocalTime time) {
         this.time = time;
+    }
+
+    public LocalDate getDate() {
+        return this.Date;
     }
 
     public void setDate(final LocalDate Date) {
@@ -77,10 +88,9 @@ public class TagLog {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof TagLog)) {
+        } else if (!(o instanceof TagLog other)) {
             return false;
         } else {
-            TagLog other = (TagLog)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (Double.compare(this.getValue(), other.getValue()) != 0) {
@@ -129,14 +139,8 @@ public class TagLog {
                 Object this$Date = this.getDate();
                 Object other$Date = other.getDate();
                 if (this$Date == null) {
-                    if (other$Date != null) {
-                        return false;
-                    }
-                } else if (!this$Date.equals(other$Date)) {
-                    return false;
-                }
-
-                return true;
+                    return other$Date == null;
+                } else return this$Date.equals(other$Date);
             }
         }
     }
@@ -149,7 +153,7 @@ public class TagLog {
         int PRIME = 59;
         int result = 1;
         long $value = Double.doubleToLongBits(this.getValue());
-        result = result * 59 + (int)($value >>> 32 ^ $value);
+        result = result * 59 + (int) ($value >>> 32 ^ $value);
         Object $id = this.getId();
         result = result * 59 + ($id == null ? 43 : $id.hashCode());
         Object $name = this.getName();
@@ -166,17 +170,5 @@ public class TagLog {
     public String toString() {
         Long var10000 = this.getId();
         return "TagLog(id=" + var10000 + ", name=" + this.getName() + ", attribute=" + this.getAttribute() + ", value=" + this.getValue() + ", time=" + this.getTime() + ", Date=" + this.getDate() + ")";
-    }
-
-    public TagLog(final Long id, final String name, final String attribute, final double value, final LocalTime time, final LocalDate Date) {
-        this.id = id;
-        this.name = name;
-        this.attribute = attribute;
-        this.value = value;
-        this.time = time;
-        this.Date = Date;
-    }
-
-    public TagLog() {
     }
 }

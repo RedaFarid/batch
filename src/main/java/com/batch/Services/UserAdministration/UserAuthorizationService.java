@@ -1,5 +1,3 @@
-
-
 package com.batch.Services.UserAdministration;
 
 import com.batch.ApplicationContext;
@@ -9,16 +7,6 @@ import com.batch.Database.Services.UserDaoService;
 import com.batch.GUI.UserAdministration.LoginWindow;
 import com.batch.Utilities.HashingAlgorithm;
 import com.batch.Utilities.Roles;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -33,19 +21,30 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Service
 public class UserAuthorizationService {
     private static final Logger log = LogManager.getLogger(UserAuthorizationService.class);
     private static ConfigurableApplicationContext configurableApplicationContext;
     private final List<WindowData> windows = new LinkedList();
-    private User currentUser = new User("", "", true, 0L, "");
     private final BooleanProperty isThereUserLoggedIn = new SimpleBooleanProperty();
     private final BooleanProperty requestForLogin = new SimpleBooleanProperty();
     private final BooleanProperty requestForLogOff = new SimpleBooleanProperty();
     private final BooleanProperty userTimeOut = new SimpleBooleanProperty();
+    private final UserDaoService userDaoService;
+    private User currentUser = new User("", "", true, 0L, "");
     private long setPointDuration = 0L;
     private long elapsedTime = 0L;
-    private final UserDaoService userDaoService;
+
+    public UserAuthorizationService(final UserDaoService userDaoService) {
+        this.userDaoService = userDaoService;
+    }
 
     public void runService() {
         this.requestForLogin.addListener((observable, oldValue, newValue) -> {
@@ -230,7 +229,7 @@ public class UserAuthorizationService {
             user.setPassword(HashingAlgorithm.StrongHash(user.getPassword()));
             this.userDaoService.saveUser(user);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
-            java.util.logging.Logger.getLogger(UserAuthorizationService.class.getName()).log(Level.SEVERE, (String)null, ex);
+            java.util.logging.Logger.getLogger(UserAuthorizationService.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -291,9 +290,5 @@ public class UserAuthorizationService {
 
     public void registerWindow(WindowData windowData) {
         this.windows.add(windowData);
-    }
-
-    public UserAuthorizationService(final UserDaoService userDaoService) {
-        this.userDaoService = userDaoService;
     }
 }

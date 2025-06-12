@@ -1,19 +1,14 @@
-
 package com.batch.PLCDataSource.ModBus;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.Address;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.ValueObject;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.*;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Utilities.StringUtilsL;
-import java.nio.ByteBuffer;
-import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.nio.ByteBuffer;
+import java.util.Map;
 
 class ReceiveDataMapper implements Runnable {
     private static final Logger log = LogManager.getLogger(ReceiveDataMapper.class);
@@ -32,16 +27,16 @@ class ReceiveDataMapper implements Runnable {
             if (this.buffer.size() > address.getByteNumber()) {
                 switch (type) {
                     case Boolean: {
-                        byte x = (Byte) this.buffer.get(address.getByteNumber());
+                        byte x = this.buffer.get(address.getByteNumber());
                         boolean val = this.getBit(x, address.getBitNumber());
                         return new BooleanDataType(val);
                     }
                     case Integer: {
-                        int val = this.getInteger((Byte) this.buffer.get(address.getByteNumber()), (Byte) this.buffer.get(address.getByteNumber() + 1));
+                        int val = this.getInteger(this.buffer.get(address.getByteNumber()), this.buffer.get(address.getByteNumber() + 1));
                         return new IntegerDataType(val);
                     }
                     case Real: {
-                        float val = this.getReal((Byte) this.buffer.get(address.getByteNumber()), (Byte) this.buffer.get(address.getByteNumber() + 1), (Byte) this.buffer.get(address.getByteNumber() + 2), (Byte) this.buffer.get(address.getByteNumber() + 3));
+                        float val = this.getReal(this.buffer.get(address.getByteNumber()), this.buffer.get(address.getByteNumber() + 1), this.buffer.get(address.getByteNumber() + 2), this.buffer.get(address.getByteNumber() + 3));
                         return new RealDataType(val);
                     }
                 }
@@ -71,8 +66,8 @@ class ReceiveDataMapper implements Runnable {
 
         try {
             this.devices.forEach((name, device) -> device.getAddresses().forEach((k, v) -> {
-                if ((Boolean)device.getInOutIndecation().get(k)) {
-                    ValueObject value = this.getValueFromBuffer((EDT)device.getTypes().get(k), v);
+                if (device.getInOutIndecation().get(k)) {
+                    ValueObject value = this.getValueFromBuffer(device.getTypes().get(k), v);
                     if (value == null) {
                         this.loggingService.newErrorMessage("Modbus sender data mapper", "Main run", "Receive data mapper : Value = null " + name + " \n" + device);
                     } else {

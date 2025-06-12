@@ -1,11 +1,19 @@
-
-
 package com.batch.Database.Services;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchModel;
 import com.batch.Database.Entities.Batch;
 import com.batch.Database.Repositories.BatchesRepository;
 import com.google.common.collect.Lists;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
@@ -13,15 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(
@@ -32,10 +31,14 @@ public class BatchesService {
     private static final Logger log = LogManager.getLogger(BatchesService.class);
     private final BatchesRepository batchesRepository;
 
+    public BatchesService(final BatchesRepository batchesRepository) {
+        this.batchesRepository = batchesRepository;
+    }
+
     public Optional<Batch> save(Batch batch) {
         return this.startMarshalling(batch.getModel()).map((rowModel) -> {
             batch.setRowModel(rowModel);
-            return (Batch)this.batchesRepository.save(batch);
+            return this.batchesRepository.save(batch);
         });
     }
 
@@ -64,7 +67,7 @@ public class BatchesService {
     private Optional<String> startMarshalling(BatchModel model) {
         try {
             StringWriter sw = new StringWriter();
-            JAXBContext jaxbcontext = JAXBContext.newInstance(new Class[]{BatchModel.class});
+            JAXBContext jaxbcontext = JAXBContext.newInstance(BatchModel.class);
             Marshaller marshaller = jaxbcontext.createMarshaller();
             marshaller.setProperty("jaxb.fragment", Boolean.TRUE);
             marshaller.marshal(model, sw);
@@ -77,9 +80,9 @@ public class BatchesService {
 
     private Optional<BatchModel> startUnMarshalling(String model) {
         try {
-            JAXBContext jaxbcontext = JAXBContext.newInstance(new Class[]{BatchModel.class});
+            JAXBContext jaxbcontext = JAXBContext.newInstance(BatchModel.class);
             Unmarshaller unMarshaller = jaxbcontext.createUnmarshaller();
-            return Optional.ofNullable((BatchModel)unMarshaller.unmarshal(new StringReader(model)));
+            return Optional.ofNullable((BatchModel) unMarshaller.unmarshal(new StringReader(model)));
         } catch (Exception var4) {
             return Optional.empty();
         }
@@ -87,9 +90,5 @@ public class BatchesService {
 
     public void updateEndTime(Long id, LocalDateTime now) {
         this.batchesRepository.updateEndTime(id, now);
-    }
-
-    public BatchesService(final BatchesRepository batchesRepository) {
-        this.batchesRepository = batchesRepository;
     }
 }

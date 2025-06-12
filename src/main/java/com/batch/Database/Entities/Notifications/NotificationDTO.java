@@ -1,12 +1,12 @@
-
 package com.batch.Database.Entities.Notifications;
 
 import com.google.common.base.Objects;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Table("Notifications")
 public class NotificationDTO implements Comparable<NotificationDTO>, Cloneable, Serializable {
@@ -19,11 +19,23 @@ public class NotificationDTO implements Comparable<NotificationDTO>, Cloneable, 
     @CreatedDate
     private LocalDateTime creationDate;
 
+    public NotificationDTO() {
+    }
+
+    public NotificationDTO(final Long notificationId, final String notificationService, final String serviceName, final String familyName, final String errorMessage, final LocalDateTime creationDate) {
+        this.notificationId = notificationId;
+        this.notificationService = notificationService;
+        this.serviceName = serviceName;
+        this.familyName = familyName;
+        this.errorMessage = errorMessage;
+        this.creationDate = creationDate;
+    }
+
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         } else if (o != null && this.getClass() == o.getClass()) {
-            NotificationDTO that = (NotificationDTO)o;
+            NotificationDTO that = (NotificationDTO) o;
             return Objects.equal(this.notificationId, that.notificationId) && Objects.equal(this.notificationService, that.notificationService) && Objects.equal(this.serviceName, that.serviceName) && Objects.equal(this.familyName, that.familyName) && Objects.equal(this.errorMessage, that.errorMessage) && Objects.equal(this.creationDate, that.creationDate);
         } else {
             return false;
@@ -31,7 +43,7 @@ public class NotificationDTO implements Comparable<NotificationDTO>, Cloneable, 
     }
 
     public int hashCode() {
-        return Objects.hashCode(new Object[]{this.notificationId, this.notificationService, this.serviceName, this.familyName, this.errorMessage, this.creationDate});
+        return Objects.hashCode(this.notificationId, this.notificationService, this.serviceName, this.familyName, this.errorMessage, this.creationDate);
     }
 
     public String toString() {
@@ -46,59 +58,47 @@ public class NotificationDTO implements Comparable<NotificationDTO>, Cloneable, 
         return this.notificationId;
     }
 
-    public String getNotificationService() {
-        return this.notificationService;
-    }
-
-    public String getServiceName() {
-        return this.serviceName;
-    }
-
-    public String getFamilyName() {
-        return this.familyName;
-    }
-
-    public String getErrorMessage() {
-        return this.errorMessage;
-    }
-
-    public LocalDateTime getCreationDate() {
-        return this.creationDate;
-    }
-
     public void setNotificationId(final Long notificationId) {
         this.notificationId = notificationId;
+    }
+
+    public String getNotificationService() {
+        return this.notificationService;
     }
 
     public void setNotificationService(final String notificationService) {
         this.notificationService = notificationService;
     }
 
+    public String getServiceName() {
+        return this.serviceName;
+    }
+
     public void setServiceName(final String serviceName) {
         this.serviceName = serviceName;
+    }
+
+    public String getFamilyName() {
+        return this.familyName;
     }
 
     public void setFamilyName(final String familyName) {
         this.familyName = familyName;
     }
 
+    public String getErrorMessage() {
+        return this.errorMessage;
+    }
+
     public void setErrorMessage(final String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
+    public LocalDateTime getCreationDate() {
+        return this.creationDate;
+    }
+
     public void setCreationDate(final LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public NotificationDTO() {
-    }
-
-    public NotificationDTO(final Long notificationId, final String notificationService, final String serviceName, final String familyName, final String errorMessage, final LocalDateTime creationDate) {
-        this.notificationId = notificationId;
-        this.notificationService = notificationService;
-        this.serviceName = serviceName;
-        this.familyName = familyName;
-        this.errorMessage = errorMessage;
         this.creationDate = creationDate;
     }
 }

@@ -1,8 +1,6 @@
-
 package com.batch.GUI.UserAdministration;
 
 import com.batch.Database.Entities.User;
-import java.util.Optional;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,17 +22,30 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.util.Optional;
+
 public class LoginWindow extends Stage {
     private static LoginWindow singleton = null;
-    private static VBox root = new VBox();
-    private static Scene scene;
-    private static Button LogIn;
-    private static Button Cancel;
-    private static Label mainlabel;
-    private static TextField username;
-    private static PasswordField password;
-    private static User user;
+    private static final VBox root = new VBox();
+    private static final Scene scene;
+    private static final Button LogIn;
+    private static final Button Cancel;
+    private static final Label mainlabel;
+    private static final TextField username;
+    private static final PasswordField password;
+    private static final User user;
     private static Optional<User> returnValue;
+
+    static {
+        scene = new Scene(root);
+        LogIn = new Button("Log in");
+        Cancel = new Button("Cancel");
+        mainlabel = new Label("System Authorization\nSign in");
+        username = new TextField("Administrator");
+        password = new PasswordField();
+        user = new User();
+        returnValue = Optional.ofNullable(user);
+    }
 
     private LoginWindow() {
         this.graphicsBuilder();
@@ -42,7 +53,7 @@ public class LoginWindow extends Stage {
 
     public static LoginWindow GetInstance() {
         if (singleton == null) {
-            synchronized(LoginWindow.class) {
+            synchronized (LoginWindow.class) {
                 singleton = new LoginWindow();
             }
         }
@@ -52,25 +63,25 @@ public class LoginWindow extends Stage {
 
     private void graphicsBuilder() {
         password.setText("Admin123456");
-        LogIn.setPrefWidth((double)300.0F);
-        LogIn.setFont(Font.font((double)13.0F));
-        Cancel.setMaxWidth((double)300.0F);
-        Cancel.setFont(Font.font((double)13.0F));
+        LogIn.setPrefWidth(300.0F);
+        LogIn.setFont(Font.font(13.0F));
+        Cancel.setMaxWidth(300.0F);
+        Cancel.setFont(Font.font(13.0F));
         Cancel.setCancelButton(true);
-        mainlabel.setPadding(new Insets((double)20.0F));
+        mainlabel.setPadding(new Insets(20.0F));
         mainlabel.setStyle("-fx-font: 30px Tahoma;\n    -fx-fill: linear-gradient(from 0% 0% to 100% 200%, repeat, aqua 0%, red 50%);\n    -fx-stroke: black;\n    -fx-stroke-width: 1;");
-        DropShadow shadow = new DropShadow((double)2.0F, (double)2.0F, (double)2.0F, Color.GRAY);
+        DropShadow shadow = new DropShadow(2.0F, 2.0F, 2.0F, Color.GRAY);
         mainlabel.setEffect(shadow);
         mainlabel.setTextAlignment(TextAlignment.CENTER);
-        username.setMaxWidth((double)300.0F);
+        username.setMaxWidth(300.0F);
         username.setPromptText("Enter Username");
-        username.setMinHeight((double)25.0F);
-        password.setMaxWidth((double)300.0F);
+        username.setMinHeight(25.0F);
+        password.setMaxWidth(300.0F);
         password.setPromptText("Enter Password");
-        password.setMinHeight((double)25.0F);
-        root.getChildren().addAll(new Node[]{mainlabel, username, password, new Pane(), LogIn, Cancel});
-        root.setSpacing((double)5.0F);
-        root.setPadding(new Insets((double)0.0F, (double)20.0F, (double)20.0F, (double)20.0F));
+        password.setMinHeight(25.0F);
+        root.getChildren().addAll(mainlabel, username, password, new Pane(), LogIn, Cancel);
+        root.setSpacing(5.0F);
+        root.setPadding(new Insets(0.0F, 20.0F, 20.0F, 20.0F));
         root.setAlignment(Pos.CENTER);
         this.setTitle("Log in");
         this.setScene(scene);
@@ -122,16 +133,5 @@ public class LoginWindow extends Stage {
         LogIn.setText("Save");
         Cancel.setOnMouseClicked((action) -> this.hide());
         this.showAndWait();
-    }
-
-    static {
-        scene = new Scene(root);
-        LogIn = new Button("Log in");
-        Cancel = new Button("Cancel");
-        mainlabel = new Label("System Authorization\nSign in");
-        username = new TextField("Administrator");
-        password = new PasswordField();
-        user = new User();
-        returnValue = Optional.ofNullable(user);
     }
 }

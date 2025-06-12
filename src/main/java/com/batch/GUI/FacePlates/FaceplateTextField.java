@@ -1,31 +1,23 @@
-
-
 package com.batch.GUI.FacePlates;
 
 import com.batch.Utilities.RestrictiveTextField;
 import javafx.geometry.Insets;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 public class FaceplateTextField extends RestrictiveTextField {
-    private Background back;
+    private final Background back;
     private Callback<String, Double> callback = (param) -> null;
 
     public FaceplateTextField() {
-        this.back = new Background(new BackgroundFill[]{new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)});
+        this.back = new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY));
         this.initialize();
     }
 
     private void initialize() {
-        this.setBorder(new Border(new BorderStroke[]{new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths((double)0.5F))}));
+        this.setBorder(new Border(new BorderStroke(Color.DARKBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(0.5F))));
         this.textProperty().addListener((observable, oldValue, newValue) -> {
             try {
                 Float.parseFloat(newValue);
@@ -44,7 +36,7 @@ public class FaceplateTextField extends RestrictiveTextField {
                     case TAB:
                         break;
                     default:
-                        this.setBackground(new Background(new BackgroundFill[]{new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)}));
+                        this.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
                 }
             }
 

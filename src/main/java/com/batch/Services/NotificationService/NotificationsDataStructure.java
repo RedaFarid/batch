@@ -1,11 +1,6 @@
-
 package com.batch.Services.NotificationService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -24,7 +19,7 @@ public class NotificationsDataStructure {
 
     public void addFamilyPartition(String service, String familyName, AddErrorEvent addErrorEvent, ResetEvent resetEvent) {
         if (this.allAlarmsCache.containsKey(service)) {
-            Map<String, ErrorObject> stringErrorObjectMap = (Map)this.allAlarmsCache.get(service);
+            Map<String, ErrorObject> stringErrorObjectMap = this.allAlarmsCache.get(service);
             ErrorObject errorObject = new ErrorObject(service, familyName, resetEvent, addErrorEvent);
             stringErrorObjectMap.put(familyName, errorObject);
             this.serviceErrorsListeners.forEach((listener) -> listener.newFamilyAdded(service, familyName, errorObject));
@@ -34,9 +29,9 @@ public class NotificationsDataStructure {
 
     public void addErrorMessage(String serviceName, String familyName, MessageObject errorMessage, AddErrorEvent addErrorEvent, ResetEvent resetEvent) {
         if (this.allAlarmsCache.containsKey(serviceName)) {
-            Map<String, ErrorObject> stringErrorObjectMap = (Map)this.allAlarmsCache.get(serviceName);
+            Map<String, ErrorObject> stringErrorObjectMap = this.allAlarmsCache.get(serviceName);
             if (stringErrorObjectMap.containsKey(familyName)) {
-                ErrorObject errorObject = (ErrorObject)stringErrorObjectMap.get(familyName);
+                ErrorObject errorObject = stringErrorObjectMap.get(familyName);
                 if (errorObject != null) {
                     boolean contains = errorObject.getErrorMessageList().contains(errorMessage.getMessage());
                     errorObject.addError(errorMessage);
@@ -64,7 +59,7 @@ public class NotificationsDataStructure {
     }
 
     public void removeFamilyPartition(String serviceName, String familyName) {
-        Map<String, ErrorObject> stringErrorObjectMap = (Map)this.allAlarmsCache.get(serviceName);
+        Map<String, ErrorObject> stringErrorObjectMap = this.allAlarmsCache.get(serviceName);
         stringErrorObjectMap.remove(familyName);
         if (stringErrorObjectMap.size() == 0) {
             this.removeServicePartition(serviceName);
@@ -74,8 +69,8 @@ public class NotificationsDataStructure {
     }
 
     public void removeErrorMessage(String serviceName, String familyName, String message) {
-        Map<String, ErrorObject> stringErrorObjectMap = (Map)this.allAlarmsCache.get(serviceName);
-        ErrorObject errorObject = (ErrorObject)stringErrorObjectMap.get(familyName);
+        Map<String, ErrorObject> stringErrorObjectMap = this.allAlarmsCache.get(serviceName);
+        ErrorObject errorObject = stringErrorObjectMap.get(familyName);
         boolean b = errorObject.removeErrorMessage(message);
         if (b) {
             this.removeFamilyPartition(serviceName, familyName);
@@ -98,11 +93,11 @@ public class NotificationsDataStructure {
     }
 
     public ErrorObject getFamilyErrorsAsMap(String serviceName, String familyName) {
-        return (ErrorObject)((Map)this.allAlarmsCache.get(serviceName)).get(familyName);
+        return (ErrorObject) ((Map) this.allAlarmsCache.get(serviceName)).get(familyName);
     }
 
     public Map<String, ErrorObject> getServiceErrorsAsMap(String serviceName) {
-        return (Map)this.allAlarmsCache.get(serviceName);
+        return this.allAlarmsCache.get(serviceName);
     }
 
     public Map<String, List<ErrorObject>> getAllFamiliesWithErrorsAsMap() {

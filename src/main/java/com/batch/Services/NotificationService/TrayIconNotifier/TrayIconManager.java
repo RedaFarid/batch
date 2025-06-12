@@ -1,25 +1,16 @@
-
-
 package com.batch.Services.NotificationService.TrayIconNotifier;
-
-import java.awt.AWTException;
-import java.awt.Image;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
-import java.awt.SystemTray;
-import java.awt.Toolkit;
-import java.awt.TrayIcon;
-import java.awt.TrayIcon.MessageType;
-import java.awt.event.MouseEvent;
-import java.net.URL;
-import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
-import javax.swing.event.MouseInputListener;
 
 import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
+
+import javax.swing.*;
+import javax.swing.event.MouseInputListener;
+import java.awt.*;
+import java.awt.TrayIcon.MessageType;
+import java.awt.event.MouseEvent;
+import java.net.URL;
 
 @Service
 public class TrayIconManager {
@@ -124,7 +115,7 @@ public class TrayIconManager {
         });
     }
 
-   @PostConstruct
+    @PostConstruct
     private void atPostConstruct() {
         this.resource = TrayIconManager.class.getResource("icon");
         this.toolTip = this.toolTip;

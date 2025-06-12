@@ -1,16 +1,15 @@
-
-
 package com.batch.PLCDataSource.ModBus;
 
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Utilities.StringUtilsL;
+import javafx.beans.property.BooleanProperty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import javafx.beans.property.BooleanProperty;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class ModbusConnectionMonitor {
     private static final Logger log = LogManager.getLogger(ModbusConnectionMonitor.class);
@@ -27,7 +26,7 @@ public class ModbusConnectionMonitor {
     }
 
     public static ModbusConnectionMonitor getService(String IP, BooleanProperty connectionStatus, BooleanProperty bufferSynchronized, NotificationService loggingService) {
-        synchronized(ModbusConnectionMonitor.class) {
+        synchronized (ModbusConnectionMonitor.class) {
             if (singleton == null) {
                 singleton = new ModbusConnectionMonitor(connectionStatus, bufferSynchronized, loggingService);
             }
@@ -70,7 +69,7 @@ public class ModbusConnectionMonitor {
         try {
             connection.Disconnect();
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(ModbusConnectionMonitor.class.getName()).log(Level.SEVERE, (String)null, ex);
+            java.util.logging.Logger.getLogger(ModbusConnectionMonitor.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

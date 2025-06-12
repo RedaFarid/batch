@@ -17,40 +17,51 @@ public class AlarmDataHolder {
     private EDT type;
     private LogIdentefires identifier;
 
+    public AlarmDataHolder(final String name, final RowAttripute attribute, final ValueObject value, final EDT type, final LogIdentefires identifier) {
+        this.name = name;
+        this.attribute = attribute;
+        this.value = value;
+        this.type = type;
+        this.identifier = identifier;
+    }
+
+    public AlarmDataHolder() {
+    }
+
     public String getName() {
         return this.name;
-    }
-
-    public RowAttripute getAttribute() {
-        return this.attribute;
-    }
-
-    public ValueObject getValue() {
-        return this.value;
-    }
-
-    public EDT getType() {
-        return this.type;
-    }
-
-    public LogIdentefires getIdentifier() {
-        return this.identifier;
     }
 
     public void setName(final String name) {
         this.name = name;
     }
 
+    public RowAttripute getAttribute() {
+        return this.attribute;
+    }
+
     public void setAttribute(final RowAttripute attribute) {
         this.attribute = attribute;
+    }
+
+    public ValueObject getValue() {
+        return this.value;
     }
 
     public void setValue(final ValueObject value) {
         this.value = value;
     }
 
+    public EDT getType() {
+        return this.type;
+    }
+
     public void setType(final EDT type) {
         this.type = type;
+    }
+
+    public LogIdentefires getIdentifier() {
+        return this.identifier;
     }
 
     public void setIdentifier(final LogIdentefires identifier) {
@@ -60,10 +71,9 @@ public class AlarmDataHolder {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof AlarmDataHolder)) {
+        } else if (!(o instanceof AlarmDataHolder other)) {
             return false;
         } else {
-            AlarmDataHolder other = (AlarmDataHolder)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -110,14 +120,8 @@ public class AlarmDataHolder {
                 Object this$identifier = this.getIdentifier();
                 Object other$identifier = other.getIdentifier();
                 if (this$identifier == null) {
-                    if (other$identifier != null) {
-                        return false;
-                    }
-                } else if (!this$identifier.equals(other$identifier)) {
-                    return false;
-                }
-
-                return true;
+                    return other$identifier == null;
+                } else return this$identifier.equals(other$identifier);
             }
         }
     }
@@ -145,16 +149,5 @@ public class AlarmDataHolder {
     public String toString() {
         String var10000 = this.getName();
         return "AlarmDataHolder(name=" + var10000 + ", attribute=" + this.getAttribute() + ", value=" + this.getValue() + ", type=" + this.getType() + ", identifier=" + this.getIdentifier() + ")";
-    }
-
-    public AlarmDataHolder(final String name, final RowAttripute attribute, final ValueObject value, final EDT type, final LogIdentefires identifier) {
-        this.name = name;
-        this.attribute = attribute;
-        this.value = value;
-        this.type = type;
-        this.identifier = identifier;
-    }
-
-    public AlarmDataHolder() {
     }
 }

@@ -1,4 +1,3 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
 public enum ValveOutput implements RowAttripute {
@@ -8,5 +7,5 @@ public enum ValveOutput implements RowAttripute {
     Reset,
     Source,
     Enable_Monitoring,
-    Monitoring_Time;
+    Monitoring_Time
 }

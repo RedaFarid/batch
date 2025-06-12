@@ -1,4 +1,3 @@
-
 package com.batch.GUI.UnitsWindow;
 
 import com.batch.Database.Entities.Unit;
@@ -26,10 +25,9 @@ public class UnitsModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof UnitsModel)) {
+        } else if (!(o instanceof UnitsModel other)) {
             return false;
         } else {
-            UnitsModel other = (UnitsModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -46,14 +44,8 @@ public class UnitsModel {
                 Object this$isShown = this.getIsShown();
                 Object other$isShown = other.getIsShown();
                 if (this$isShown == null) {
-                    if (other$isShown != null) {
-                        return false;
-                    }
-                } else if (!this$isShown.equals(other$isShown)) {
-                    return false;
-                }
-
-                return true;
+                    return other$isShown == null;
+                } else return this$isShown.equals(other$isShown);
             }
         }
     }

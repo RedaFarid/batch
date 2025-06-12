@@ -1,27 +1,22 @@
-
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.Address;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.ValueObject;
+import com.batch.PLCDataSource.PLC.ElementaryDefinitions.*;
 import com.batch.Utilities.LogIdentefires;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class RowDataDefinition {
+    protected final boolean In = true;
+    protected final boolean Out = false;
     protected String name;
     private int InAddressOffset;
     private int OutAddressOffset;
-    protected final boolean In = true;
-    protected final boolean Out = false;
-    private Map<RowAttripute, EDT> elementsDataType = Collections.synchronizedMap(new LinkedHashMap());
-    private Map<RowAttripute, Address> elementsAddress = Collections.synchronizedMap(new LinkedHashMap());
-    private Map<RowAttripute, ValueObject> elementsValue = Collections.synchronizedMap(new LinkedHashMap());
-    private Map<RowAttripute, Boolean> inOutIndecator = Collections.synchronizedMap(new LinkedHashMap());
+    private final Map<RowAttripute, EDT> elementsDataType = Collections.synchronizedMap(new LinkedHashMap());
+    private final Map<RowAttripute, Address> elementsAddress = Collections.synchronizedMap(new LinkedHashMap());
+    private final Map<RowAttripute, ValueObject> elementsValue = Collections.synchronizedMap(new LinkedHashMap());
+    private final Map<RowAttripute, Boolean> inOutIndecator = Collections.synchronizedMap(new LinkedHashMap());
     private Map<RowAttripute, TagQuality> quality = Collections.synchronizedMap(new LinkedHashMap());
     private Map<RowAttripute, Alarming> enableAlarmLogging = Collections.synchronizedMap(new LinkedHashMap());
     private Map<RowAttripute, Logging> enableTagLogging = Collections.synchronizedMap(new LinkedHashMap());
@@ -46,10 +41,12 @@ public abstract class RowDataDefinition {
 
     public synchronized void setValue(RowAttripute name, ValueObject value) {
         try {
-            switch ((EDT)this.elementsDataType.get(name)) {
-                case Boolean -> ((BooleanDataType)this.elementsValue.get(name)).setValue(((BooleanDataType)value).getValue());
-                case Integer -> ((IntegerDataType)this.elementsValue.get(name)).setValue(((IntegerDataType)value).getValue());
-                case Real -> ((RealDataType)this.elementsValue.get(name)).setValue(((RealDataType)value).getValue());
+            switch (this.elementsDataType.get(name)) {
+                case Boolean ->
+                        ((BooleanDataType) this.elementsValue.get(name)).setValue(((BooleanDataType) value).getValue());
+                case Integer ->
+                        ((IntegerDataType) this.elementsValue.get(name)).setValue(((IntegerDataType) value).getValue());
+                case Real -> ((RealDataType) this.elementsValue.get(name)).setValue(((RealDataType) value).getValue());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -59,7 +56,7 @@ public abstract class RowDataDefinition {
 
     public synchronized Map<RowAttripute, EDT> getTypes() {
         Map<RowAttripute, EDT> map = new LinkedHashMap();
-        this.elementsDataType.keySet().forEach((i) -> map.put(i, (EDT)this.elementsDataType.get(i)));
+        this.elementsDataType.keySet().forEach((i) -> map.put(i, this.elementsDataType.get(i)));
         return map;
     }
 
@@ -71,13 +68,13 @@ public abstract class RowDataDefinition {
 
     public synchronized Map<RowAttripute, Address> getAddresses() {
         Map<RowAttripute, Address> map = new LinkedHashMap();
-        this.elementsDataType.keySet().forEach((i) -> map.put(i, (Address)this.elementsAddress.get(i)));
+        this.elementsDataType.keySet().forEach((i) -> map.put(i, this.elementsAddress.get(i)));
         return map;
     }
 
     public synchronized Map<RowAttripute, Boolean> getInOutIndecation() {
         Map<RowAttripute, Boolean> map = new LinkedHashMap();
-        this.elementsDataType.keySet().forEach((i) -> map.put(i, (Boolean)this.inOutIndecator.get(i)));
+        this.elementsDataType.keySet().forEach((i) -> map.put(i, this.inOutIndecator.get(i)));
         return map;
     }
 

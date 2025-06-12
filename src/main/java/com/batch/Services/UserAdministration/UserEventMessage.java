@@ -1,4 +1,3 @@
-
 package com.batch.Services.UserAdministration;
 
 import com.batch.Database.Entities.User;
@@ -8,24 +7,33 @@ public class UserEventMessage {
     private User user;
     private AllGroupsDTO allGroupsDTO;
 
+    public UserEventMessage(final boolean isLoggedOn, final User user, final AllGroupsDTO allGroupsDTO) {
+        this.isLoggedOn = isLoggedOn;
+        this.user = user;
+        this.allGroupsDTO = allGroupsDTO;
+    }
+
+    public UserEventMessage() {
+    }
+
     public boolean isLoggedOn() {
         return this.isLoggedOn;
-    }
-
-    public User getUser() {
-        return this.user;
-    }
-
-    public AllGroupsDTO getAllGroupsDTO() {
-        return this.allGroupsDTO;
     }
 
     public void setLoggedOn(final boolean isLoggedOn) {
         this.isLoggedOn = isLoggedOn;
     }
 
+    public User getUser() {
+        return this.user;
+    }
+
     public void setUser(final User user) {
         this.user = user;
+    }
+
+    public AllGroupsDTO getAllGroupsDTO() {
+        return this.allGroupsDTO;
     }
 
     public void setAllGroupsDTO(final AllGroupsDTO allGroupsDTO) {
@@ -35,10 +43,9 @@ public class UserEventMessage {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof UserEventMessage)) {
+        } else if (!(o instanceof UserEventMessage other)) {
             return false;
         } else {
-            UserEventMessage other = (UserEventMessage)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.isLoggedOn() != other.isLoggedOn()) {
@@ -57,14 +64,8 @@ public class UserEventMessage {
                 Object this$allGroupsDTO = this.getAllGroupsDTO();
                 Object other$allGroupsDTO = other.getAllGroupsDTO();
                 if (this$allGroupsDTO == null) {
-                    if (other$allGroupsDTO != null) {
-                        return false;
-                    }
-                } else if (!this$allGroupsDTO.equals(other$allGroupsDTO)) {
-                    return false;
-                }
-
-                return true;
+                    return other$allGroupsDTO == null;
+                } else return this$allGroupsDTO.equals(other$allGroupsDTO);
             }
         }
     }
@@ -87,14 +88,5 @@ public class UserEventMessage {
     public String toString() {
         boolean var10000 = this.isLoggedOn();
         return "UserEventMessage(isLoggedOn=" + var10000 + ", user=" + this.getUser() + ", allGroupsDTO=" + this.getAllGroupsDTO() + ")";
-    }
-
-    public UserEventMessage(final boolean isLoggedOn, final User user, final AllGroupsDTO allGroupsDTO) {
-        this.isLoggedOn = isLoggedOn;
-        this.user = user;
-        this.allGroupsDTO = allGroupsDTO;
-    }
-
-    public UserEventMessage() {
     }
 }

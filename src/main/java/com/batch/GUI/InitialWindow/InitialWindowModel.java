@@ -1,13 +1,6 @@
-
-
 package com.batch.GUI.InitialWindow;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 public class InitialWindowModel {
     private StringProperty connectionInfo = new SimpleStringProperty();
@@ -25,76 +18,76 @@ public class InitialWindowModel {
         return this.connectionInfo;
     }
 
-    public BooleanProperty getConnectionStatus() {
-        return this.connectionStatus;
-    }
-
-    public StringProperty getAirPressureInfo() {
-        return this.airPressureInfo;
-    }
-
-    public BooleanProperty getAirPressureStatus() {
-        return this.airPressureStatus;
-    }
-
-    public StringProperty getOverUnderVoltageInfo() {
-        return this.overUnderVoltageInfo;
-    }
-
-    public BooleanProperty getOverUnderVoltageStatus() {
-        return this.overUnderVoltageStatus;
-    }
-
-    public StringProperty getEsdInfo() {
-        return this.esdInfo;
-    }
-
-    public BooleanProperty getEsdStatus() {
-        return this.esdStatus;
-    }
-
-    public DoubleProperty getGauge1() {
-        return this.gauge1;
-    }
-
-    public DoubleProperty getGauge2() {
-        return this.gauge2;
-    }
-
     public void setConnectionInfo(final StringProperty connectionInfo) {
         this.connectionInfo = connectionInfo;
+    }
+
+    public BooleanProperty getConnectionStatus() {
+        return this.connectionStatus;
     }
 
     public void setConnectionStatus(final BooleanProperty connectionStatus) {
         this.connectionStatus = connectionStatus;
     }
 
+    public StringProperty getAirPressureInfo() {
+        return this.airPressureInfo;
+    }
+
     public void setAirPressureInfo(final StringProperty airPressureInfo) {
         this.airPressureInfo = airPressureInfo;
+    }
+
+    public BooleanProperty getAirPressureStatus() {
+        return this.airPressureStatus;
     }
 
     public void setAirPressureStatus(final BooleanProperty airPressureStatus) {
         this.airPressureStatus = airPressureStatus;
     }
 
+    public StringProperty getOverUnderVoltageInfo() {
+        return this.overUnderVoltageInfo;
+    }
+
     public void setOverUnderVoltageInfo(final StringProperty overUnderVoltageInfo) {
         this.overUnderVoltageInfo = overUnderVoltageInfo;
+    }
+
+    public BooleanProperty getOverUnderVoltageStatus() {
+        return this.overUnderVoltageStatus;
     }
 
     public void setOverUnderVoltageStatus(final BooleanProperty overUnderVoltageStatus) {
         this.overUnderVoltageStatus = overUnderVoltageStatus;
     }
 
+    public StringProperty getEsdInfo() {
+        return this.esdInfo;
+    }
+
     public void setEsdInfo(final StringProperty esdInfo) {
         this.esdInfo = esdInfo;
+    }
+
+    public BooleanProperty getEsdStatus() {
+        return this.esdStatus;
     }
 
     public void setEsdStatus(final BooleanProperty esdStatus) {
         this.esdStatus = esdStatus;
     }
 
+    public DoubleProperty getGauge1() {
+        return this.gauge1;
+    }
+
     public void setGauge1(final DoubleProperty gauge1) {
         this.gauge1 = gauge1;
+    }
+
+    public DoubleProperty getGauge2() {
+        return this.gauge2;
     }
 
     public void setGauge2(final DoubleProperty gauge2) {
@@ -104,10 +97,9 @@ public class InitialWindowModel {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof InitialWindowModel)) {
+        } else if (!(o instanceof InitialWindowModel other)) {
             return false;
         } else {
-            InitialWindowModel other = (InitialWindowModel)o;
             if (!other.canEqual(this)) {
                 return false;
             } else {
@@ -204,14 +196,8 @@ public class InitialWindowModel {
                 Object this$gauge2 = this.getGauge2();
                 Object other$gauge2 = other.getGauge2();
                 if (this$gauge2 == null) {
-                    if (other$gauge2 != null) {
-                        return false;
-                    }
-                } else if (!this$gauge2.equals(other$gauge2)) {
-                    return false;
-                }
-
-                return true;
+                    return other$gauge2 == null;
+                } else return this$gauge2.equals(other$gauge2);
             }
         }
     }

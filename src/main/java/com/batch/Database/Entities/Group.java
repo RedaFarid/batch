@@ -1,12 +1,12 @@
-
 package com.batch.Database.Entities;
 
 import com.batch.Utilities.Roles;
-import java.util.LinkedHashMap;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.LinkedHashMap;
 
 @Table("AuthorizationGroups")
 public class Group {
@@ -29,72 +29,87 @@ public class Group {
     @Transient
     private LinkedHashMap<Roles, Boolean> RolesStatus = new LinkedHashMap();
 
+    public Group(final Long id, final String group, final String description, final String window, final boolean monitoring, final boolean editing, final boolean deleting, final boolean updating, final LinkedHashMap<Roles, Boolean> RolesStatus) {
+        this.id = id;
+        this.group = group;
+        this.description = description;
+        this.window = window;
+        this.monitoring = monitoring;
+        this.editing = editing;
+        this.deleting = deleting;
+        this.updating = updating;
+        this.RolesStatus = RolesStatus;
+    }
+
+    public Group() {
+    }
+
     public Long getId() {
         return this.id;
-    }
-
-    public String getGroup() {
-        return this.group;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public String getWindow() {
-        return this.window;
-    }
-
-    public boolean isMonitoring() {
-        return this.monitoring;
-    }
-
-    public boolean isEditing() {
-        return this.editing;
-    }
-
-    public boolean isDeleting() {
-        return this.deleting;
-    }
-
-    public boolean isUpdating() {
-        return this.updating;
-    }
-
-    public LinkedHashMap<Roles, Boolean> getRolesStatus() {
-        return this.RolesStatus;
     }
 
     public void setId(final Long id) {
         this.id = id;
     }
 
+    public String getGroup() {
+        return this.group;
+    }
+
     public void setGroup(final String group) {
         this.group = group;
+    }
+
+    public String getDescription() {
+        return this.description;
     }
 
     public void setDescription(final String description) {
         this.description = description;
     }
 
+    public String getWindow() {
+        return this.window;
+    }
+
     public void setWindow(final String window) {
         this.window = window;
+    }
+
+    public boolean isMonitoring() {
+        return this.monitoring;
     }
 
     public void setMonitoring(final boolean monitoring) {
         this.monitoring = monitoring;
     }
 
+    public boolean isEditing() {
+        return this.editing;
+    }
+
     public void setEditing(final boolean editing) {
         this.editing = editing;
+    }
+
+    public boolean isDeleting() {
+        return this.deleting;
     }
 
     public void setDeleting(final boolean deleting) {
         this.deleting = deleting;
     }
 
+    public boolean isUpdating() {
+        return this.updating;
+    }
+
     public void setUpdating(final boolean updating) {
         this.updating = updating;
+    }
+
+    public LinkedHashMap<Roles, Boolean> getRolesStatus() {
+        return this.RolesStatus;
     }
 
     public void setRolesStatus(final LinkedHashMap<Roles, Boolean> RolesStatus) {
@@ -104,10 +119,9 @@ public class Group {
     public boolean equals(final Object o) {
         if (o == this) {
             return true;
-        } else if (!(o instanceof Group)) {
+        } else if (!(o instanceof Group other)) {
             return false;
         } else {
-            Group other = (Group)o;
             if (!other.canEqual(this)) {
                 return false;
             } else if (this.isMonitoring() != other.isMonitoring()) {
@@ -162,14 +176,8 @@ public class Group {
                 Object this$RolesStatus = this.getRolesStatus();
                 Object other$RolesStatus = other.getRolesStatus();
                 if (this$RolesStatus == null) {
-                    if (other$RolesStatus != null) {
-                        return false;
-                    }
-                } else if (!this$RolesStatus.equals(other$RolesStatus)) {
-                    return false;
-                }
-
-                return true;
+                    return other$RolesStatus == null;
+                } else return this$RolesStatus.equals(other$RolesStatus);
             }
         }
     }
@@ -201,20 +209,5 @@ public class Group {
     public String toString() {
         Long var10000 = this.getId();
         return "Group(id=" + var10000 + ", group=" + this.getGroup() + ", description=" + this.getDescription() + ", window=" + this.getWindow() + ", monitoring=" + this.isMonitoring() + ", editing=" + this.isEditing() + ", deleting=" + this.isDeleting() + ", updating=" + this.isUpdating() + ", RolesStatus=" + this.getRolesStatus() + ")";
-    }
-
-    public Group(final Long id, final String group, final String description, final String window, final boolean monitoring, final boolean editing, final boolean deleting, final boolean updating, final LinkedHashMap<Roles, Boolean> RolesStatus) {
-        this.id = id;
-        this.group = group;
-        this.description = description;
-        this.window = window;
-        this.monitoring = monitoring;
-        this.editing = editing;
-        this.deleting = deleting;
-        this.updating = updating;
-        this.RolesStatus = RolesStatus;
-    }
-
-    public Group() {
     }
 }

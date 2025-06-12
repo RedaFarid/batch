@@ -1,5 +1,3 @@
-
-
 package com.batch.Database.Services;
 
 import com.batch.Database.Entities.Group;
@@ -8,15 +6,21 @@ import com.batch.Database.Repositories.GroupRepository;
 import com.batch.Database.Repositories.UserRepository;
 import com.batch.Utilities.Roles;
 import com.google.common.collect.Lists;
+import org.springframework.stereotype.Service;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
 
 @Service
 public class UserDaoService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
+
+    public UserDaoService(final GroupRepository groupRepository, final UserRepository userRepository) {
+        this.groupRepository = groupRepository;
+        this.userRepository = userRepository;
+    }
 
     public boolean isUserExist(User currentUser) {
         return this.userRepository.existsByUserName(currentUser.getUserName());
@@ -62,10 +66,10 @@ public class UserDaoService {
 
     public void saveGroup(Group tempGroup) {
         LinkedHashMap<Roles, Boolean> rolesStatus = tempGroup.getRolesStatus();
-        Boolean deleting = (Boolean)rolesStatus.get(Roles.Deleting);
-        Boolean updating = (Boolean)rolesStatus.get(Roles.Updating);
-        Boolean editing = (Boolean)rolesStatus.get(Roles.Editing);
-        Boolean monitoring = (Boolean)rolesStatus.get(Roles.Monitoring);
+        Boolean deleting = rolesStatus.get(Roles.Deleting);
+        Boolean updating = rolesStatus.get(Roles.Updating);
+        Boolean editing = rolesStatus.get(Roles.Editing);
+        Boolean monitoring = rolesStatus.get(Roles.Monitoring);
         tempGroup.setDeleting(deleting);
         tempGroup.setUpdating(updating);
         tempGroup.setEditing(editing);
@@ -75,10 +79,5 @@ public class UserDaoService {
 
     public void saveUser(User user) {
         this.userRepository.save(user);
-    }
-
-    public UserDaoService(final GroupRepository groupRepository, final UserRepository userRepository) {
-        this.groupRepository = groupRepository;
-        this.userRepository = userRepository;
     }
 }
