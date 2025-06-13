@@ -324,7 +324,11 @@
                             </classPath>
                             <jre>
                                 <path>bin/jdk-22</path>
-                                <minVersion>22</minVersion>
+                                <bundledJre64Bit>true</bundledJre64Bit>
+                                <bundledJreAsFallback>true</bundledJreAsFallback>
+<!--                                <minVersion>14.0.1</minVersion>-->
+<!--                                <jdkPreference>preferJre</jdkPreference>-->
+                                <runtimeBits>64/32</runtimeBits>
                             </jre>
                             <versionInfo>
                                 <fileVersion>1.0.0.0</fileVersion>
