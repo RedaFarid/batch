@@ -1,7 +1,11 @@
 package com.batch.GUI.InitialWindow;
 
 import javafx.beans.property.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public class InitialWindowModel {
     private StringProperty connectionInfo = new SimpleStringProperty();
     private BooleanProperty connectionStatus = new SimpleBooleanProperty();
@@ -13,86 +17,6 @@ public class InitialWindowModel {
     private BooleanProperty esdStatus = new SimpleBooleanProperty();
     private DoubleProperty gauge1 = new SimpleDoubleProperty();
     private DoubleProperty gauge2 = new SimpleDoubleProperty();
-
-    public StringProperty getConnectionInfo() {
-        return this.connectionInfo;
-    }
-
-    public void setConnectionInfo(final StringProperty connectionInfo) {
-        this.connectionInfo = connectionInfo;
-    }
-
-    public BooleanProperty getConnectionStatus() {
-        return this.connectionStatus;
-    }
-
-    public void setConnectionStatus(final BooleanProperty connectionStatus) {
-        this.connectionStatus = connectionStatus;
-    }
-
-    public StringProperty getAirPressureInfo() {
-        return this.airPressureInfo;
-    }
-
-    public void setAirPressureInfo(final StringProperty airPressureInfo) {
-        this.airPressureInfo = airPressureInfo;
-    }
-
-    public BooleanProperty getAirPressureStatus() {
-        return this.airPressureStatus;
-    }
-
-    public void setAirPressureStatus(final BooleanProperty airPressureStatus) {
-        this.airPressureStatus = airPressureStatus;
-    }
-
-    public StringProperty getOverUnderVoltageInfo() {
-        return this.overUnderVoltageInfo;
-    }
-
-    public void setOverUnderVoltageInfo(final StringProperty overUnderVoltageInfo) {
-        this.overUnderVoltageInfo = overUnderVoltageInfo;
-    }
-
-    public BooleanProperty getOverUnderVoltageStatus() {
-        return this.overUnderVoltageStatus;
-    }
-
-    public void setOverUnderVoltageStatus(final BooleanProperty overUnderVoltageStatus) {
-        this.overUnderVoltageStatus = overUnderVoltageStatus;
-    }
-
-    public StringProperty getEsdInfo() {
-        return this.esdInfo;
-    }
-
-    public void setEsdInfo(final StringProperty esdInfo) {
-        this.esdInfo = esdInfo;
-    }
-
-    public BooleanProperty getEsdStatus() {
-        return this.esdStatus;
-    }
-
-    public void setEsdStatus(final BooleanProperty esdStatus) {
-        this.esdStatus = esdStatus;
-    }
-
-    public DoubleProperty getGauge1() {
-        return this.gauge1;
-    }
-
-    public void setGauge1(final DoubleProperty gauge1) {
-        this.gauge1 = gauge1;
-    }
-
-    public DoubleProperty getGauge2() {
-        return this.gauge2;
-    }
-
-    public void setGauge2(final DoubleProperty gauge2) {
-        this.gauge2 = gauge2;
-    }
 
     public boolean equals(final Object o) {
         if (o == this) {

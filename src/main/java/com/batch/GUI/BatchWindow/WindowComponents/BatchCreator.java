@@ -18,7 +18,6 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -188,29 +187,10 @@ public class BatchCreator extends Stage {
                                         try {
                                             this.controller.parseRecipeToDetailsString(this.selectedRecipe).flatMap((details) -> this.showInfoWindow("Recipe details", details)).ifPresent((buttonType) -> {
                                                 if (buttonType.equals(ButtonType.OK)) {
-                                                    BatchModel batchModel = new BatchModel();
-                                                    Batch createdBatchNew = new Batch(this.batchID.getText(), this.selectedRecipe.getUnitName(), BatchStates.Idle.name(), BatchOrders.Create.name(), this.batchComment.getText(), batchModel);
-                                                    List<BatchParallelStepsModel> listOfBatchParallelStepModel = new LinkedList();
-                                                    batchModel.setParallelSteps(listOfBatchParallelStepModel);
-                                                    this.selectedRecipe.getModel().getParallelSteps().forEach((recipeParallelStep) -> listOfBatchParallelStepModel.add(new BatchParallelStepsModel(recipeParallelStep.getSteps().stream().map((item) -> {
-                                                        if (item.getPhaseType() != null && item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
-                                                            double percentage = item.getValueParametersData().get("Percentage %");
-                                                            double totalQty = this.quantity * percentage / (double) 100.0F;
-                                                            item.getValueParametersData().replace("Percentage %", totalQty);
-                                                        }
-
-                                                        return new BatchStepModel(item);
-                                                    }).collect(Collectors.toList()))));
-                                                    createdBatchNew.setState(BatchStates.Created.name());
-                                                    createdBatchNew.setClient(this.clientName.getText());
-                                                    this.controller.createNewBatch(createdBatchNew).ifPresentOrElse((savedBatch) -> {
-                                                        this.createdBatch = savedBatch;
-                                                        this.hide();
-                                                    }, () -> this.showErrorWindow("Error", "Could not saved"));
+                                                    CreateBatch();
                                                 } else {
                                                     this.showErrorWindow("Warning", "Canceling creating batch");
                                                 }
-
                                             });
                                         } catch (Exception e) {
                                             e.printStackTrace();
@@ -219,12 +199,10 @@ public class BatchCreator extends Stage {
                                     } else {
                                         this.showErrorWindow("Error creating batch", "Total batch quantity is greater than the maximum allowed value 15000 or equal to zero \nThe Entered quantity equals to " + this.quantity);
                                     }
-
                                 }, () -> this.showErrorWindow("Error", "Recipe configurations not found "));
                             } else {
                                 this.showErrorWindow("Error", "Zero quantity entered or internal error\nCreate batch again ... ");
                             }
-
                         });
                     } else {
                         this.showErrorWindow("Error", "Please enter client name");
@@ -239,7 +217,27 @@ public class BatchCreator extends Stage {
             e.printStackTrace();
             this.showErrorWindowForException(e.getMessage(), e);
         }
+    }
 
+    private void CreateBatch() {
+        BatchModel batchModel = new BatchModel();
+        Batch createdBatchNew = new Batch(this.batchID.getText(), this.selectedRecipe.getUnitName(), BatchStates.Idle.name(), BatchOrders.Create.name(), this.batchComment.getText(), batchModel);
+        List<BatchParallelStepsModel> listOfBatchParallelStepModel = new LinkedList<>();
+        batchModel.setParallelSteps(listOfBatchParallelStepModel);
+        this.selectedRecipe.getModel().getParallelSteps().forEach((recipeParallelStep) -> listOfBatchParallelStepModel.add(new BatchParallelStepsModel(recipeParallelStep.getSteps().stream().map((item) -> {
+            if (item.getPhaseType() != null && item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())) {
+                double percentage = item.getValueParametersData().get("Percentage %");
+                double totalQty = this.quantity * percentage / (double) 100.0F;
+                item.getValueParametersData().replace("Percentage %", totalQty);
+            }
+            return new BatchStepModel(item);
+        }).collect(Collectors.toList()))));
+        createdBatchNew.setState(BatchStates.Created.name());
+        createdBatchNew.setClient(this.clientName.getText());
+        this.controller.createNewBatch(createdBatchNew).ifPresentOrElse((savedBatch) -> {
+            this.createdBatch = savedBatch;
+            this.hide();
+        }, () -> this.showErrorWindow("Error", "Could not saved"));
     }
 
     private void onLoadRecipeAtClick(MouseEvent action) {

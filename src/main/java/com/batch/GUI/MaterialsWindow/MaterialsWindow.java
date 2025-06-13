@@ -5,7 +5,6 @@ import com.batch.Database.Entities.Material;
 import com.batch.GUI.Controls.DataEntryPartition;
 import com.batch.Utilities.RestrictiveTextField;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -23,7 +22,6 @@ public class MaterialsWindow extends Stage {
     private final ToolBar hbox = new ToolBar();
     private final MaterialsController controller;
     private final MaterialsModel model;
-    private Stage mainWindow = null;
     private final TableView<Material> table = new TableView();
     private final TableColumn<Material, String> NameColumn = new TableColumn("ID");
     private final TableColumn<Material, String> LicenceNumberColumn = new TableColumn("Name");
@@ -37,6 +35,7 @@ public class MaterialsWindow extends Stage {
     private final RestrictiveTextField idField = new RestrictiveTextField();
     private final RestrictiveTextField nameField = new RestrictiveTextField();
     private final RestrictiveTextField commentField = new RestrictiveTextField();
+    private Stage mainWindow = null;
 
     private MaterialsWindow(Stage Window) {
         this.mainWindow = Window;

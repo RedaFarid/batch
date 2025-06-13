@@ -12,8 +12,7 @@ import com.batch.PLCDataSource.ModBus.ModBusService;
 import com.batch.PLCDataSource.PLC.ComplexDataType.*;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
-import com.batch.Services.LoggingService.LoggingService;
-import com.batch.Services.NotificationService.BackGroundServices;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.batch.Services.NotificationService.ErrorObject;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Services.NotificationService.ServiceErrorsListener;
@@ -23,22 +22,23 @@ import com.batch.Utilities.LogIdentefires;
 import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import javafx.scene.image.ImageView;
-import lombok.extern.log4j.Log4j;
+import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.ContextStoppedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Log4j2
 @Controller("InitialWindowController")
 public class InitialWindowController {
+    @Getter
     private final InitialWindowModel model = new InitialWindowModel();
     private final ModBusService modBusService;
     private final UnitsRepository unitsRepository;
@@ -46,26 +46,24 @@ public class InitialWindowController {
     private final PLCDataDefinitionFactory plcDataDefinitionFactory;
     private final BatchControllerDataService batchControllerDataService;
     private final UserAuthorizationService userAuthorizationService;
-    private final LoggingService loggingService;
+
+    @Getter
+    private final MessageLoggingService messageLoggingService;
 
     @Autowired
     private final NotificationService notificationService;
 
     private Map<String, RowDataDefinition> allDataDefinitions;
 
-    public InitialWindowController(final ModBusService modBusService, final UnitsRepository unitsRepository, final BatchesService batchesService, final PLCDataDefinitionFactory plcDataDefinitionFactory, final BatchControllerDataService batchControllerDataService, final UserAuthorizationService userAuthorizationService, final LoggingService loggingService, final InitialWindow initialWindow, final NotificationService notificationService) {
+    public InitialWindowController(final ModBusService modBusService, final UnitsRepository unitsRepository, final BatchesService batchesService, final PLCDataDefinitionFactory plcDataDefinitionFactory, final BatchControllerDataService batchControllerDataService, final UserAuthorizationService userAuthorizationService, final MessageLoggingService messageLoggingService, final InitialWindow initialWindow, final NotificationService notificationService) {
         this.modBusService = modBusService;
         this.unitsRepository = unitsRepository;
         this.batchesService = batchesService;
         this.plcDataDefinitionFactory = plcDataDefinitionFactory;
         this.batchControllerDataService = batchControllerDataService;
         this.userAuthorizationService = userAuthorizationService;
-        this.loggingService = loggingService;
+        this.messageLoggingService = messageLoggingService;
         this.notificationService = notificationService;
-    }
-
-    public InitialWindowModel getModel() {
-        return this.model;
     }
 
     public Valve getValveByName(String name) {
@@ -86,7 +84,7 @@ public class InitialWindowController {
 
     public void atStartWaterFill(boolean val) {
         ((BooleanDataType) this.allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Start_WaterTank_Fill_To_HiAlarm)).setValue(val);
-        this.loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "Start water fill"));
+        this.messageLoggingService.logEvent(new Log(LogIdentefires.Info.name(), "", "Start water fill"));
     }
 
     public synchronized void onSetAllInAutoPressed(Map<String, ImageView> mixers, Map<String, ImageView> pumps, Map<String, ImageView> valves) {
@@ -94,7 +92,7 @@ public class InitialWindowController {
         mixers.forEach((name, mixer) -> ((BooleanDataType) this.allDataDefinitions.get(name).getAllValues().get(MixerOutput.Mode)).setValue(Boolean.TRUE));
         pumps.forEach((name, mixer) -> ((BooleanDataType) this.allDataDefinitions.get(name).getAllValues().get(PumpOutput.Mode)).setValue(Boolean.TRUE));
         valves.forEach((name, mixer) -> ((BooleanDataType) this.allDataDefinitions.get(name).getAllValues().get(ValveOutput.Mode)).setValue(Boolean.TRUE));
-        this.loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "Set all devices to auto"));
+        this.messageLoggingService.logEvent(new Log(LogIdentefires.Info.name(), "", "Set all devices to auto"));
     }
 
     public synchronized void onSetAllInAutoReleased() {
@@ -110,12 +108,12 @@ public class InitialWindowController {
     }
 
     @EventListener
-    public void afterRefreshed(ApplicationContext.GraphicsInitializerEvent event) {
+    public void withGraphicsEvent(ApplicationContext.GraphicsInitializerEvent event) {
         this.allDataDefinitions = this.plcDataDefinitionFactory.getAllDevicesDataModel();
     }
 
     @EventListener
-    private void init(ContextStartedEvent event) {
+    private void atStarted(ContextStartedEvent event) {
         this.checkESDAlarms();
         this.checkPLCConnection();
         this.checkAirPressureAlarms();
@@ -160,7 +158,6 @@ public class InitialWindowController {
             if (!newValue) {
                 ((BooleanDataType) this.allDataDefinitions.get("General").getAllValues().get(GeneralOutput.Mixer_1_Manual_Add_Confirmation)).setValue(false);
             }
-
         });
         ((BooleanDataType) this.allDataDefinitions.get("General").getAllValues().get(GeneralInput.Mixer_2_Manual_Add_Message_Request)).addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
@@ -198,6 +195,7 @@ public class InitialWindowController {
             }
 
         });
+        messageLoggingService.system("Initial data model binded to PLC data");
     }
 
     private void listenToNotifications() {
@@ -238,7 +236,6 @@ public class InitialWindowController {
                 this.model.getConnectionStatus().setValue(false);
             });
         }
-
     }
 
     private void checkAirPressureAlarms() {
@@ -255,7 +252,6 @@ public class InitialWindowController {
                 this.model.getAirPressureStatus().setValue(true);
                 this.model.getAirPressureInfo().setValue("Normal air pressure");
             }
-
         });
     }
 
@@ -269,7 +265,6 @@ public class InitialWindowController {
                 this.model.getOverUnderVoltageStatus().setValue(true);
                 this.model.getOverUnderVoltageInfo().setValue("Normal supply voltage");
             }
-
         });
     }
 
@@ -304,19 +299,16 @@ public class InitialWindowController {
 
     @EventListener
     private void atAppStart(ContextStartedEvent event) {
-        this.loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "System start"));
+        this.messageLoggingService.logEvent(new Log(LogIdentefires.Info.name(), "", "System start"));
     }
 
     @EventListener
     private void atAppClose(ContextStoppedEvent event) {
-        this.loggingService.LogRecord(new Log(LogIdentefires.Info.name(), "", "System stop"));
+        this.messageLoggingService.logEvent(new Log(LogIdentefires.Info.name(), "", "System stop"));
     }
 
     public PLCDataDefinitionFactory getPLCDataDefinitionFactory() {
         return this.plcDataDefinitionFactory;
     }
 
-    public LoggingService getLoggingService() {
-        return this.loggingService;
-    }
 }

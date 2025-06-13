@@ -11,8 +11,6 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.core.task.TaskExecutor;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Controller;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.time.chrono.ChronoLocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -31,7 +28,6 @@ import java.util.stream.Collectors;
 
 @Controller
 public class ReportsController {
-    private static final Logger log = LogManager.getLogger(ReportsController.class);
     private final MaterialsRepository materialsRepository;
     private final BatchesService batchesService;
     private final TaskExecutor executor;

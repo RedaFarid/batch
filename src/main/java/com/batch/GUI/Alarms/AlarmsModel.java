@@ -7,27 +7,19 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import lombok.Getter;
 
 public class AlarmsModel {
+    @Getter
     private final ObservableList<Log> allAlarmsList = FXCollections.observableArrayList();
     private final BooleanProperty isShown = new SimpleBooleanProperty();
+    @Getter
     private final StringProperty airPressureLoAlarm = new SimpleStringProperty();
+    @Getter
     private final StringProperty airPressureHiAlarm = new SimpleStringProperty();
 
-    public ObservableList<Log> getAllAlarmsList() {
-        return this.allAlarmsList;
-    }
-
-    public BooleanProperty getIsShown() {
+    public BooleanProperty viewIsShown() {
         return this.isShown;
-    }
-
-    public StringProperty getAirPressureLoAlarm() {
-        return this.airPressureLoAlarm;
-    }
-
-    public StringProperty getAirPressureHiAlarm() {
-        return this.airPressureHiAlarm;
     }
 
     public boolean equals(final Object o) {
@@ -49,8 +41,8 @@ public class AlarmsModel {
                     return false;
                 }
 
-                Object this$isShown = this.getIsShown();
-                Object other$isShown = other.getIsShown();
+                Object this$isShown = this.viewIsShown();
+                Object other$isShown = other.viewIsShown();
                 if (this$isShown == null) {
                     if (other$isShown != null) {
                         return false;
@@ -87,7 +79,7 @@ public class AlarmsModel {
         int result = 1;
         Object $allAlarmsList = this.getAllAlarmsList();
         result = result * 59 + ($allAlarmsList == null ? 43 : $allAlarmsList.hashCode());
-        Object $isShown = this.getIsShown();
+        Object $isShown = this.viewIsShown();
         result = result * 59 + ($isShown == null ? 43 : $isShown.hashCode());
         Object $airPressureLoAlarm = this.getAirPressureLoAlarm();
         result = result * 59 + ($airPressureLoAlarm == null ? 43 : $airPressureLoAlarm.hashCode());
@@ -97,7 +89,7 @@ public class AlarmsModel {
     }
 
     public String toString() {
-        ObservableList var10000 = this.getAllAlarmsList();
-        return "AlarmsModel(allAlarmsList=" + var10000 + ", isShown=" + this.getIsShown() + ", airPressureLoAlarm=" + this.getAirPressureLoAlarm() + ", airPressureHiAlarm=" + this.getAirPressureHiAlarm() + ")";
+        ObservableList<Log> var10000 = this.getAllAlarmsList();
+        return "AlarmsModel(allAlarmsList=" + var10000 + ", isShown=" + this.viewIsShown() + ", airPressureLoAlarm=" + this.getAirPressureLoAlarm() + ", airPressureHiAlarm=" + this.getAirPressureHiAlarm() + ")";
     }
 }

@@ -1,7 +1,6 @@
 package com.batch.Services.BatchController;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchOrders;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchParallelStepsModel;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchStates;
 import com.batch.DTO.BatchSystemDataDefinitions.BatchStepModel;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhaseParameterType;
@@ -20,11 +19,10 @@ import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.batch.Services.NotificationService.BackGroundServices;
 import com.batch.Services.NotificationService.NotificationService;
 import com.google.common.collect.Lists;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -34,7 +32,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class BatchService {
-    private static final Logger log = LogManager.getLogger(BatchService.class);
     private final ModBusService modBusService;
     private final BatchesService batchesService;
     private final BatchControllerDataService batchControllerDataService;
@@ -50,6 +47,9 @@ public class BatchService {
     @Autowired
     @BackGroundServices
     private NotificationService notificationService;
+
+    @Autowired
+    private MessageLoggingService log;
 
     public BatchService(final ModBusService modBusService, final BatchesService batchesService, final BatchControllerDataService batchControllerDataService, final RecipeConfigService recipeConfigService, final PhaseRepository phaseRepository, final PLCDataDefinitionFactory plcDataDefinitionFactory) {
         this.modBusService = modBusService;
@@ -146,13 +146,13 @@ public class BatchService {
                             this.clearRowDataDefinition(data.getUnit());
                         }
                     } catch (Exception e) {
-                        log.fatal(e, e);
+                        log.logExcption("BatchService [Run]", e);
                         this.notificationService.newErrorMessage("Batch controller", "Main run inner", e.getMessage());
                     }
                 }
             }
         } catch (Exception e) {
-            log.fatal(e, e);
+            log.logExcption("BatchService [Run]", e);
             this.notificationService.newErrorMessage("Batch controller", "Main run", e.getMessage());
         }
 

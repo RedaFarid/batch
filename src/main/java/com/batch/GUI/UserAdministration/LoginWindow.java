@@ -4,7 +4,6 @@ import com.batch.Database.Entities.User;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -25,7 +24,6 @@ import javafx.stage.StageStyle;
 import java.util.Optional;
 
 public class LoginWindow extends Stage {
-    private static LoginWindow singleton = null;
     private static final VBox root = new VBox();
     private static final Scene scene;
     private static final Button LogIn;
@@ -34,6 +32,7 @@ public class LoginWindow extends Stage {
     private static final TextField username;
     private static final PasswordField password;
     private static final User user;
+    private static LoginWindow singleton = null;
     private static Optional<User> returnValue;
 
     static {

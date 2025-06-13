@@ -11,8 +11,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TreeItem;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 
@@ -23,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Controller
 public class PhasesController {
-    private static final Logger log = LogManager.getLogger(PhasesController.class);
     private final PhasesModel model = new PhasesModel();
     private final PhaseRepository phaseRepository;
     private final UnitsRepository unitsRepository;

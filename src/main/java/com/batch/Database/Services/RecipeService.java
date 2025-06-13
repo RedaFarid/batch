@@ -4,8 +4,6 @@ import com.batch.DTO.RecipeSystemDataDefinitions.RecipeModel;
 import com.batch.Database.Entities.Recipe;
 import com.batch.Database.Repositories.RecipesRepository;
 import com.google.common.collect.Lists;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -21,7 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class RecipeService {
-    private static final Logger log = LogManager.getLogger(RecipeService.class);
     private final RecipesRepository recipesRepository;
 
     public RecipeService(final RecipesRepository recipesRepository) {

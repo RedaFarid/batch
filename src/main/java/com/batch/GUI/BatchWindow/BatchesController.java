@@ -1,8 +1,6 @@
 package com.batch.GUI.BatchWindow;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchOrders;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchParallelStepsModel;
-import com.batch.DTO.BatchSystemDataDefinitions.BatchStepModel;
 import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
 import com.batch.Database.Entities.*;
 import com.batch.Database.Repositories.MaterialsRepository;
@@ -15,8 +13,6 @@ import com.batch.Database.Services.RecipeService;
 import com.batch.GUI.RecipeEditor.RecipeEditorController;
 import com.google.common.collect.Lists;
 import javafx.beans.property.ReadOnlyBooleanProperty;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +25,6 @@ import java.util.function.Consumer;
 
 @Controller
 public class BatchesController {
-    private static final Logger log = LogManager.getLogger(BatchesController.class);
     private final BatchesModel model = new BatchesModel();
     private final TreeViewItemsDataRepository treeViewItemsDataRepository;
     private final RecipeService recipeService;

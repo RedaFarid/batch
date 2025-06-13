@@ -10,16 +10,16 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ModbusClientUpdated {
+    private final AtomicInteger transactionIdentifierCounter = new AtomicInteger(0);
+    private final byte[] crc = new byte[2];
     public byte[] receiveData;
     public byte[] sendData;
     protected String ipAddress = "190.168.0.1";
     protected int port = 502;
-    private final AtomicInteger transactionIdentifierCounter = new AtomicInteger(0);
     private Socket tcpClientSocket = new Socket();
     private byte[] transactionIdentifier = new byte[2];
     private byte[] protocolIdentifier = new byte[2];
     private byte[] length = new byte[2];
-    private final byte[] crc = new byte[2];
     private byte unitIdentifier = 1;
     private byte functionCode;
     private byte[] startingAddress = new byte[2];

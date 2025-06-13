@@ -1,6 +1,5 @@
 package com.batch.Services.LoggingService;
 
-import com.batch.ApplicationContext;
 import com.batch.Database.Entities.TagLog;
 import com.batch.Database.Repositories.TagLogRepository;
 import com.batch.PLCDataSource.PLC.ComplexDataType.Logging;
@@ -11,6 +10,7 @@ import com.batch.PLCDataSource.PLC.ElementaryDefinitions.ValueObject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class ProcessTagLoggingService {
     }
 
     @EventListener
-    public void atStart(ApplicationContext.GraphicsInitializerEvent event) {
+    public void atStart(ContextStartedEvent event) {
         this.allDevices = this.plcDataDefinitionFactory.getAllDevicesDataModel();
     }
 

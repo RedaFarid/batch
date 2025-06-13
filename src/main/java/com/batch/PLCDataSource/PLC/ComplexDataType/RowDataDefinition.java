@@ -10,13 +10,13 @@ import java.util.Map;
 public abstract class RowDataDefinition {
     protected final boolean In = true;
     protected final boolean Out = false;
-    protected String name;
-    private int InAddressOffset;
-    private int OutAddressOffset;
     private final Map<RowAttripute, EDT> elementsDataType = Collections.synchronizedMap(new LinkedHashMap());
     private final Map<RowAttripute, Address> elementsAddress = Collections.synchronizedMap(new LinkedHashMap());
     private final Map<RowAttripute, ValueObject> elementsValue = Collections.synchronizedMap(new LinkedHashMap());
     private final Map<RowAttripute, Boolean> inOutIndecator = Collections.synchronizedMap(new LinkedHashMap());
+    protected String name;
+    private int InAddressOffset;
+    private int OutAddressOffset;
     private Map<RowAttripute, TagQuality> quality = Collections.synchronizedMap(new LinkedHashMap());
     private Map<RowAttripute, Alarming> enableAlarmLogging = Collections.synchronizedMap(new LinkedHashMap());
     private Map<RowAttripute, Logging> enableTagLogging = Collections.synchronizedMap(new LinkedHashMap());

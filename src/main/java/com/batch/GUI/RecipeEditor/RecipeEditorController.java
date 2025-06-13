@@ -5,11 +5,11 @@ import com.batch.Database.Entities.*;
 import com.batch.Database.Repositories.*;
 import com.batch.Database.Services.RecipeService;
 import com.batch.GUI.InitialWindow.InitialWindow;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.google.common.collect.Lists;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.concurrent.Task;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 
@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Controller
 public class RecipeEditorController {
-    private static final Logger log = LogManager.getLogger(RecipeEditorController.class);
     private final ParametersRepository parametersRepository;
     private final PhaseRepository phaseRepository;
     private final RecipeService recipeService;
@@ -29,6 +28,9 @@ public class RecipeEditorController {
     private final RecipeConfRepository recipeConfRepository;
     private final MaterialsRepository materialsRepository;
     private final TaskExecutor executor;
+
+    @Autowired
+    MessageLoggingService log;
 
     public RecipeEditorController(final ParametersRepository parametersRepository, final PhaseRepository phaseRepository, final RecipeService recipeService, final TreeViewItemsDataRepository treeViewItemsDataRepository, final RecipeConfRepository recipeConfRepository, final MaterialsRepository materialsRepository, final TaskExecutor executor) {
         this.parametersRepository = parametersRepository;
@@ -61,7 +63,7 @@ public class RecipeEditorController {
         Optional<RecipeConf> anyRecipeConf = Lists.newArrayList(this.recipeConfRepository.findAll()).stream().findAny();
         Objects.requireNonNull(recipeConf);
         anyRecipeConf.ifPresentOrElse(recipeConf::set, () -> recipeConf.set(this.recipeConfRepository.save(new RecipeConf())));
-        log.error(recipeConf);
+        log.system(recipeConf.toString());
         return recipeConf.get();
     }
 

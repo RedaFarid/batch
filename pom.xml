@@ -270,24 +270,15 @@
 
     <build>
         <plugins>
-
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!--                <configuration>-->
-                <!--                    <arguments>&#45;&#45;enable-preview</arguments>-->
-                <!--                    <jvmArguments>&#45;&#45;enable-preview</jvmArguments>-->
-                <!--                </configuration>-->
+                <version>3.5.0</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <!--                <version>3.0.0-M4</version>-->
-                <!--                <configuration>-->
-                <!--                    <argLine>&#45;&#45;enable-preview</argLine>-->
-                <!--                </configuration>-->
             </plugin>
 
             <plugin>
@@ -297,19 +288,13 @@
                 <configuration>
                     <source>22</source>
                     <target>22</target>
-                    <!--                    <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
-                    <!--                    <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
-                    <!--					<compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
                 </configuration>
-                <!--				<configuration>-->
-                <!--					<compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
-                <!--                    <source>14</source>-->
-                <!--                    <target>14</target>-->
-                <!--                </configuration>-->
             </plugin>
+
             <plugin>
                 <groupId>com.akathist.maven.plugins.launch4j</groupId>
                 <artifactId>launch4j-maven-plugin</artifactId>
+                <version>2.5.3</version>
                 <executions>
                     <execution>
                         <id>l4j-clui</id>
@@ -321,33 +306,26 @@
                             <headerType>gui</headerType>
                             <outfile>target/MIXING_PLATFORM.exe</outfile>
                             <jar>target/batch-0.0.1.jar</jar>
-                            <errTitle>Error</errTitle>
+                            <errTitle>encc</errTitle>
                             <singleInstance>
                                 <mutexName>MIXING_PLATFORM</mutexName>
                                 <windowTitle>MIXING_PLATFORM</windowTitle>
                             </singleInstance>
-                            <splash>
-                                <file>D:\splash.bmp</file>
-                                <waitForWindow>true</waitForWindow>
-                                <timeout>900</timeout>
-                            </splash>
+                            <!--							<splash>-->
+                            <!--								<file>E:\splash .bmp</file>-->
+                            <!--								<waitForWindow>true</waitForWindow>-->
+                            <!--								<timeout>900</timeout>-->
+                            <!--							</splash>-->
                             <stayAlive>false</stayAlive>
                             <classPath>
                                 <mainClass>org.springframework.boot.loader.JarLauncher</mainClass>
                                 <addDependencies>true</addDependencies>
                                 <preCp>anything</preCp>
                             </classPath>
-
-
                             <jre>
-                                <path>bin/jdk-16.0.1</path>
-                                <bundledJre64Bit>true</bundledJre64Bit>
-                                <bundledJreAsFallback>true</bundledJreAsFallback>
-                                <minVersion>16</minVersion>
-                                <jdkPreference>preferJre</jdkPreference>
-                                <runtimeBits>64/32</runtimeBits>
+                                <path>bin/jdk-22</path>
+                                <minVersion>22</minVersion>
                             </jre>
-
                             <versionInfo>
                                 <fileVersion>1.0.0.0</fileVersion>
                                 <txtFileVersion>1.0.0.0</txtFileVersion>
@@ -363,7 +341,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 

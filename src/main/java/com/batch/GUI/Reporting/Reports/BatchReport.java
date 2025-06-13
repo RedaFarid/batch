@@ -12,7 +12,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.print.*;
 import javafx.print.Printer.MarginType;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -35,9 +34,6 @@ public class BatchReport extends Stage {
     private final TriConsumer<ReportModel, File, Runnable> consumer;
     private final Printer printer = Printer.getDefaultPrinter();
     private final PageLayout pageLayout;
-    private double width;
-    private double height;
-    private Stage mainWindow;
     private final VBox mainRoot;
     private final BorderPane root;
     private final VBox center;
@@ -50,6 +46,9 @@ public class BatchReport extends Stage {
     private final Button export;
     private final ReportModel dataModel;
     private final Color TABLE_LABEL_COLOR;
+    private double width;
+    private double height;
+    private Stage mainWindow;
 
     public BatchReport(ReportModel model, Stage window, TriConsumer<ReportModel, File, Runnable> consumer) {
         this.pageLayout = this.printer.createPageLayout(Paper.A4, PageOrientation.LANDSCAPE, MarginType.EQUAL);

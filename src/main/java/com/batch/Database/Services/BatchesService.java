@@ -4,8 +4,6 @@ import com.batch.DTO.BatchSystemDataDefinitions.BatchModel;
 import com.batch.Database.Entities.Batch;
 import com.batch.Database.Repositories.BatchesRepository;
 import com.google.common.collect.Lists;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,7 +26,6 @@ import java.util.stream.Collectors;
         propagation = Propagation.REQUIRES_NEW
 )
 public class BatchesService {
-    private static final Logger log = LogManager.getLogger(BatchesService.class);
     private final BatchesRepository batchesRepository;
 
     public BatchesService(final BatchesRepository batchesRepository) {

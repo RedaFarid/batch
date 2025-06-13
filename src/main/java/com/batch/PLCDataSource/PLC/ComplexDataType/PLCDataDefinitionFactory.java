@@ -1,15 +1,14 @@
 package com.batch.PLCDataSource.PLC.ComplexDataType;
 
-import com.batch.ApplicationContext;
 import com.batch.Database.Repositories.RecipeConfRepository;
 import com.batch.Database.Repositories.UnitsRepository;
 import com.batch.PLCDataSource.PLC.ComplexDataType.Batches.BatchPhasesDataDefinition;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
-import com.batch.PLCDataSource.PLC.ElementaryDefinitions.EDT;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.IntegerDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
 import com.google.common.collect.Lists;
 import jakarta.annotation.PostConstruct;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -80,7 +79,7 @@ public class PLCDataDefinitionFactory {
     }
 
     @EventListener
-    public void afterAppStart(ApplicationContext.GraphicsInitializerEvent event) {
+    public void afterAppStart(ContextStartedEvent event) {
         this.AddBatchData();
     }
 

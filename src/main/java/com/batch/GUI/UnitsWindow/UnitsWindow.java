@@ -2,7 +2,6 @@ package com.batch.GUI.UnitsWindow;
 
 import com.batch.ApplicationContext;
 import com.batch.Database.Entities.Unit;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;

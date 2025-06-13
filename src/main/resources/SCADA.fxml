@@ -11,7 +11,7 @@
 
 <AnchorPane id="AnchorPane" fx:id="BackGround" prefHeight="1080.0" prefWidth="1920.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.batch.GUI.InitialWindow.SCADAController">
     <stylesheets>
-        <URL value="@/Styles/scada.css" />
+        <URL value="@/com/batch/GUI/Styles/scada.css" />
     </stylesheets>
    <children>
       <ImageView fitHeight="20.0" fitWidth="200.0" layoutX="919.0" layoutY="286.0" pickOnBounds="true" preserveRatio="true" scaleX="5.0">

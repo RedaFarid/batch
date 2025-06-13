@@ -10,12 +10,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SCADAController {
-    private static final Map<String, ImageView> valves = new LinkedHashMap();
-    private static final Map<String, ImageView> pumps = new LinkedHashMap();
-    private static final Map<String, ImageView> mixers = new LinkedHashMap();
-    private static final Map<String, Pane> levelBars = new LinkedHashMap();
-    private static final Map<String, Label> levelLabels = new LinkedHashMap();
-    private static Map<String, Label> weightLabels = new LinkedHashMap();
+    private static final Map<String, ImageView> valves = new LinkedHashMap<>();
+    private static final Map<String, ImageView> pumps = new LinkedHashMap<>();
+    private static final Map<String, ImageView> mixers = new LinkedHashMap<>();
+    private static final Map<String, Pane> levelBars = new LinkedHashMap<>();
+    private static final Map<String, Label> levelLabels = new LinkedHashMap<>();
+    private static Map<String, Label> weightLabels = new LinkedHashMap<>();
     private static Pane waterLevel;
     private static AnchorPane Parent;
     private static Pane WaterPress;

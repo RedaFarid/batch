@@ -1,7 +1,6 @@
 package com.batch;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -16,14 +15,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @EnableAsync
 @EnableScheduling
 public class AsyncConfigurations {
-    private static final Logger log = LogManager.getLogger(AsyncConfigurations.class);
+
 
     @Bean
     @Primary
-    public TaskScheduler taskScheduler() {
+    public TaskScheduler taskScheduler(MessageLoggingService log) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(10);
-        scheduler.setErrorHandler((t) -> log.fatal(t.getMessage()));
+        scheduler.setErrorHandler((t) -> log.system(t.getMessage()));
         scheduler.setWaitForTasksToCompleteOnShutdown(true);
         scheduler.setThreadNamePrefix("Service-layer-scheduler");
         scheduler.initialize();
@@ -43,13 +42,11 @@ public class AsyncConfigurations {
         return executor;
     }
 
-    @Bean(
-            name = {"ModbusScheduler"}
-    )
-    public TaskScheduler modbusScheduler() {
+    @Bean(name = {"ModbusScheduler"})
+    public TaskScheduler modbusScheduler(MessageLoggingService log) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(3);
-        scheduler.setErrorHandler((t) -> log.fatal(t.getMessage()));
+        scheduler.setErrorHandler((t) -> log.system(t.getMessage()));
         scheduler.setWaitForTasksToCompleteOnShutdown(true);
         scheduler.setThreadNamePrefix("Mod_bus-scheduler");
         scheduler.initialize();

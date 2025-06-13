@@ -5,7 +5,6 @@ import javafx.beans.property.FloatProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -15,7 +14,6 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 
 public class MeasurementBarGraphics extends HBox {
     private final double Height;
@@ -38,12 +36,12 @@ public class MeasurementBarGraphics extends HBox {
     private final PhongMaterial normal;
     private final PhongMaterial warning;
     private final PhongMaterial alarm;
+    private final DoubleProperty angleX;
+    private final DoubleProperty angleY;
     private double anchorX;
     private double anchorY;
     private double anchorAngleX;
     private double anchorAngleY;
-    private final DoubleProperty angleX;
-    private final DoubleProperty angleY;
 
     public MeasurementBarGraphics(FloatProperty value, FloatProperty zero, FloatProperty span, FloatProperty lowWarning, FloatProperty lowAlarm, FloatProperty highWarning, FloatProperty highAlarm) {
         this.normal = new PhongMaterial(Color.LIGHTGREEN);

@@ -1,6 +1,5 @@
 package com.batch.Services.LoggingService;
 
-import com.batch.ApplicationContext;
 import com.batch.Database.Entities.Log;
 import com.batch.PLCDataSource.PLC.ComplexDataType.Alarming;
 import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
@@ -10,6 +9,7 @@ import com.batch.Utilities.LogIdentefires;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +18,16 @@ import java.util.List;
 
 @Service
 public class ProcessAlarmLoggingService {
-    private final LoggingService loggingService;
+    private final MessageLoggingService messageLoggingService;
     private final PLCDataDefinitionFactory plcDataDefinitionFactory;
 
-    public ProcessAlarmLoggingService(final LoggingService loggingService, final PLCDataDefinitionFactory plcDataDefinitionFactory) {
-        this.loggingService = loggingService;
+    public ProcessAlarmLoggingService(final MessageLoggingService messageLoggingService, final PLCDataDefinitionFactory plcDataDefinitionFactory) {
+        this.messageLoggingService = messageLoggingService;
         this.plcDataDefinitionFactory = plcDataDefinitionFactory;
     }
 
     @EventListener
-    private void initialization(ApplicationContext.GraphicsInitializerEvent event) {
+    private void initialization(ContextStartedEvent event) {
         this.plcDataDefinitionFactory.getAllDevicesDataModel().values().stream().flatMap((item) -> {
             List<AlarmDataHolder> list = new ArrayList();
             item.getEnableAlarmLogging().forEach((att, val) -> {
@@ -51,15 +51,15 @@ public class ProcessAlarmLoggingService {
                         record = new Log(element.getIdentifier().name(), element.getName(), "Alarm : -->" + element.getAttribute().toString() + "<-- was deactivated [changed from 1 to 0]");
                     }
 
-                    this.loggingService.LogRecord(record);
+                    this.messageLoggingService.logEvent(record);
                 });
                 case Integer -> ((IntegerProperty) element.getValue()).addListener((observable, oldValue, newValue) -> {
                     Log record = new Log(element.getIdentifier().name(), element.getName(), " Alarm : -->" + element.getAttribute().toString() + "<-- Value changed from " + oldValue + " to " + newValue);
-                    this.loggingService.LogRecord(record);
+                    this.messageLoggingService.logEvent(record);
                 });
                 case Real -> ((FloatProperty) element.getValue()).addListener((observable, oldValue, newValue) -> {
                     Log record = new Log(element.getIdentifier().name(), element.getName(), " Alarm : -->" + element.getAttribute().toString() + "<-- Value changed from " + oldValue + " to " + newValue);
-                    this.loggingService.LogRecord(record);
+                    this.messageLoggingService.logEvent(record);
                 });
             }
 

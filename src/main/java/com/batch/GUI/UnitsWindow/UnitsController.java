@@ -2,12 +2,13 @@ package com.batch.GUI.UnitsWindow;
 
 import com.batch.Database.Entities.Unit;
 import com.batch.Database.Repositories.UnitsRepository;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.google.common.collect.Lists;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
@@ -17,21 +18,18 @@ import java.util.stream.Collectors;
 
 @Controller
 public class UnitsController {
-    private static final Logger log = LogManager.getLogger(UnitsController.class);
+
+    @Getter
     private final UnitsModel model = new UnitsModel();
     private final UnitsRepository unitsRepository;
+    @Autowired
+    MessageLoggingService log;
 
     public UnitsController(final UnitsRepository unitsRepository) {
         this.unitsRepository = unitsRepository;
     }
 
-    public UnitsModel getModel() {
-        return this.model;
-    }
-
-    @Scheduled(
-            fixedDelay = 1000L
-    )
+    @Scheduled(fixedDelay = 1000L)
     public void update() {
         try {
             if (this.model.getIsShown().getValue()) {
@@ -41,7 +39,7 @@ public class UnitsController {
                 updateTask.get();
             }
         } catch (Exception e) {
-            log.fatal(e, e);
+            log.logExcption("UnitsController [Update]", e);
         }
 
     }

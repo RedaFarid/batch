@@ -3,15 +3,13 @@ package com.batch.PLCDataSource.ModBus;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Utilities.StringUtilsL;
 import javafx.beans.property.BooleanProperty;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class ModbusSender extends ModbusSystem {
-    private static final Logger log = LogManager.getLogger(ModbusSender.class);
     private final BooleanProperty bufferSynchronized;
     private final BooleanProperty connectionStatus;
     private final Runnable dataMapperTask;
@@ -45,7 +43,7 @@ public class ModbusSender extends ModbusSystem {
     }
 
     protected void taskProcedure(int start, int quantity) throws Exception {
-        List<Byte> tempBuffer = new ArrayList(super.buffer.values());
+        List<Byte> tempBuffer = new ArrayList<>(super.buffer.values());
 
         for (this.i = 0; this.i < quantity; ++this.i) {
             int address = this.j * 120 * 2 + this.i * 2;

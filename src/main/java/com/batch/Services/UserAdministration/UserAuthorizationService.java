@@ -11,8 +11,6 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextStartedEvent;
@@ -30,7 +28,6 @@ import java.util.stream.Stream;
 
 @Service
 public class UserAuthorizationService {
-    private static final Logger log = LogManager.getLogger(UserAuthorizationService.class);
     private static ConfigurableApplicationContext configurableApplicationContext;
     private final List<WindowData> windows = new LinkedList();
     private final BooleanProperty isThereUserLoggedIn = new SimpleBooleanProperty();

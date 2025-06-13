@@ -2,11 +2,11 @@ package com.batch.Services.NotificationService.BackgroundServicesNotifier;
 
 import com.batch.Database.Entities.Notifications.NotificationDTO;
 import com.batch.Database.Services.Notifications.NotificationsDAO;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.batch.Services.NotificationService.*;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.concurrent.Task;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -23,12 +23,14 @@ import java.util.stream.Stream;
 @Service
 @BackGroundServices
 public class BackGroundNotificationsService extends NotificationService {
-    private static final Logger log = LogManager.getLogger(BackGroundNotificationsService.class);
     private final AtomicBoolean isConfigurationsEnabled = new AtomicBoolean(true);
     @Autowired
     private NotificationsDAO notificationsDAO;
     @Autowired
     private Executor executor;
+
+    @Autowired
+    private MessageLoggingService log;
 
     @Async
     public void saveNewErrorToDatabase(String serviceName, String familyName, String message) {
@@ -38,7 +40,7 @@ public class BackGroundNotificationsService extends NotificationService {
         notificationDTO.setFamilyName(familyName);
         notificationDTO.setErrorMessage(message);
         this.notificationsDAO.save(notificationDTO).exceptionally((error) -> {
-            log.fatal(error, error);
+            log.logExcption("BackgroundnotificationService [saveNewErrorToDatabase]", error);
             return null;
         });
     }
@@ -56,7 +58,7 @@ public class BackGroundNotificationsService extends NotificationService {
                     BGAcknowledgementObject acknowledgementObject1 = (BGAcknowledgementObject) acknowledgementObject;
                     BackGroundNotificationsService.this.notificationsDAO.deleteSelected(acknowledgementObject1.getServiceName(), acknowledgementObject1.getFamilyName());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.logExcption("BackgroundnotificationService [saveNewErrorToDatabase]", e);
                 }
 
                 return null;
@@ -74,14 +76,14 @@ public class BackGroundNotificationsService extends NotificationService {
                 List<NotificationDTO> databaseList = this.notificationsDAO.findAllSync();
                 List<ErrorObject> actualList = this.getNotificationsDataStructure().getAllErrorObjects();
                 databaseList.stream().map(CompareObject::toCompareObject).filter((item) -> {
-                    Stream var10000 = actualList.stream().flatMap(CompareObject::toCompareObject);
+                    Stream<CompareObject> list = actualList.stream().flatMap(CompareObject::toCompareObject);
                     Objects.requireNonNull(item);
-                    return var10000.noneMatch(item::equals);
+                    return list.noneMatch(item::equals);
                 }).forEach((newAdd) -> this.addErrorMessage(newAdd.getServiceName(), newAdd.getFamilyName(), new MessageObject(newAdd.getErrorMessage(), false)));
                 actualList.stream().flatMap(CompareObject::toCompareObject).filter((item) -> databaseList.stream().map(CompareObject::toCompareObject).noneMatch((dataBaseItem) -> dataBaseItem.equals(item))).forEach((remove) -> this.removeErrorMessage(remove.getServiceName(), remove.getFamilyName(), remove.getErrorMessage()));
             }
         } catch (Exception e) {
-            log.fatal(e, e);
+            log.logExcption("BackgroundnotificationService [updateDataStructureFromDatabase]", e);
         }
 
     }
@@ -94,6 +96,7 @@ public class BackGroundNotificationsService extends NotificationService {
     public void errorsListenerToGenerateAlarms() {
     }
 
+    @Getter
     private static class CompareObject {
         private String serviceName;
         private String familyName;
@@ -128,24 +131,12 @@ public class BackGroundNotificationsService extends NotificationService {
             return com.google.common.base.Objects.hashCode(this.serviceName, this.familyName, this.errorMessage);
         }
 
-        public String getServiceName() {
-            return this.serviceName;
-        }
-
         public void setServiceName(final String serviceName) {
             this.serviceName = serviceName;
         }
 
-        public String getFamilyName() {
-            return this.familyName;
-        }
-
         public void setFamilyName(final String familyName) {
             this.familyName = familyName;
-        }
-
-        public String getErrorMessage() {
-            return this.errorMessage;
         }
 
         public void setErrorMessage(final String errorMessage) {

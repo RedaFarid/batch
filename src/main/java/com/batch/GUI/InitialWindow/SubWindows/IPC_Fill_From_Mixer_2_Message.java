@@ -6,7 +6,6 @@ import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -68,7 +67,7 @@ public class IPC_Fill_From_Mixer_2_Message extends Stage {
         this.root.setPadding(new Insets(5.0F));
         this.root.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE.darker(), CornerRadii.EMPTY, Insets.EMPTY)));
         Scene scene = new Scene(this.root);
-        scene.getStylesheets().add("/GUI/Styles/Faceplate.css");
+        scene.getStylesheets().add("Styles/Faceplate.css");
         this.setScene(scene);
         this.setTitle("Mixer 2 IPC container filling");
         this.setWidth(400.0F);

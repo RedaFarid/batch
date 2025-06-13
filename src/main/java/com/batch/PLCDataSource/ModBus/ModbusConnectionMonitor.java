@@ -3,8 +3,6 @@ package com.batch.PLCDataSource.ModBus;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Utilities.StringUtilsL;
 import javafx.beans.property.BooleanProperty;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -12,7 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 public class ModbusConnectionMonitor {
-    private static final Logger log = LogManager.getLogger(ModbusConnectionMonitor.class);
     private static volatile ModbusConnectionMonitor singleton = null;
     private final BooleanProperty connectionStatus;
     private final BooleanProperty bufferSynchronized;

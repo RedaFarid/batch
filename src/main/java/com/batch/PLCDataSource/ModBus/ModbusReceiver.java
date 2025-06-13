@@ -3,13 +3,10 @@ package com.batch.PLCDataSource.ModBus;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Utilities.StringUtilsL;
 import javafx.beans.property.BooleanProperty;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
 public class ModbusReceiver extends ModbusSystem {
-    private static final Logger log = LogManager.getLogger(ModbusReceiver.class);
     private final BooleanProperty bufferSynchronized;
     private final BooleanProperty connectionStatus;
     private final Runnable dataMapperTask;

@@ -23,7 +23,7 @@ import com.batch.GUI.UserAdministration.UserAdministrationWindow;
 import com.batch.PLCDataSource.PLC.ComplexDataType.*;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.BooleanDataType;
 import com.batch.PLCDataSource.PLC.ElementaryDefinitions.RealDataType;
-import com.batch.Services.LoggingService.LoggingService;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.batch.Services.UserAdministration.UserEvent;
 import com.batch.Services.UserAdministration.UserEventMessage;
 import com.batch.Services.UserAdministration.WindowData;
@@ -50,7 +50,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -67,22 +66,18 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.Getter;
 import org.controlsfx.dialog.ExceptionDialog;
 import org.kordamp.ikonli.entypo.Entypo;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import java.io.FileNotFoundException;
@@ -92,11 +87,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
+
 
 @Component
 public class InitialWindow implements ApplicationListener<ApplicationContext.GraphicsInitializerEvent> {
-    private static final Logger log = LogManager.getLogger(InitialWindow.class);
+
+    @Getter
+    private Stage initialStage;
+
     private final BorderPane root = new BorderPane();
     private final Scene scene;
     private final TabPane containerPane;
@@ -143,7 +141,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
     private final Background HEALTHY_BACKGROUND;
     private final Background FAULTY_BACKGROUND;
     private final Background CONNECTION_LOSS_BACKGROUND;
-    private Stage initialStage;
     private Parent scada;
     private Map<String, ImageView> valves;
     private Map<String, ImageView> pumps;
@@ -162,8 +159,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
     private InitialWindowModel model;
 
     private InitialWindowController controller;
-    private PLCDataDefinitionFactory plcDataDefinitionFactory;
-    private LoggingService loggingService;
+    private MessageLoggingService log;
 
     private UserAdministrationWindow userAdministrationWindow;
     private NCServicesView ncServicesView;
@@ -226,10 +222,29 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
     }
 
     @EventListener
-    public void onApplicationEvent(ApplicationContext.GraphicsInitializerEvent listener) {
-        System.out.println("graphics initialized");
-        try {
+    public void atRefreshed(ContextRefreshedEvent event) {
+    }
 
+    @EventListener
+    public void atReady(ApplicationReadyEvent event) {
+    }
+
+    @EventListener
+    public void onApplicationEvent(ApplicationContext.GraphicsInitializerEvent listener) {
+
+        try {
+            this.controller = (InitialWindowController) ApplicationContext.applicationContext.getBean("InitialWindowController");
+            this.model = controller.getModel();
+            this.allDataDefinitions = controller.getPLCDataDefinitionFactory().getAllDevicesDataModel();
+            this.log = controller.getMessageLoggingService();
+
+            this.controller.registerWindowToUserAuthorizationService(new WindowData("Recipe window"));
+            this.controller.registerWindowToUserAuthorizationService(new WindowData("Batch window"));
+            this.controller.registerWindowToUserAuthorizationService(new WindowData("Users window"));
+            this.controller.registerWindowToUserAuthorizationService(new WindowData("Phases window"));
+            this.controller.registerWindowToUserAuthorizationService(new WindowData("Units window"));
+            this.controller.registerWindowToUserAuthorizationService(new WindowData("Reporting window"));
+            this.controller.registerWindowToUserAuthorizationService(new WindowData("Material window"));
 
             this.initialStage = listener.getStage();
             this.allAlarmsWindow = AllAlarmsWindow.getWindow(this.initialStage);
@@ -245,8 +260,120 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             this.batchCreator.setMinWidth(800.0F);
             this.batchCreator.setResizable(false);
             this.batchCreator.initOwner(this.initialStage);
+
+            log.system("graphics initialized " + Thread.currentThread().getName());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.logExcption("Initial window [On Application Event]", e);
+        }
+
+    }
+
+    @EventListener
+    public void atStarted(ContextStartedEvent event) {
+            graphicsBuilder();
+            this.adjustGauges();
+            this.connectionStatus.textProperty().bind(this.model.getConnectionInfo());
+            this.connectionStatus.backgroundProperty().bind(Bindings.when(this.model.getConnectionStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.CONNECTION_LOSS_BACKGROUND));
+            this.connectionStatus.textFillProperty().bind(Bindings.when(this.model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+            this.airPressureStatus.textProperty().bind(this.model.getAirPressureInfo());
+            this.airPressureStatus.backgroundProperty().bind(Bindings.when(this.model.getAirPressureStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
+            this.airPressureStatus.textFillProperty().bind(Bindings.when(this.model.getAirPressureStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+            this.overUnderVoltageStatus.textProperty().bind(this.model.getOverUnderVoltageInfo());
+            this.overUnderVoltageStatus.backgroundProperty().bind(Bindings.when(this.model.getOverUnderVoltageStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
+            this.overUnderVoltageStatus.textFillProperty().bind(Bindings.when(this.model.getOverUnderVoltageStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+            this.ESDStatus.textProperty().bind(this.model.getEsdInfo());
+            this.ESDStatus.backgroundProperty().bind(Bindings.when(this.model.getEsdStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
+            this.ESDStatus.textFillProperty().bind(Bindings.when(this.model.getEsdStatus()).then(Color.BLACK).otherwise(Color.WHITE));
+
+            actionHandler();
+
+        this.controller
+                .getAllBatchControllerData()
+                .stream()
+                .filter((data) -> data.getRunningBatchID() > 0L)
+                .forEach((item) ->
+                        this.controller
+                        .getBatchById(item.getRunningBatchID())
+                        .ifPresentOrElse(this::createBatchObserver,
+                                () -> this.log.logEvent(new Log(LogIdentefires.System.name(), "error creating batch view as batch not found in database ID= " + item.getRunningBatchID()))));
+    }
+
+    @EventListener
+    public void atException(ExceptionWindowRequestEvent event) {
+        ExceptionData exception = event.getException();
+        Platform.runLater(() -> {
+            ExceptionDialog exceptionDialog = new ExceptionDialog(exception.e);
+            exceptionDialog.setHeaderText(exception.header);
+            exceptionDialog.getDialogPane().setMaxWidth(500.0F);
+            exceptionDialog.initOwner(this.initialStage);
+            exceptionDialog.initModality(Modality.WINDOW_MODAL);
+            exceptionDialog.initStyle(StageStyle.UTILITY);
+            exceptionDialog.show();
+        });
+    }
+
+    @Scheduled(fixedDelay = 500L, initialDelay = 2000L)
+    public void run() {
+        try {
+            this.batchObservers.forEach((id, batchObserver) -> batchObserver.update());
+        } catch (Exception e) {
+            log.logExcption("InitialWindow [run]", e);
+        }
+
+    }
+
+    @Scheduled(fixedDelay = 1000L, initialDelay = 20000L)
+    public void updateAlarms() {
+        try {
+            Log lastEnteredLog = this.log.getLastEnteredLog();
+            Platform.runLater(() -> {
+                if (!this.lastAlarmField.getText().equals(lastEnteredLog.toString())) {
+                    this.lastAlarmField.setText(lastEnteredLog.toString());
+                    if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Error.name())) {
+                        this.lastAlarmField.setStyle("-fx-background-color: red; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Warning.name())) {
+                        this.lastAlarmField.setStyle("-fx-background-color: yellow; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Info.name())) {
+                        this.lastAlarmField.setStyle("-fx-background-color: wheat; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.System.name())) {
+                        this.lastAlarmField.setStyle("-fx-background-color: black; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
+                    }
+                }
+
+            });
+        } catch (Exception e) {
+            log.logExcption("InitialWindow [updateAlarms]", e);
+        }
+
+    }
+
+    @EventListener
+    public void newUserLogIn(UserEvent event) {
+        UserEventMessage message = event.getMessage();
+        if (message.isLoggedOn()) {
+            if (message.getUser().getUserName().equals("Administrator")) {
+                this.recipeEditorItem.setDisable(false);
+                this.batchCreatorItem.setDisable(false);
+                this.Phases.setDisable(false);
+                this.UserAdministrationMenuItem.setDisable(false);
+                this.Units.setDisable(false);
+                this.reportingSystem.setDisable(false);
+                this.materialItem.setDisable(false);
+            }
+
+            message.getAllGroupsDTO().getList().forEach((windowGroupsDTO) -> {
+                LinkedHashMap<String, List<Group>> rowGroup = windowGroupsDTO.getRowGroup();
+            });
+        } else {
+            Platform.runLater(() -> {
+                this.recipeEditorItem.setDisable(true);
+                this.batchCreatorItem.setDisable(true);
+                this.Phases.setDisable(true);
+                this.UserAdministrationMenuItem.setDisable(true);
+                this.Units.setDisable(true);
+                this.reportingSystem.setDisable(true);
+                this.materialItem.setDisable(true);
+            });
         }
 
     }
@@ -298,8 +425,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             this.airPress = SCADAController.getAirPress();
             this.scada.setScaleY(0.92);
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(InitialWindow.class.getName()).log(Level.SEVERE, null, ex);
-            log.fatal(ex, ex);
+            log.logExcption("InitialWindow [GraphicsBuilder]", ex);
         }
 
 
@@ -321,22 +447,20 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
         this.LogOutItem.setGraphic(logoutFontIconItem);
         this.root.setCenter(this.containerPane);
         this.root.setTop(this.topBars);
-        this.scene.getStylesheets().add(Resources.getResource("Styles/scada.css").toString());
+        this.scene.getStylesheets().add(Resources.getResource("Views/scada.css").toString());
         this.initialStage.setScene(this.scene);
         this.initialStage.setTitle("Mixing Platform");
         this.initialStage.setMaximized(true);
 
         try {
-            this.initialStage.getIcons().add(new Image(ResourceUtils.getURL("classpath:Icons/splash.png").toString()));
+            this.initialStage.getIcons().add(new Image(ResourceUtils.getURL("Icons/splash.png").toString()));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            log.logExcption("InitialWindow [GraphicsBuilder]", e);
         }
 
         this.initialStage.show();
     }
-
-    @EventListener
-    public void actionHandler(ContextStartedEvent event) {
+    public void actionHandler() {
         try {
             this.Units.setOnAction((action) -> UnitsWindow.getWindow(this.initialStage).show());
             this.Phases.setOnAction((action) -> PhasesWindow.getWindow(this.initialStage).show());
@@ -387,9 +511,8 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             this.setWaterTankLevel();
             this.confirmationMessageControl();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.logExcption("InitialWindow [actionHandler]", e);
         }
-
     }
 
     private void handleLevelBlockIcon(String name, Pane bar) {
@@ -435,14 +558,12 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
                         e.printStackTrace();
                     }
                 }
-
             });
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
-
     private void handleMixerBlockIcon(String name, ImageView mixer) {
         Pane pane = new Pane();
         this.SCADAPane.getChildren().add(pane);
@@ -478,7 +599,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
 
         });
     }
-
     private void handlePumpBlockIcon(String name, ImageView pump) {
         Pane pane = new Pane();
         this.SCADAPane.getChildren().add(pane);
@@ -515,7 +635,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
 
         });
     }
-
     private void handleValveBlockIcon(String name, ImageView valve) {
         Pane pane = new Pane();
         this.SCADAPane.getChildren().add(pane);
@@ -603,6 +722,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             e.printStackTrace();
         }
 
+
     }
 
     private void showNotificationCenter() {
@@ -635,7 +755,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
 
         });
     }
-
     private void bindStatusToPump(RowDataDefinition data, ImageView item) {
         Platform.runLater(() -> {
             try {
@@ -656,7 +775,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
 
         });
     }
-
     private void bindStatusToMixer(Mixer data, ImageView item) {
         Platform.runLater(() -> {
             try {
@@ -677,7 +795,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
 
         });
     }
-
     private void bindStatusToMWeight(Weight data, Pane pane, Pane backGroundBar, Label label, Label weightLabel, double Height) {
         Platform.runLater(() -> {
             try {
@@ -731,7 +848,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
 
         });
     }
-
     private void bindStatusToLevel(Weight data, Pane pane, Pane backGroundBar, double Height) {
         Platform.runLater(() -> {
             try {
@@ -806,7 +922,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
                 batchObserver.update();
                 this.containerPane.getSelectionModel().select(batchObserver);
             }
-
         });
     }
 
@@ -833,7 +948,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
         try {
             this.batchCreator.showAndReturnBatch().ifPresent(this::createBatchObserver);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.logExcption("InitilWindow [onBatchCreatorRequest]", e);
         }
 
     }
@@ -1039,112 +1154,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
         });
     }
 
-    @EventListener
-    public void atStartedToInitialize(ContextStartedEvent event) {
-        this.controller = (InitialWindowController) ApplicationContext.applicationContext.getBean("InitialWindowController");
-        this.model = controller.getModel();
-        this.plcDataDefinitionFactory = controller.getPLCDataDefinitionFactory();
-        this.loggingService = controller.getLoggingService();
-
-        this.allDataDefinitions = this.plcDataDefinitionFactory.getAllDevicesDataModel();
-        this.controller.registerWindowToUserAuthorizationService(new WindowData("Recipe window"));
-        this.controller.registerWindowToUserAuthorizationService(new WindowData("Batch window"));
-        this.controller.registerWindowToUserAuthorizationService(new WindowData("Users window"));
-        this.controller.registerWindowToUserAuthorizationService(new WindowData("Phases window"));
-        this.controller.registerWindowToUserAuthorizationService(new WindowData("Units window"));
-        this.controller.registerWindowToUserAuthorizationService(new WindowData("Reporting window"));
-        this.controller.registerWindowToUserAuthorizationService(new WindowData("Material window"));
-
-        this.controller.getAllBatchControllerData().stream().filter((data) -> data.getRunningBatchID() > 0L).forEach((item) -> this.controller.getBatchById(item.getRunningBatchID()).ifPresentOrElse(this::createBatchObserver, () -> this.loggingService.LogRecord(new Log(LogIdentefires.System.name(), "error creating batch view as batch not found in database  \n" + item))));
-        Platform.runLater(() -> {
-            graphicsBuilder();
-            this.adjustGauges();
-            this.connectionStatus.textProperty().bind(this.model.getConnectionInfo());
-            this.connectionStatus.backgroundProperty().bind(Bindings.when(this.model.getConnectionStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.CONNECTION_LOSS_BACKGROUND));
-            this.connectionStatus.textFillProperty().bind(Bindings.when(this.model.getConnectionStatus()).then(Color.BLACK).otherwise(Color.WHITE));
-            this.airPressureStatus.textProperty().bind(this.model.getAirPressureInfo());
-            this.airPressureStatus.backgroundProperty().bind(Bindings.when(this.model.getAirPressureStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
-            this.airPressureStatus.textFillProperty().bind(Bindings.when(this.model.getAirPressureStatus()).then(Color.BLACK).otherwise(Color.WHITE));
-            this.overUnderVoltageStatus.textProperty().bind(this.model.getOverUnderVoltageInfo());
-            this.overUnderVoltageStatus.backgroundProperty().bind(Bindings.when(this.model.getOverUnderVoltageStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
-            this.overUnderVoltageStatus.textFillProperty().bind(Bindings.when(this.model.getOverUnderVoltageStatus()).then(Color.BLACK).otherwise(Color.WHITE));
-            this.ESDStatus.textProperty().bind(this.model.getEsdInfo());
-            this.ESDStatus.backgroundProperty().bind(Bindings.when(this.model.getEsdStatus()).then(this.HEALTHY_BACKGROUND).otherwise(this.FAULTY_BACKGROUND));
-            this.ESDStatus.textFillProperty().bind(Bindings.when(this.model.getEsdStatus()).then(Color.BLACK).otherwise(Color.WHITE));
-        });
-    }
-
-    @EventListener
-    public void atRefreshed(ContextRefreshedEvent event) {
-
-    }
-
-    @Scheduled(fixedDelay = 500L, initialDelay = 2000L)
-    public void run() {
-        try {
-            this.batchObservers.forEach((id, batchObserver) -> batchObserver.update());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Scheduled(fixedDelay = 1000L, initialDelay = 20000L)
-    public void updateAlarms() {
-        try {
-            Log lastEnteredLog = this.loggingService.getLastEnteredLog();
-            Platform.runLater(() -> {
-                if (!this.lastAlarmField.getText().equals(lastEnteredLog.toString())) {
-                    this.lastAlarmField.setText(lastEnteredLog.toString());
-                    if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Error.name())) {
-                        this.lastAlarmField.setStyle("-fx-background-color: red; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
-                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Warning.name())) {
-                        this.lastAlarmField.setStyle("-fx-background-color: yellow; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
-                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.Info.name())) {
-                        this.lastAlarmField.setStyle("-fx-background-color: wheat; -fx-dark-text-color: black;-fx-mid-text-color: black;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
-                    } else if (lastEnteredLog.getIdentifier().equals(LogIdentefires.System.name())) {
-                        this.lastAlarmField.setStyle("-fx-background-color: black; -fx-dark-text-color: white;-fx-mid-text-color: white;-fx-font-weight:bold;-fx-font-style:normal;-fx-font-size:16;-fx-font-family: monospace;");
-                    }
-                }
-
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @EventListener
-    public void newUserLogIn(UserEvent event) {
-        UserEventMessage message = event.getMessage();
-        if (message.isLoggedOn()) {
-            if (message.getUser().getUserName().equals("Administrator")) {
-                this.recipeEditorItem.setDisable(false);
-                this.batchCreatorItem.setDisable(false);
-                this.Phases.setDisable(false);
-                this.UserAdministrationMenuItem.setDisable(false);
-                this.Units.setDisable(false);
-                this.reportingSystem.setDisable(false);
-                this.materialItem.setDisable(false);
-            }
-
-            message.getAllGroupsDTO().getList().forEach((windowGroupsDTO) -> {
-                LinkedHashMap<String, List<Group>> rowGroup = windowGroupsDTO.getRowGroup();
-            });
-        } else {
-            Platform.runLater(() -> {
-                this.recipeEditorItem.setDisable(true);
-                this.batchCreatorItem.setDisable(true);
-                this.Phases.setDisable(true);
-                this.UserAdministrationMenuItem.setDisable(true);
-                this.Units.setDisable(true);
-                this.reportingSystem.setDisable(true);
-                this.materialItem.setDisable(true);
-            });
-        }
-
-    }
-
     public void showNotificationDownButton(String title, String content, int duration) {
         FontIcon icon1 = new FontIcon("fas-info-circle");
         icon1.setIconColor(Color.BLUE);
@@ -1159,24 +1168,6 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             NotificationsManager.send(NotificationPos.BOTTOM_RIGHT, notification, 5.0F, 5);
             notification.setAutoFix(true);
             notification.show(this.initialStage);
-        });
-    }
-
-    public Stage getInitialStage() {
-        return this.initialStage;
-    }
-
-    @EventListener
-    public void atException(ExceptionWindowRequestEvent event) {
-        ExceptionData exception = event.getException();
-        Platform.runLater(() -> {
-            ExceptionDialog exceptionDialog = new ExceptionDialog(exception.e);
-            exceptionDialog.setHeaderText(exception.header);
-            exceptionDialog.getDialogPane().setMaxWidth(500.0F);
-            exceptionDialog.initOwner(this.initialStage);
-            exceptionDialog.initModality(Modality.WINDOW_MODAL);
-            exceptionDialog.initStyle(StageStyle.UTILITY);
-            exceptionDialog.show();
         });
     }
 

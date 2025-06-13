@@ -15,7 +15,6 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -50,7 +49,6 @@ public class BatchArchiveWindow extends Stage {
     private final Label batchNameLabel = new Label("Filter by batch name");
     private final Button filterByDate = new Button("Filter by date");
     private final Button filterByName = new Button("Filter by name");
-    private Stage mainWindow = null;
     private final TableView<Batch> table = new TableView();
     private final TableColumn<Batch, Long> NameColumn = new TableColumn("ID");
     private final TableColumn<Batch, String> UnitNameColumn = new TableColumn("Unit name");
@@ -58,6 +56,7 @@ public class BatchArchiveWindow extends Stage {
     private final TableColumn<Batch, String> CreationDateColumn = new TableColumn("Creation date");
     private final TableColumn<Batch, String> CreationTimeColumn = new TableColumn("Creation time");
     private final TableColumn<Batch, String> CommentColumn = new TableColumn("Comment");
+    private Stage mainWindow = null;
     private double totalLoaded;
     private double totalRequired;
     private double totalError;

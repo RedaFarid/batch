@@ -7,7 +7,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -19,7 +18,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class ProgressWindow {
-    private Stage Window = null;
     private final Stage dialogStage = new Stage();
     private final ProgressBar progressbar = new ProgressBar();
     private final ProgressIndicator progressindicator = new ProgressIndicator();
@@ -28,6 +26,7 @@ public class ProgressWindow {
     private final BorderPane Pane = new BorderPane();
     private final HBox hbox = new HBox();
     private final StringProperty StringProgress = new SimpleStringProperty("Calculating ...");
+    private Stage Window = null;
 
     public ProgressWindow(Stage parentsatge, String Title) {
         this.Window = parentsatge;

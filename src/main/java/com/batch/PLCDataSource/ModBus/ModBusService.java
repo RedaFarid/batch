@@ -2,11 +2,12 @@ package com.batch.PLCDataSource.ModBus;
 
 import com.batch.PLCDataSource.PLC.ComplexDataType.PLCDataDefinitionFactory;
 import com.batch.PLCDataSource.PLC.ComplexDataType.RowDataDefinition;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.batch.Services.NotificationService.BackGroundServices;
 import com.batch.Services.NotificationService.NotificationService;
-import com.batch.Utilities.StringUtilsL;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 @Service
 public class ModBusService {
+    @Getter
     private final BooleanProperty connectionStatus;
     private final BooleanProperty bufferSynchronized;
     @Value("${modbus.receivingTime}")
@@ -35,11 +37,12 @@ public class ModBusService {
     @Autowired
     @BackGroundServices
     private NotificationService notificationService;
-    @Autowired(
-            required = false
-    )
+    @Autowired(required = false)
     @Qualifier("ModbusScheduler")
     private TaskScheduler scheduler;
+
+    @Autowired
+    private MessageLoggingService log;
 
     public ModBusService() {
         this.connectionStatus = new SimpleBooleanProperty(Boolean.FALSE);
@@ -53,8 +56,8 @@ public class ModBusService {
     @EventListener
     public void initializeAndStartService(ContextRefreshedEvent event) {
         Map<String, RowDataDefinition> devices = this.plcDataDefinitionFactory.getAllDevicesDataModel();
-        Map<Integer, Byte> sendBuffer = new LinkedHashMap();
-        Map<Integer, Byte> receiveBuffer = new LinkedHashMap();
+        Map<Integer, Byte> sendBuffer = new LinkedHashMap<>();
+        Map<Integer, Byte> receiveBuffer = new LinkedHashMap<>();
         Map<Integer, Byte> concurrentSendBuffer = Collections.synchronizedMap(sendBuffer);
         Map<Integer, Byte> concurrentReceiveBuffer = Collections.synchronizedMap(receiveBuffer);
         SendDataMapper sendMapper = new SendDataMapper(devices, concurrentSendBuffer, this.notificationService);
@@ -73,24 +76,19 @@ public class ModBusService {
             this.scheduler.scheduleWithFixedDelay(sender, 100L);
             this.scheduler.scheduleWithFixedDelay(receiver, 100L);
         } catch (Exception e) {
+            log.logExcption("ModbusService [initializeAndStartService] ", e);
 //            this.notificationService.newErrorMessage("Modbus Service", "Main run", StringUtilsL.textLimiter(e.getMessage(), 40));
         }
 
         this.bufferSynchronized.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
+                log.system("Buffer is synchronized");
 //                this.notificationService.newErrorMessage("Modbus connection monitor", "Check connection", "Buffer is synchronized");
             } else {
+                log.system("Buffer is synchronized");
 //                this.notificationService.newErrorMessage("Modbus connection monitor", "Check connection", "Buffer is not synchronized");
             }
 
         });
-    }
-
-    public BooleanProperty getConnectionStatus() {
-        return this.connectionStatus;
-    }
-
-    public BooleanProperty getBufferSynchronized() {
-        return this.bufferSynchronized;
     }
 }

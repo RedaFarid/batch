@@ -7,7 +7,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -26,6 +25,8 @@ public abstract class ControlFacePlate extends Stage {
     private final BorderPane root = new BorderPane();
     private final Scene scene;
     private final ImageView imView;
+    private final Stage mainWindow;
+    private final RowDataDefinition dataModel;
     private HBox mainContainer;
     private VBox controlContainer;
     private VBox statusContainer;
@@ -39,8 +40,6 @@ public abstract class ControlFacePlate extends Stage {
     private Label Monitoring;
     private Label Signals;
     private Button reset;
-    private final Stage mainWindow;
-    private final RowDataDefinition dataModel;
 
     public ControlFacePlate(Stage stage, RowDataDefinition dataModel) {
         this.scene = new Scene(this.root);
@@ -114,7 +113,7 @@ public abstract class ControlFacePlate extends Stage {
         this.initStyle(StageStyle.UTILITY);
         this.initModality(Modality.NONE);
         this.setTitle(this.dataModel.getName());
-        this.scene.getStylesheets().add("/GUI/Styles/Faceplate.css");
+        this.scene.getStylesheets().add("Styles/Faceplate.css");
     }
 
     private void flasherStartubg() {

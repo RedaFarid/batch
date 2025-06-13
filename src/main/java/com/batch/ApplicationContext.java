@@ -1,24 +1,20 @@
-
 package com.batch;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
+@Log4j2
 public class ApplicationContext extends Application {
-    private static final Logger log = LogManager.getLogger(ApplicationContext.class);
     public static ConfigurableApplicationContext applicationContext;
 
     public void start(Stage stage) throws Exception {
         try {
-            System.err.println("Puplishing start event");
             applicationContext.publishEvent(new GraphicsInitializerEvent(stage));
             applicationContext.start();
         } catch (Exception e) {
@@ -30,7 +26,6 @@ public class ApplicationContext extends Application {
         ApplicationContextInitializer<GenericApplicationContext> initializer = (applicationContext) -> applicationContext.registerBean(Application.class, () -> this);
         applicationContext = (new SpringApplicationBuilder()).sources(BatchingApplication.class).initializers(new ApplicationContextInitializer[]{initializer}).run(this.getParameters().getRaw().toArray(new String[0]));
         applicationContext.registerShutdownHook();
-//        applicationContext.addApplicationListener((event) -> Platform.exit());
         super.init();
     }
 

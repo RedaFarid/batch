@@ -5,8 +5,6 @@
 
 package com.batch;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration;
@@ -30,7 +28,6 @@ import javax.sql.DataSource;
 @EnableJdbcRepositories
 @EnableTransactionManagement
 public class SQLConfig extends AbstractJdbcConfiguration {
-    private static final Logger log = LogManager.getLogger(SQLConfig.class);
 
     @Bean
     NamedParameterJdbcOperations operations() {

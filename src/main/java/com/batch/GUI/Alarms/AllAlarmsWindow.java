@@ -4,8 +4,9 @@ import com.batch.ApplicationContext;
 import com.batch.Database.Entities.Log;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
@@ -17,11 +18,11 @@ public class AllAlarmsWindow extends Tab {
     private static volatile AllAlarmsWindow Singleton = null;
     private final AlarmsController controller;
     private final AlarmsModel model;
-    private Stage mainWindow = null;
     private final GridPane dataentery = new GridPane();
     private final VBox root = new VBox();
     private final VBox vbox = new VBox();
     private final ToolBar toolbar = new ToolBar();
+    private final Button refreshButton = new Button("Refresh");
     private final ObservableList<Log> list = FXCollections.observableArrayList();
     private final TableView<Log> table = new TableView();
     private final TableColumn<Log, String> identifierColumn = new TableColumn("Identefier");
@@ -31,6 +32,7 @@ public class AllAlarmsWindow extends Tab {
     private final TableColumn<Log, String> GroupColumn = new TableColumn("Group");
     private final TableColumn<Log, String> TimeColumn = new TableColumn("Time");
     private final TableColumn<Log, String> DateColumn = new TableColumn("Date");
+    private Stage mainWindow = null;
     private TableFilter<Log> tableFilter;
 
     private AllAlarmsWindow(Stage Window) {
@@ -106,14 +108,20 @@ public class AllAlarmsWindow extends Tab {
 
             }
         });
+
+        this.toolbar.getItems().add(refreshButton);
         this.vbox.getChildren().addAll(this.dataentery, this.toolbar);
         this.root.getChildren().add(this.vbox);
         this.root.getChildren().add(this.table);
+        this.root.setPadding(new Insets(10));
         this.setContent(this.root);
         this.setText("Journal alarms");
     }
 
     private void actionHandling() {
-        this.model.getIsShown().bind(this.selectedProperty());
+        this.model.viewIsShown().bind(this.selectedProperty());
+        refreshButton.setOnAction(event -> {
+            controller.refresh();
+        });
     }
 }

@@ -12,7 +12,6 @@ import javafx.collections.SetChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -22,15 +21,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.time.LocalDateTime;
 
+@Log4j2
 public class BGNotification extends BorderPane {
-    private static final Logger log = LogManager.getLogger(BGNotification.class);
     private final ErrorObject errorObject;
     private final Label header;
     private final ToolBar toolBar;
@@ -47,8 +45,8 @@ public class BGNotification extends BorderPane {
         this.CURSOR_DEFAULT = new SimpleObjectProperty(Cursor.DEFAULT);
         this.CURSOR_WAIT = new SimpleObjectProperty(Cursor.WAIT);
         this.errorObject = errorObject;
-        String var10003 = StringUtils.capitalize(errorObject.getErrorFamily());
-        this.header = new Label(var10003 + "\n" + LocalDateTime.now());
+        String errorFamily = StringUtils.capitalize(errorObject.getErrorFamily());
+        this.header = new Label(errorFamily + "\n" + LocalDateTime.now());
         this.messageContent = new VBox();
         this.reset = new Button("Reset all");
         this.toolBar = new ToolBar();

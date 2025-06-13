@@ -46,14 +46,14 @@ public class BatchStep extends VBox implements Runnable {
     private final Map<String, Node> paraReference;
     private final Map<String, ProgressBar> paraProgReferences;
     private final BatchesController controller;
-    private Label phaseTypeLabel;
-    private Label Name;
     private final Label materialName;
     private final Stage mainWindow;
-    private Color selectedColor;
     private final long batchID;
     private final int parallelStepNo;
     private final int stepNo;
+    private Label phaseTypeLabel;
+    private Label Name;
+    private Color selectedColor;
 
     public BatchStep(long batchID, int parallelStepNo, int stepNo, BatchStepModel model, String phaseName, Stage window) {
         this.scene = new Scene(this.root);

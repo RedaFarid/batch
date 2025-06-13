@@ -1,15 +1,15 @@
 package com.batch.GUI.NotificationCenter;
 
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.batch.Services.NotificationService.BackGroundServices;
 import com.batch.Services.NotificationService.ErrorObject;
 import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Services.NotificationService.ServiceErrorsListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -22,13 +22,15 @@ import java.util.Map;
 
 @Controller
 public class NCController {
-    private static final Logger log = LogManager.getLogger(NCController.class);
     private final NCModel model = new NCModel();
     private final ObservableList<String> categories = FXCollections.observableArrayList();
     private final ObservableList<String> errors = FXCollections.observableArrayList();
     @Autowired
     @BackGroundServices
     private NotificationService bgNotificationService;
+
+    @Autowired
+    MessageLoggingService log;
 
     public NCModel getModel() {
         return this.model;
@@ -110,7 +112,7 @@ public class NCController {
                 });
             }
         } catch (Exception e) {
-            log.fatal(e, e);
+            log.logExcption("NCController [onExportCSV]", e);
         }
 
     }
@@ -163,7 +165,7 @@ public class NCController {
             xssfWorkbook.write(fileOutputStream);
             xssfWorkbook.close();
         } catch (Exception e) {
-            log.fatal(e, e);
+            log.logExcption("NCController [onExportExcel]", e);
         }
 
     }

@@ -11,7 +11,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -29,6 +28,10 @@ import javafx.stage.StageStyle;
 import javafx.util.Callback;
 
 public abstract class MeasurementFacePlate extends Stage {
+    private final BorderPane root = new BorderPane();
+    private final Scene scene;
+    private final Stage mainWindow;
+    private final RowDataDefinition dataModel;
     protected HBox mainContainer;
     protected VBox controlContainer;
     protected VBox statusContainer;
@@ -48,11 +51,7 @@ public abstract class MeasurementFacePlate extends Stage {
     protected TextField reading;
     protected FaceplateTextField simulationValueField;
     protected CheckBox enableSimulation;
-    private final BorderPane root = new BorderPane();
-    private final Scene scene;
     private MeasurementBarGraphics barIndecator;
-    private final Stage mainWindow;
-    private final RowDataDefinition dataModel;
     private String unit;
 
     public MeasurementFacePlate(Stage stage, RowDataDefinition dataModel, String unit) {
@@ -147,7 +146,7 @@ public abstract class MeasurementFacePlate extends Stage {
         this.initStyle(StageStyle.UTILITY);
         this.initModality(Modality.NONE);
         this.setTitle(this.dataModel.getName());
-        this.scene.getStylesheets().add("/GUI/Styles/Faceplate.css");
+        this.scene.getStylesheets().add("Styles/Faceplate.css");
     }
 
     private void initialActions() {
