@@ -13,7 +13,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.stage.Stage;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -273,7 +272,7 @@ public class UserAuthorizationService {
 
     @Async
     @EventListener
-    public void atStart(ContextStartedEvent event) {
+    public void atGraphicsInitialized(ApplicationContext.GraphicsInitializerEvent event) {
         configurableApplicationContext = ApplicationContext.applicationContext;
         this.startNotification(false);
         this.checkAdministratorUser();

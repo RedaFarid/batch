@@ -9,6 +9,8 @@ import com.batch.Utilities.LogIdentefires;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -21,15 +23,19 @@ public class ProcessAlarmLoggingService {
     private final MessageLoggingService messageLoggingService;
     private final PLCDataDefinitionFactory plcDataDefinitionFactory;
 
+    @Autowired
+    private MessageLoggingService log;
+
     public ProcessAlarmLoggingService(final MessageLoggingService messageLoggingService, final PLCDataDefinitionFactory plcDataDefinitionFactory) {
         this.messageLoggingService = messageLoggingService;
         this.plcDataDefinitionFactory = plcDataDefinitionFactory;
     }
 
     @EventListener
-    private void initialization(ContextStartedEvent event) {
+    private void initialization(ApplicationReadyEvent event) {
+        log.system("Initialization " + Thread.currentThread().getName());
         this.plcDataDefinitionFactory.getAllDevicesDataModel().values().stream().flatMap((item) -> {
-            List<AlarmDataHolder> list = new ArrayList();
+            List<AlarmDataHolder> list = new ArrayList<>();
             item.getEnableAlarmLogging().forEach((att, val) -> {
                 if (val.equals(Alarming.Enable)) {
                     ValueObject value = item.getAllValues().get(att);

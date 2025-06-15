@@ -17,6 +17,7 @@ public class ApplicationContext extends Application {
         try {
             applicationContext.publishEvent(new GraphicsInitializerEvent(stage));
             applicationContext.start();
+            applicationContext.publishEvent(new GraphicsShowEvent("Start"));
         } catch (Exception e) {
             log.fatal(e, e);
         }
@@ -42,6 +43,12 @@ public class ApplicationContext extends Application {
 
         public Stage getStage() {
             return (Stage) this.getSource();
+        }
+    }
+
+    public static class GraphicsShowEvent extends ApplicationEvent {
+        public GraphicsShowEvent(String attribute) {
+            super(attribute);
         }
     }
 }

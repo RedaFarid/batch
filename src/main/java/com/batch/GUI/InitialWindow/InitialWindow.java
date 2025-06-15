@@ -296,6 +296,12 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
                         .getBatchById(item.getRunningBatchID())
                         .ifPresentOrElse(this::createBatchObserver,
                                 () -> this.log.logEvent(new Log(LogIdentefires.System.name(), "error creating batch view as batch not found in database ID= " + item.getRunningBatchID()))));
+
+
+    }
+    @EventListener
+    public void atShowEvent(ApplicationContext.GraphicsShowEvent event){
+        this.initialStage.show();
     }
 
     @EventListener
@@ -458,7 +464,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
             log.logExcption("InitialWindow [GraphicsBuilder]", e);
         }
 
-        this.initialStage.show();
+
     }
     public void actionHandler() {
         try {

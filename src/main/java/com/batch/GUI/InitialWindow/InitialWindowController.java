@@ -110,10 +110,11 @@ public class InitialWindowController {
     @EventListener
     public void withGraphicsEvent(ApplicationContext.GraphicsInitializerEvent event) {
         this.allDataDefinitions = this.plcDataDefinitionFactory.getAllDevicesDataModel();
+        atStarted();
     }
 
-    @EventListener
-    private void atStarted(ContextStartedEvent event) {
+
+    private void atStarted() {
         this.checkESDAlarms();
         this.checkPLCConnection();
         this.checkAirPressureAlarms();

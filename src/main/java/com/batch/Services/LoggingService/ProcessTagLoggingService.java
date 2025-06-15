@@ -10,7 +10,7 @@ import com.batch.PLCDataSource.PLC.ElementaryDefinitions.ValueObject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
-import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class ProcessTagLoggingService {
     }
 
     @EventListener
-    public void atStart(ContextStartedEvent event) {
+    public void atAppReady(ApplicationReadyEvent event) {
         this.allDevices = this.plcDataDefinitionFactory.getAllDevicesDataModel();
     }
 

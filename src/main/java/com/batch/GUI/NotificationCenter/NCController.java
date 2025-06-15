@@ -7,6 +7,7 @@ import com.batch.Services.NotificationService.NotificationService;
 import com.batch.Services.NotificationService.ServiceErrorsListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import lombok.Getter;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 import org.checkerframework.checker.units.qual.A;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 @Controller
 public class NCController {
+    @Getter
     private final NCModel model = new NCModel();
     private final ObservableList<String> categories = FXCollections.observableArrayList();
     private final ObservableList<String> errors = FXCollections.observableArrayList();
@@ -31,10 +33,6 @@ public class NCController {
 
     @Autowired
     MessageLoggingService log;
-
-    public NCModel getModel() {
-        return this.model;
-    }
 
     @Async
     @EventListener

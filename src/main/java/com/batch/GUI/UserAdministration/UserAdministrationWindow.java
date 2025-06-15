@@ -1,7 +1,9 @@
 package com.batch.GUI.UserAdministration;
 
+import com.batch.ApplicationContext;
 import com.batch.Database.Entities.User;
 import com.batch.GUI.InitialWindow.InitialWindow;
+import com.batch.Services.LoggingService.MessageLoggingService;
 import com.batch.Services.UserAdministration.UserAuthorizationService;
 import com.batch.Services.UserAdministration.UserEvent;
 import com.batch.Utilities.RestrictiveTextField;
@@ -67,22 +69,23 @@ public class UserAdministrationWindow extends TabPane {
     private final ToolBar usersToolbar = new ToolBar();
     private final User currentUser = null;
     private final LinkedHashSet<String> setToDelete = new LinkedHashSet();
-    @Autowired(
-            required = false
-    )
+    @Autowired(required = false)
     private InitialWindow window;
+
+    @Autowired
+    private MessageLoggingService log;
 
     public UserAdministrationWindow(final UserAuthorizationService userAuthorizationService) {
         this.userAuthorizationService = userAuthorizationService;
     }
 
     @EventListener
-    public void atStart(ContextStartedEvent event) {
+    public void atGraphicsInitialized(ApplicationContext.GraphicsInitializerEvent listener) {
         try {
             this.graphicsBuilder();
             this.actionHandling();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.logExcption("UserAdministrationWindows [atGraphicsInitialized]", e);
         }
 
     }
