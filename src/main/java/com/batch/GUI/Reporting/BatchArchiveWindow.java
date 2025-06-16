@@ -52,10 +52,12 @@ public class BatchArchiveWindow extends Stage {
     private final Label batchNameLabel = new Label("Filter by batch name");
     private final Button filterByDate = new Button("Filter by date");
     private final Button filterByName = new Button("Filter by name");
+    private final Button exportExcel = new Button("Export Excel");
     private final TableView<Batch> table = new TableView();
     private final TableColumn<Batch, Long> NameColumn = new TableColumn("ID");
     private final TableColumn<Batch, String> UnitNameColumn = new TableColumn("Unit name");
     private final TableColumn<Batch, String> BatchNameColumn = new TableColumn("Batch name");
+    private final TableColumn<Batch, String> CreatedByColumn = new TableColumn("Created By");
     private final TableColumn<Batch, String> CreationDateColumn = new TableColumn("Creation date");
     private final TableColumn<Batch, String> CreationTimeColumn = new TableColumn("Creation time");
     private final TableColumn<Batch, String> CommentColumn = new TableColumn("Comment");
@@ -95,6 +97,7 @@ public class BatchArchiveWindow extends Stage {
         this.batchNameLabel.setPrefWidth(200.0F);
         this.filterByDate.setPrefWidth(250.0F);
         this.filterByName.setPrefWidth(250.0F);
+        this.exportExcel.setPrefWidth(250.0F);
         this.dataEntry.add(this.fromLabel, 1, 1);
         this.dataEntry.add(this.fromPicker, 2, 1);
         this.dataEntry.add(this.toLabel, 3, 1);
@@ -104,14 +107,15 @@ public class BatchArchiveWindow extends Stage {
         this.dataEntry.setPadding(new Insets(10.0F));
         this.dataEntry.setVgap(10.0F);
         this.dataEntry.setHgap(10.0F);
-        this.bar.getItems().addAll(this.filterByDate, new Separator(), this.filterByName);
+        this.bar.getItems().addAll(this.filterByDate, new Separator(), this.filterByName,this.exportExcel);
         this.NameColumn.setCellValueFactory(new PropertyValueFactory("id"));
         this.UnitNameColumn.setCellValueFactory(new PropertyValueFactory("unitName"));
         this.BatchNameColumn.setCellValueFactory(new PropertyValueFactory("batchName"));
+        this.CreatedByColumn.setCellValueFactory(new PropertyValueFactory("createdBy"));
         this.CreationDateColumn.setCellValueFactory(new PropertyValueFactory("creationDate"));
         this.CreationTimeColumn.setCellValueFactory(new PropertyValueFactory("creationTime"));
         this.CommentColumn.setCellValueFactory(new PropertyValueFactory("comment"));
-        this.table.getColumns().addAll(this.NameColumn, this.UnitNameColumn, this.BatchNameColumn, this.CreationDateColumn, this.CreationTimeColumn, this.CommentColumn);
+        this.table.getColumns().addAll(this.NameColumn, this.UnitNameColumn, this.BatchNameColumn,this.CreatedByColumn, this.CreationDateColumn, this.CreationTimeColumn, this.CommentColumn);
         this.table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         this.table.setItems(this.model.getList());
         this.table.prefHeightProperty().bind(this.root.heightProperty());
@@ -195,6 +199,9 @@ public class BatchArchiveWindow extends Stage {
             ReadOnlyBooleanProperty readOnlyBooleanProperty = this.controller.onFilterByName();
             this.root.cursorProperty().bind(Bindings.when(readOnlyBooleanProperty).then(this.CURSOR_WAIT).otherwise(this.CURSOR_DEFAULT));
         });
+        this.exportExcel.setOnMouseClicked((event) -> {
+          onExportExcel();
+        });
         this.showingProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 ReadOnlyBooleanProperty readOnlyBooleanProperty = this.controller.updateTable();
@@ -204,7 +211,7 @@ public class BatchArchiveWindow extends Stage {
         });
     }
 
-    private void onExportExcel(MouseEvent mouseEvent) {
+    private void onExportExcel() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Export Batch to excel");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel format", "*.xlsx"));
@@ -252,9 +259,6 @@ public class BatchArchiveWindow extends Stage {
 
         controller.onExportExcel(file,var10002);
     }
-
-
-
 
     public void close() {
         this.hide();
