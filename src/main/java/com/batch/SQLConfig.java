@@ -5,8 +5,14 @@
 
 package com.batch;
 
+import com.batch.Database.Entities.User;
+import com.batch.GUI.UserAdministration.LoginWindow;
+import com.batch.Services.UserAdministration.UserAuditor;
+import com.batch.Services.UserAdministration.UserEvent;
+import com.batch.Services.UserAdministration.UserEventMessage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jdbc.repository.config.AbstractJdbcConfiguration;
 import org.springframework.data.jdbc.repository.config.EnableJdbcAuditing;
 import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
@@ -22,6 +28,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
+import java.util.Optional;
 
 @Configuration
 @EnableJdbcAuditing
@@ -47,6 +54,10 @@ public class SQLConfig extends AbstractJdbcConfiguration {
         dataSource.setPassword("123456");
         dataSource.setUrl("jdbc:sqlserver://localhost:1434;databaseName=MIXINGBase;;encrypt=true;trustServerCertificate=true");
         return dataSource;
+    }
+    @Bean
+    public AuditorAware<String> auditorProvider() {
+        return new UserAuditor();
     }
 
     @Bean

@@ -11,17 +11,19 @@ public class ReportModel {
     private String batchName;
     private LocalDate creationDate;
     private LocalTime creationTime;
+    private String createdBy;
     private LocalDateTime endTime;
     private String product;
     private String client;
     private String comment;
     private List<ReportTableDataModel> data = new LinkedList();
 
-    public ReportModel(final long batchID, final String batchName, final LocalDate creationDate, final LocalTime creationTime, final LocalDateTime endTime, final String product, final String client, final String comment, final List<ReportTableDataModel> data) {
+    public ReportModel(final long batchID, final String batchName, final LocalDate creationDate, final LocalTime creationTime,final String createdBy,final LocalDateTime endTime, final String product, final String client, final String comment, final List<ReportTableDataModel> data) {
         this.batchID = batchID;
         this.batchName = batchName;
         this.creationDate = creationDate;
         this.creationTime = creationTime;
+        this.createdBy = createdBy;
         this.endTime = endTime;
         this.product = product;
         this.client = client;
@@ -70,6 +72,14 @@ public class ReportModel {
 
     public void setEndTime(final LocalDateTime endTime) {
         this.endTime = endTime;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     public String getProduct() {

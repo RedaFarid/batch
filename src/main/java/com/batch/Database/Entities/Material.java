@@ -1,6 +1,8 @@
 package com.batch.Database.Entities;
 
 import com.google.common.base.Objects;
+import lombok.AllArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -67,6 +69,7 @@ public class Material {
     public void setComment(final String Comment) {
         this.Comment = Comment;
     }
+
 
     public String toString() {
         Long var10000 = this.getId();

@@ -318,7 +318,7 @@
                             <!--							</splash>-->
                             <stayAlive>false</stayAlive>
                             <classPath>
-                                <mainClass>org.springframework.boot.loader.JarLauncher</mainClass>
+                                <mainClass>org.springframework.boot.loader.launch.JarLauncher</mainClass>
                                 <addDependencies>true</addDependencies>
                                 <preCp>anything</preCp>
                             </classPath>

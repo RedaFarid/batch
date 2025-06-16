@@ -2,6 +2,9 @@ package com.batch.Database.Entities;
 
 import com.batch.DTO.BatchSystemDataDefinitions.BatchModel;
 import com.google.common.base.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -12,6 +15,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@AllArgsConstructor
+@Data
 @Table("batches")
 public class Batch {
     @Id
@@ -35,6 +40,8 @@ public class Batch {
     private String product;
     @Transient
     private BatchModel model;
+    @CreatedBy
+    private String createdBy;
 
     public Batch(Long id, String batchName, String state, String order, String comment, BatchModel model) {
         this.id = id;
