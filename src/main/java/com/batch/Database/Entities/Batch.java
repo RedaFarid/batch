@@ -218,6 +218,15 @@ public class Batch {
         this.model = model;
     }
 
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
     public String toString() {
         Long var10000 = this.getId();
         return "Batch(id=" + var10000 + ", unitName=" + this.getUnitName() + ", batchName=" + this.getBatchName() + ", creationDate=" + this.getCreationDate() + ", creationTime=" + this.getCreationTime() + ", state=" + this.getState() + ", order=" + this.getOrder() + ", comment=" + this.getComment() + ", rowModel=" + this.getRowModel() + ", endTime=" + this.getEndTime() + ", client=" + this.getClient() + ", product=" + this.getProduct() + ", model=" + this.getModel() + ")";

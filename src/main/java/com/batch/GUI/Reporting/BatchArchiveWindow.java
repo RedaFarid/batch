@@ -5,6 +5,7 @@ import com.batch.DTO.RecipeSystemDataDefinitions.PhasesTypes;
 import com.batch.Database.Entities.Batch;
 import com.batch.Database.Entities.Material;
 import com.batch.GUI.Controls.DataEntryPartition;
+import com.batch.GUI.Reporting.MaterialConsumption.MaterialConsumptionWindow;
 import com.batch.GUI.Reporting.Reports.BatchReport;
 import com.batch.GUI.Reporting.Reports.ReportModel;
 import com.batch.GUI.Reporting.Reports.ReportTableDataModel;
@@ -27,6 +28,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -68,6 +70,9 @@ public class BatchArchiveWindow extends Stage {
     private double totalRequired;
     private double totalError;
     private int counter;
+    private ReportModel reportModel;
+
+    private MaterialConsumptionWindow materialConsumptionWindow =   new MaterialConsumptionWindow(this.mainWindow);
 
     private BatchArchiveWindow(Stage Window) {
         this.CURSOR_DEFAULT = new SimpleObjectProperty(Cursor.DEFAULT);
@@ -76,6 +81,7 @@ public class BatchArchiveWindow extends Stage {
         this.mainWindow = Window;
         this.controller = ApplicationContext.applicationContext.getBean(ReportsController.class);
         this.model = this.controller.getModel();
+        reportModel = new ReportModel();
         this.graphicsBuilder();
         this.actionHandling();
     }
@@ -110,7 +116,7 @@ public class BatchArchiveWindow extends Stage {
         this.dataEntry.setPadding(new Insets(10.0F));
         this.dataEntry.setVgap(10.0F);
         this.dataEntry.setHgap(10.0F);
-        this.bar.getItems().addAll(this.filterByDate, new Separator(), this.filterByName,this.exportExcel,this.batchReport);
+        this.bar.getItems().addAll(this.filterByDate, new Separator(), this.filterByName, this.exportExcel, this.batchReport);
         this.NameColumn.setCellValueFactory(new PropertyValueFactory("id"));
         this.UnitNameColumn.setCellValueFactory(new PropertyValueFactory("unitName"));
         this.BatchNameColumn.setCellValueFactory(new PropertyValueFactory("batchName"));
@@ -118,13 +124,14 @@ public class BatchArchiveWindow extends Stage {
         this.CreationDateColumn.setCellValueFactory(new PropertyValueFactory("creationDate"));
         this.CreationTimeColumn.setCellValueFactory(new PropertyValueFactory("creationTime"));
         this.CommentColumn.setCellValueFactory(new PropertyValueFactory("comment"));
-        this.table.getColumns().addAll(this.NameColumn, this.UnitNameColumn, this.BatchNameColumn,this.CreatedByColumn, this.CreationDateColumn, this.CreationTimeColumn, this.CommentColumn);
+        this.table.getColumns().addAll(this.NameColumn, this.UnitNameColumn, this.BatchNameColumn, this.CreatedByColumn, this.CreationDateColumn, this.CreationTimeColumn, this.CommentColumn);
         this.table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         this.table.setItems(this.model.getList());
         this.table.prefHeightProperty().bind(this.root.heightProperty());
         this.root.getChildren().addAll(this.dataEntry, this.bar, this.table);
         this.root.setPadding(new Insets(10.0F));
         this.root.setSpacing(10.0F);
+        root.setMinSize(1250, 800);
         this.model.getFromDate().bind(this.fromPicker.valueProperty());
         this.model.getToDate().bind(this.toPicker.valueProperty());
         this.model.getFilterString().bind(this.batchNameField.textProperty());
@@ -132,7 +139,15 @@ public class BatchArchiveWindow extends Stage {
         this.initOwner(this.mainWindow);
         this.initModality(Modality.WINDOW_MODAL);
         this.initStyle(StageStyle.UTILITY);
-        this.setScene(new Scene(this.root, 1250.0F, 800.0F));
+        TabPane tabPane = new TabPane();
+        Tab batchTab = new Tab("Batch  Report");
+        Tab materialCosumptionTab = new Tab("Material Consumption Report");
+        batchTab.setContent(this.root);
+        batchTab.setClosable(false);
+        materialCosumptionTab.setContent(materialConsumptionWindow.getContent());
+        materialCosumptionTab.setClosable(false);
+        tabPane.getTabs().addAll(batchTab,materialCosumptionTab);
+        this.setScene(new Scene(tabPane, 1250.0F, 800.0F));
         this.setMinHeight(500.0F);
     }
 
@@ -149,7 +164,7 @@ public class BatchArchiveWindow extends Stage {
                     LocalDate date = batch.getCreationDate();
                     LocalTime time = batch.getCreationTime();
                     LocalDateTime endTime = batch.getEndTime();
-                    String  createdBy = batch.getCreatedBy();
+                    String createdBy = batch.getCreatedBy();
                     List<ReportTableDataModel> data = batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> {
                         try {
                             double required = item.getValueParametersData().get("Percentage %");
@@ -177,7 +192,8 @@ public class BatchArchiveWindow extends Stage {
                     data = data.stream().map((item) -> new ReportTableDataModel(this.counter++, item.getMaterialName(), item.getRequired(), item.getLoaded(), item.getError(), Round.RoundDouble(item.getRequired() / this.totalRequired * (double) 100.0F, 4), Round.RoundDouble(item.getLoaded() / this.totalLoaded * (double) 100.0F, 4))).collect(Collectors.toList());
                     double totalActualPercent = data.stream().map(ReportTableDataModel::getActualPercent).reduce((double) 0.0F, Double::sum);
                     data.add(new ReportTableDataModel(this.counter, "", Round.RoundDouble(this.totalRequired, 4), Round.RoundDouble(this.totalLoaded, 4), Round.RoundDouble(this.totalError, 4), 100.0F, totalActualPercent));
-                    ReportModel var10002 = new ReportModel(ID, batchName, date, time,createdBy, endTime, product, client, comment, data);
+                    ReportModel var10002 = new ReportModel(ID, batchName, date, time, createdBy, endTime, product, client, comment, data);
+                    reportModel = new ReportModel(ID, batchName, date, time, createdBy, endTime, product, client, comment, data);
                     ReportsController var10004 = this.controller;
                     Objects.requireNonNull(var10004);
                     BatchReport report = new BatchReport(var10002, this, var10004::exportReport);
@@ -203,48 +219,46 @@ public class BatchArchiveWindow extends Stage {
             this.root.cursorProperty().bind(Bindings.when(readOnlyBooleanProperty).then(this.CURSOR_WAIT).otherwise(this.CURSOR_DEFAULT));
         });
         this.exportExcel.setOnMouseClicked((event) -> {
-          onExportExcel();
+            onExportExcel();
         });
         this.batchReport.setOnAction(e -> {
-            Batch batch = this.table.getSelectionModel().getSelectedItem();
-            String batchName = batch.getBatchName();
-            long ID = batch.getId();
-            String client = batch.getClient();
-            String product = batch.getProduct();
-            String comment = batch.getComment();
-            LocalDate date = batch.getCreationDate();
-            LocalTime time = batch.getCreationTime();
-            LocalDateTime endTime = batch.getEndTime();
-            String  createdBy = batch.getCreatedBy();
-            List<ReportTableDataModel> data = batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> {
-                try {
-                    double required = item.getValueParametersData().get("Percentage %");
-                    double loaded = 0.0F;
-
-                    try {
-                        loaded = item.getActualvalueParametersData().get("Percentage %");
-                    } catch (Exception var9) {
-                    }
-
-                    double error = loaded - required;
-                    required = Round.RoundDouble(required, 4);
-                    loaded = Round.RoundDouble(loaded, 4);
-                    error = Round.RoundDouble(error, 4);
-                    String materialName = this.controller.getMaterialById(item.getMaterialID()).map(Material::getName).orElse("");
-                    return new ReportTableDataModel(0, materialName, required, loaded, error, 0.0F, 0.0F);
-                } catch (Exception var10) {
-                    return new ReportTableDataModel(0, "MaterialName", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-                }
-            }).collect(Collectors.toList());
-            this.counter = 1;
-            data = data.stream().map((item) -> new ReportTableDataModel(this.counter++, item.getMaterialName(), item.getRequired(), item.getLoaded(), item.getError(), Round.RoundDouble(item.getRequired() / this.totalRequired * (double) 100.0F, 4), Round.RoundDouble(item.getLoaded() / this.totalLoaded * (double) 100.0F, 4))).collect(Collectors.toList());
-            double totalActualPercent = data.stream().map(ReportTableDataModel::getActualPercent).reduce((double) 0.0F, Double::sum);
-            data.add(new ReportTableDataModel(this.counter, "", Round.RoundDouble(this.totalRequired, 4), Round.RoundDouble(this.totalLoaded, 4), Round.RoundDouble(this.totalError, 4), 100.0F, totalActualPercent));
-            ReportModel var10002 = new ReportModel(ID, batchName, date, time,createdBy, endTime, product, client, comment, data);
-
-            controller.onReport(var10002).whenComplete((pane, throwable) -> {
+//            Batch batch = this.table.getSelectionModel().getSelectedItem();
+//            String batchName = batch.getBatchName();
+//            long ID = batch.getId();
+//            String client = batch.getClient();
+//            String product = batch.getProduct();
+//            String comment = batch.getComment();
+//            LocalDate date = batch.getCreationDate();
+//            LocalTime time = batch.getCreationTime();
+//            LocalDateTime endTime = batch.getEndTime();
+//            String  createdBy = batch.getCreatedBy();
+//            List<ReportTableDataModel> data = batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> {
+//                try {
+//                    double required = item.getValueParametersData().get("Percentage %");
+//                    double loaded = 0.0F;
+//
+//                    try {
+//                        loaded = item.getActualvalueParametersData().get("Percentage %");
+//                    } catch (Exception var9) {
+//                    }
+//
+//                    double error = loaded - required;
+//                    required = Round.RoundDouble(required, 4);
+//                    loaded = Round.RoundDouble(loaded, 4);
+//                    error = Round.RoundDouble(error, 4);
+//                    String materialName = this.controller.getMaterialById(item.getMaterialID()).map(Material::getName).orElse("");
+//                    return new ReportTableDataModel(0, materialName, required, loaded, error, 0.0F, 0.0F);
+//                } catch (Exception var10) {
+//                    return new ReportTableDataModel(0, "MaterialName", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+//                }
+//            }).collect(Collectors.toList());
+//            this.counter = 1;
+//            data = data.stream().map((item) -> new ReportTableDataModel(this.counter++, item.getMaterialName(), item.getRequired(), item.getLoaded(), item.getError(), Round.RoundDouble(item.getRequired() / this.totalRequired * (double) 100.0F, 4), Round.RoundDouble(item.getLoaded() / this.totalLoaded * (double) 100.0F, 4))).collect(Collectors.toList());
+//            double totalActualPercent = data.stream().map(ReportTableDataModel::getActualPercent).reduce((double) 0.0F, Double::sum);
+//            data.add(new ReportTableDataModel(this.counter, "", Round.RoundDouble(this.totalRequired, 4), Round.RoundDouble(this.totalLoaded, 4), Round.RoundDouble(this.totalError, 4), 100.0F, totalActualPercent));
+//            ReportModel var10002 = new ReportModel(ID, batchName, date, time,createdBy, endTime, product, client, comment, data);
+            controller.onReport(reportModel).whenComplete((pane, throwable) -> {
                 if (throwable != null) {
-                    System.err.println(throwable);
                     return;
                 }
                 Platform.runLater(() -> {
@@ -282,7 +296,7 @@ public class BatchArchiveWindow extends Stage {
         LocalDate date = batch.getCreationDate();
         LocalTime time = batch.getCreationTime();
         LocalDateTime endTime = batch.getEndTime();
-        String  createdBy = batch.getCreatedBy();
+        String createdBy = batch.getCreatedBy();
         List<ReportTableDataModel> data = batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> {
             try {
                 double required = item.getValueParametersData().get("Percentage %");
@@ -310,9 +324,9 @@ public class BatchArchiveWindow extends Stage {
         data = data.stream().map((item) -> new ReportTableDataModel(this.counter++, item.getMaterialName(), item.getRequired(), item.getLoaded(), item.getError(), Round.RoundDouble(item.getRequired() / this.totalRequired * (double) 100.0F, 4), Round.RoundDouble(item.getLoaded() / this.totalLoaded * (double) 100.0F, 4))).collect(Collectors.toList());
         double totalActualPercent = data.stream().map(ReportTableDataModel::getActualPercent).reduce((double) 0.0F, Double::sum);
         data.add(new ReportTableDataModel(this.counter, "", Round.RoundDouble(this.totalRequired, 4), Round.RoundDouble(this.totalLoaded, 4), Round.RoundDouble(this.totalError, 4), 100.0F, totalActualPercent));
-        ReportModel var10002 = new ReportModel(ID, batchName, date, time,createdBy, endTime, product, client, comment, data);
+        ReportModel var10002 = new ReportModel(ID, batchName, date, time, createdBy, endTime, product, client, comment, data);
 
-        controller.onExportExcel(file,var10002);
+        controller.onExportExcel(file, var10002);
     }
 
     public void close() {

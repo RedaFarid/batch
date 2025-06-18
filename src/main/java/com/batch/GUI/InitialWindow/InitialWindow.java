@@ -432,7 +432,7 @@ public class InitialWindow implements ApplicationListener<ApplicationContext.Gra
         this.topBars.getChildren().addAll(this.menuBar, this.toolBar, this.lastAlarmField);
         this.topBars.setAlignment(Pos.CENTER);
         this.containerPane.getTabs().addAll(this.SCADATab);
-        this.containerPane.setStyle("-fx-open-tab-animation: NONE; -fx-close-tab-animation: NONE;");
+//        this.containerPane.setStyle("-fx-open-tab-animation: NONE; -fx-close-tab-animation: NONE;");
         this.SCADATab.setContent(this.scada);
         this.SCADATab.setClosable(false);
         this.SCADATab.setStyle("-fx-border-color: darkblue; -fx-border-width:0.1;");
