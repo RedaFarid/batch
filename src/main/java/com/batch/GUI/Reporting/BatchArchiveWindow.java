@@ -9,6 +9,7 @@ import com.batch.GUI.Reporting.Reports.BatchReport;
 import com.batch.GUI.Reporting.Reports.ReportModel;
 import com.batch.GUI.Reporting.Reports.ReportTableDataModel;
 import com.batch.Utilities.Round;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -53,6 +54,7 @@ public class BatchArchiveWindow extends Stage {
     private final Button filterByDate = new Button("Filter by date");
     private final Button filterByName = new Button("Filter by name");
     private final Button exportExcel = new Button("Export Excel");
+    private final Button batchReport = new Button("Show Report");
     private final TableView<Batch> table = new TableView();
     private final TableColumn<Batch, Long> NameColumn = new TableColumn("ID");
     private final TableColumn<Batch, String> UnitNameColumn = new TableColumn("Unit name");
@@ -98,6 +100,7 @@ public class BatchArchiveWindow extends Stage {
         this.filterByDate.setPrefWidth(250.0F);
         this.filterByName.setPrefWidth(250.0F);
         this.exportExcel.setPrefWidth(250.0F);
+        this.batchReport.setPrefWidth(250.0F);
         this.dataEntry.add(this.fromLabel, 1, 1);
         this.dataEntry.add(this.fromPicker, 2, 1);
         this.dataEntry.add(this.toLabel, 3, 1);
@@ -107,7 +110,7 @@ public class BatchArchiveWindow extends Stage {
         this.dataEntry.setPadding(new Insets(10.0F));
         this.dataEntry.setVgap(10.0F);
         this.dataEntry.setHgap(10.0F);
-        this.bar.getItems().addAll(this.filterByDate, new Separator(), this.filterByName,this.exportExcel);
+        this.bar.getItems().addAll(this.filterByDate, new Separator(), this.filterByName,this.exportExcel,this.batchReport);
         this.NameColumn.setCellValueFactory(new PropertyValueFactory("id"));
         this.UnitNameColumn.setCellValueFactory(new PropertyValueFactory("unitName"));
         this.BatchNameColumn.setCellValueFactory(new PropertyValueFactory("batchName"));
@@ -129,13 +132,13 @@ public class BatchArchiveWindow extends Stage {
         this.initOwner(this.mainWindow);
         this.initModality(Modality.WINDOW_MODAL);
         this.initStyle(StageStyle.UTILITY);
-        this.setScene(new Scene(this.root, 800.0F, 800.0F));
+        this.setScene(new Scene(this.root, 1250.0F, 800.0F));
         this.setMinHeight(500.0F);
     }
 
     private void actionHandling() {
         this.table.setOnMousePressed((action) -> {
-            if (action.getButton().equals(MouseButton.PRIMARY) && action.getClickCount() == 4 && this.table.getItems().size() > 0 && !this.table.getSelectionModel().isEmpty()) {
+            if (action.getButton().equals(MouseButton.PRIMARY) && action.getClickCount() == 2 && this.table.getItems().size() > 0 && !this.table.getSelectionModel().isEmpty()) {
                 try {
                     Batch batch = this.table.getSelectionModel().getSelectedItem();
                     String batchName = batch.getBatchName();
@@ -201,6 +204,58 @@ public class BatchArchiveWindow extends Stage {
         });
         this.exportExcel.setOnMouseClicked((event) -> {
           onExportExcel();
+        });
+        this.batchReport.setOnAction(e -> {
+            Batch batch = this.table.getSelectionModel().getSelectedItem();
+            String batchName = batch.getBatchName();
+            long ID = batch.getId();
+            String client = batch.getClient();
+            String product = batch.getProduct();
+            String comment = batch.getComment();
+            LocalDate date = batch.getCreationDate();
+            LocalTime time = batch.getCreationTime();
+            LocalDateTime endTime = batch.getEndTime();
+            String  createdBy = batch.getCreatedBy();
+            List<ReportTableDataModel> data = batch.getModel().getParallelSteps().stream().flatMap((item) -> item.getSteps().stream()).filter((item) -> !item.getPhaseName().equals("Start")).filter((item) -> !item.getPhaseName().equals("End")).filter((item) -> item.getPhaseType().equals(PhasesTypes.Dose_phase.name().replace("_", " ").trim())).map((item) -> {
+                try {
+                    double required = item.getValueParametersData().get("Percentage %");
+                    double loaded = 0.0F;
+
+                    try {
+                        loaded = item.getActualvalueParametersData().get("Percentage %");
+                    } catch (Exception var9) {
+                    }
+
+                    double error = loaded - required;
+                    required = Round.RoundDouble(required, 4);
+                    loaded = Round.RoundDouble(loaded, 4);
+                    error = Round.RoundDouble(error, 4);
+                    String materialName = this.controller.getMaterialById(item.getMaterialID()).map(Material::getName).orElse("");
+                    return new ReportTableDataModel(0, materialName, required, loaded, error, 0.0F, 0.0F);
+                } catch (Exception var10) {
+                    return new ReportTableDataModel(0, "MaterialName", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+                }
+            }).collect(Collectors.toList());
+            this.counter = 1;
+            data = data.stream().map((item) -> new ReportTableDataModel(this.counter++, item.getMaterialName(), item.getRequired(), item.getLoaded(), item.getError(), Round.RoundDouble(item.getRequired() / this.totalRequired * (double) 100.0F, 4), Round.RoundDouble(item.getLoaded() / this.totalLoaded * (double) 100.0F, 4))).collect(Collectors.toList());
+            double totalActualPercent = data.stream().map(ReportTableDataModel::getActualPercent).reduce((double) 0.0F, Double::sum);
+            data.add(new ReportTableDataModel(this.counter, "", Round.RoundDouble(this.totalRequired, 4), Round.RoundDouble(this.totalLoaded, 4), Round.RoundDouble(this.totalError, 4), 100.0F, totalActualPercent));
+            ReportModel var10002 = new ReportModel(ID, batchName, date, time,createdBy, endTime, product, client, comment, data);
+
+            controller.onReport(var10002).whenComplete((pane, throwable) -> {
+                if (throwable != null) {
+                    System.err.println(throwable);
+                    return;
+                }
+                Platform.runLater(() -> {
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(pane));
+                    stage.setTitle("Batch Report");
+                    stage.initOwner(this);
+                    stage.setWidth(1300);
+                    stage.show();
+                });
+            });
         });
         this.showingProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {

@@ -6,13 +6,18 @@ import com.batch.Database.Repositories.MaterialsRepository;
 import com.batch.Database.Services.BatchesService;
 import com.batch.GUI.Reporting.Reports.ReportModel;
 import com.batch.GUI.Reporting.Reports.ReportTableDataModel;
+import com.batch.Reporting.ReportsDTO.Batches;
+import com.batch.Reporting.ReportsDTO.DTO;
+import com.batch.Reporting.ReportsDetails.ReportDetailsFactory;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.scene.layout.Pane;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
@@ -23,6 +28,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,6 +38,8 @@ public class ReportsController {
     private final BatchesService batchesService;
     private final TaskExecutor executor;
     private final ReportsModel model = new ReportsModel();
+    @Autowired
+    private ReportDetailsFactory reportDetailsFactory;
 
     public ReportsController(final MaterialsRepository materialsRepository, final BatchesService batchesService, final TaskExecutor executor) {
         this.materialsRepository = materialsRepository;
@@ -213,9 +221,8 @@ public class ReportsController {
     }
 
 
-
     @Async
-    public void onExportExcel( File file,ReportModel model) {
+    public void onExportExcel(File file, ReportModel model) {
         if (file != null) {
             try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
                 try (XSSFWorkbook xssfWorkbook = new XSSFWorkbook()) {
@@ -346,7 +353,40 @@ public class ReportsController {
     }
 
 
+    public CompletableFuture<Pane> onReport(ReportModel model) {
 
+        if (model.getBatchID() > 0 && !model.getData().isEmpty()) {
+            try {
+                List<DTO> collect = model.getData().stream()
+                        .map(listItem -> new Batches(
+                                        String.valueOf(model.getBatchID()),
+                                        String.valueOf(model.getBatchName()),
+                                        String.valueOf(model.getProduct()),
+                                        String.valueOf(model.getEndTime()),
+                                        String.valueOf(model.getComment()),
+                                        String.valueOf(model.getCreatedBy()),
+                                        String.valueOf(model.getCreationDate()),
+                                        String.valueOf(model.getCreationTime()),
+                                        String.valueOf(model.getClient()),
+                                        String.valueOf(listItem.getNumber()),
+                                        String.valueOf(listItem.getMaterialName()),
+                                        String.valueOf(listItem.getRequired()),
+                                        String.valueOf(listItem.getLoaded()),
+                                        String.valueOf(listItem.getError()),
+                                        String.valueOf(listItem.getRequiredPercent()),
+                                        String.valueOf(listItem.getActualPercent())
+                                )
+                        ).collect(Collectors.toList());
+
+                Pane reportPane = reportDetailsFactory.getReportDetailsPaneFor("Batch", collect);
+
+                return CompletableFuture.completedFuture(new Pane());
+            } catch (Exception e) {
+                return CompletableFuture.failedFuture(e);
+            }
+        } else
+            return CompletableFuture.failedFuture(new IllegalStateException("Please select a batch"));
+  }
 
 
     private enum InHeader {
