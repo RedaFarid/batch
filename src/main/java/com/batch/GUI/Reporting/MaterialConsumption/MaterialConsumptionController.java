@@ -17,6 +17,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
@@ -64,10 +65,12 @@ public class MaterialConsumptionController {
 
     private List<MaterialConsumptionModel.Item> getMaterialsConsumption() {
         List<MaterialConsumptionModel.Item> list = FXCollections.observableArrayList();
+
         if (model.getFromDate().getValue() != null && model.getToDate().getValue() != null) {
             List<ReportTableDataModel> data = batchesService.findAll().stream()
-                    .filter((item) -> item.getCreationDate().isAfter(model.getFromDate().getValue()))
-                    .filter((item) -> item.getCreationDate().isBefore(model.getToDate().get()))
+                    .filter((item)->  item.getCreationDate()!=null)
+                    .filter((item) -> item.getCreationDate().isAfter(model.getFromDate().getValue())  ||  item.getCreationDate().isEqual(model.getFromDate().getValue()))
+                    .filter((item) -> item.getCreationDate().isBefore(model.getToDate().get())  ||  item.getCreationDate().isEqual(model.getToDate().getValue()))
                     .flatMap(batch -> batch.getModel().getParallelSteps().parallelStream()
                             .flatMap((item) -> item.getSteps().stream().map((step) -> {
                                 try {
@@ -86,15 +89,13 @@ public class MaterialConsumptionController {
                                     String materialName = getMaterialById(step.getMaterialID()).map(Material::getName).orElse("");
                                     return new ReportTableDataModel(0, materialName, required, loaded, error, 0.0F, 0.0F);
                                 } catch (Exception var10) {
-                                    return new ReportTableDataModel(0, "MaterialName", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+                                    return new ReportTableDataModel(0, "", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
                                 }
                             }))).collect(Collectors.toList());
             counter = 1;
-            System.out.println("FFF"+data);
             data = data.stream().map((item) -> new ReportTableDataModel(counter++, item.getMaterialName(), item.getRequired(), item.getLoaded(), item.getError(), 0.0, 0.0)).collect(Collectors.toList());
             Map<String, MaterialConsumptionModel.Item> map = new HashMap<>();
-
-            data.stream().forEach(item -> {
+            data.stream().filter(i->i.getMaterialName()!="").forEach(item -> {
                 String materialName = item.getMaterialName();
                 double required = item.getRequired();
                 double act = item.getLoaded();
@@ -112,8 +113,9 @@ public class MaterialConsumptionController {
                     map.put(materialName, item1);
                 }
             });
+            map.forEach((k,v)->{
+                list.add(v);});
         }
-        System.err.println("jjj --   "+list);
         return list;
     }
 
@@ -145,132 +147,86 @@ public class MaterialConsumptionController {
     }
 
     @Async
-    public void onExportExcel(File file, ReportModel model) {
-        if (file != null) {
-            try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-                try (XSSFWorkbook xssfWorkbook = new XSSFWorkbook()) {
-                    XSSFSheet firstSheet = xssfWorkbook.createSheet("Batch details");
-                    firstSheet.setAutobreaks(true);
-                    XSSFFont font = xssfWorkbook.createFont();
-                    font.setBold(true);
-                    XSSFCellStyle cellStyle = xssfWorkbook.createCellStyle();
-                    cellStyle.setFont(font);
-                    cellStyle.setAlignment(HorizontalAlignment.LEFT);
-                    cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-                    cellStyle.setFillPattern(FillPatternType.FINE_DOTS);
-                    cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-                    XSSFCellStyle valueCellStyle = xssfWorkbook.createCellStyle();
-                    valueCellStyle.setAlignment(HorizontalAlignment.LEFT);
-                    valueCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-                    XSSFRow batchNameRow = firstSheet.createRow(0);
-                    XSSFCell batchNameLabel = batchNameRow.createCell(0, CellType.STRING);
-                    batchNameLabel.setCellValue("Batch Name ");
-                    batchNameLabel.setCellStyle(cellStyle);
-                    XSSFCell batchName = batchNameRow.createCell(1, CellType.STRING);
-                    batchName.setCellValue(model.getBatchName());
-                    batchName.setCellStyle(valueCellStyle);
-                    XSSFRow batchIdLabelRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFCell batchIdLabel = batchIdLabelRow.createCell(0, CellType.STRING);
-                    batchIdLabel.setCellValue("Batch ID ");
-                    batchIdLabel.setCellStyle(cellStyle);
-                    XSSFCell batchId = batchIdLabelRow.createCell(1, CellType.NUMERIC);
-                    batchId.setCellValue((double) model.getBatchID());
-                    batchId.setCellStyle(valueCellStyle);
-                    XSSFRow productLabelRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFCell productLabel = productLabelRow.createCell(0, CellType.STRING);
-                    productLabel.setCellValue("Product ");
-                    productLabel.setCellStyle(cellStyle);
-                    XSSFCell product = productLabelRow.createCell(1, CellType.NUMERIC);
-                    product.setCellValue(model.getProduct());
-                    product.setCellStyle(valueCellStyle);
-                    XSSFRow clientLabelRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFCell clientLabel = clientLabelRow.createCell(0, CellType.STRING);
-                    clientLabel.setCellValue("Client ");
-                    clientLabel.setCellStyle(cellStyle);
-                    XSSFCell client = clientLabelRow.createCell(1, CellType.NUMERIC);
-                    client.setCellValue(model.getClient());
-                    client.setCellStyle(valueCellStyle);
-                    XSSFRow commentLabelRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFCell commentLabel = commentLabelRow.createCell(0, CellType.STRING);
-                    commentLabel.setCellValue("Comment ");
-                    commentLabel.setCellStyle(cellStyle);
-                    XSSFCell comment = commentLabelRow.createCell(1, CellType.NUMERIC);
-                    comment.setCellValue(model.getComment());
-                    comment.setCellStyle(valueCellStyle);
-                    XSSFRow creationByRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFCell creationByLabel = creationByRow.createCell(0, CellType.STRING);
-                    creationByLabel.setCellValue("Created by ");
-                    creationByLabel.setCellStyle(cellStyle);
-                    XSSFCell creationBy = creationByRow.createCell(1, CellType.STRING);
-                    creationBy.setCellValue(model.getCreatedBy() == null ? "" : model.getCreatedBy().toString());
-                    creationBy.setCellStyle(valueCellStyle);
-                    XSSFRow creationDateRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFCell creationDateLabel = creationDateRow.createCell(0, CellType.STRING);
-                    creationDateLabel.setCellValue("Creation date ");
-                    creationDateLabel.setCellStyle(cellStyle);
-                    XSSFCell creationDate = creationDateRow.createCell(1, CellType.STRING);
-                    creationDate.setCellValue(model.getCreationDate() == null ? "" : model.getCreationDate().toString());
-                    creationDate.setCellStyle(valueCellStyle);
-                    XSSFRow creationTimeRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFCell creationTimeLabel = creationTimeRow.createCell(0, CellType.STRING);
-                    creationTimeLabel.setCellValue("Creation time ");
-                    creationTimeLabel.setCellStyle(cellStyle);
-                    XSSFCell creationTime = creationTimeRow.createCell(1, CellType.STRING);
-                    creationTime.setCellValue(model.getCreationTime() == null ? "" : model.getCreationTime().toString());
-                    creationTime.setCellStyle(valueCellStyle);
-                    XSSFRow endTimeRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFCell endTimeLabel = endTimeRow.createCell(0, CellType.STRING);
-                    endTimeLabel.setCellValue("End time ");
-                    endTimeLabel.setCellStyle(cellStyle);
-                    XSSFCell endTime = endTimeRow.createCell(1, CellType.STRING);
-                    endTime.setCellValue(model.getEndTime() == null ? "" : model.getEndTime().toString());
-                    endTime.setCellStyle(valueCellStyle);
-                    firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    XSSFRow headerRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                    headerRow.setHeight((short) 400);
+    public void onExportExcel(File file, ObservableList<MaterialConsumptionModel.Item>  list) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+            try (XSSFWorkbook xssfWorkbook = new XSSFWorkbook()) {
+                XSSFSheet firstSheet = xssfWorkbook.createSheet("Material Consumption");
+                XSSFRow row = firstSheet.createRow(0);
+                firstSheet.setAutobreaks(true);
+                XSSFFont font = xssfWorkbook.createFont();
+                font.setBold(true);
 
-                    for (int column = 0; column < MaterialConsumptionController.InHeader.values().length; ++column) {
-                        XSSFCell cell = headerRow.createCell(column, CellType.STRING);
-                        cell.setCellValue(String.valueOf(MaterialConsumptionController.InHeader.values()[column]));
-                        cell.setAsActiveCell();
-                        cell.setCellStyle(cellStyle);
-                    }
+                firstSheet.setAutobreaks(true);
+                row.setHeight(((short) 400));
 
-                    for (ReportTableDataModel component : model.getData()) {
-                        XSSFRow newRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
-                        XSSFCell cell0 = newRow.createCell(0, CellType.NUMERIC);
-                        cell0.setCellValue(String.valueOf(component.getNumber()));
-                        cell0.setCellStyle(valueCellStyle);
-                        XSSFCell cell1 = newRow.createCell(1, CellType.STRING);
-                        cell1.setCellValue(component.getMaterialName());
-                        cell1.setCellStyle(valueCellStyle);
-                        XSSFCell cell2 = newRow.createCell(2, CellType.NUMERIC);
-                        cell2.setCellValue(String.valueOf(component.getRequired()));
-                        cell2.setCellStyle(valueCellStyle);
-                        XSSFCell cell3 = newRow.createCell(3, CellType.NUMERIC);
-                        cell3.setCellValue(String.valueOf(component.getLoaded()));
-                        cell3.setCellStyle(valueCellStyle);
-                        XSSFCell cell4 = newRow.createCell(4, CellType.NUMERIC);
-                        cell4.setCellValue(component.getError());
-                        cell4.setCellStyle(valueCellStyle);
-                        XSSFCell cell5 = newRow.createCell(5, CellType.NUMERIC);
-                        cell5.setCellValue(component.getRequiredPercent());
-                        cell5.setCellStyle(valueCellStyle);
-                        XSSFCell cell6 = newRow.createCell(6, CellType.NUMERIC);
-                        cell6.setCellValue(component.getActualPercent());
-                        cell6.setCellStyle(valueCellStyle);
-                    }
+                XSSFCellStyle cellStyle = xssfWorkbook.createCellStyle();
+                cellStyle.setFont(font);
+                cellStyle.setAlignment(HorizontalAlignment.LEFT);
+                cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+                cellStyle.setFillPattern(FillPatternType.FINE_DOTS);
+                cellStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
 
-                    for (int i = 0; i < MaterialConsumptionController.InHeader.values().length; ++i) {
-                        firstSheet.autoSizeColumn(i);
-                    }
+                XSSFCellStyle valueCellStyle = xssfWorkbook.createCellStyle();
+                valueCellStyle.setAlignment(HorizontalAlignment.LEFT);
+                valueCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
-                    xssfWorkbook.write(fileOutputStream);
+
+                XSSFRow fromDateRow = firstSheet.createRow(0);
+                XSSFCell fromLabel = fromDateRow.createCell(0, CellType.STRING);
+                fromLabel.setCellValue("From ");
+                fromLabel.setCellStyle(cellStyle);
+                XSSFCell from = fromDateRow.createCell(1, CellType.STRING);
+                from.setCellValue(model.getFromDate().getValue().toString());
+                from.setCellStyle(valueCellStyle);
+
+                XSSFRow toDateRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
+                XSSFCell toLabel = toDateRow.createCell(0, CellType.STRING);
+                toLabel.setCellValue("To ");
+                toLabel.setCellStyle(cellStyle);
+                XSSFCell to = toDateRow.createCell(1, CellType.STRING);
+                to.setCellValue( model.getToDate().getValue().toString());
+                to.setCellStyle(valueCellStyle);
+
+                firstSheet.createRow(firstSheet.getLastRowNum() + 1);
+                XSSFRow headerRow = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
+                headerRow.setHeight((short) 400);
+
+                //Fill header row
+                for (int column = 0; column < 4; column++) {
+                    XSSFCell cell = headerRow.createCell(column, CellType.STRING);
+                    cell.setCellValue(String.valueOf(InHeader.values()[column]));
+                    cell.setAsActiveCell();
+                    cell.setCellStyle(cellStyle);
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                //Fill data
+                list.forEach(item -> {
+
+                            XSSFRow row1 = firstSheet.createRow(firstSheet.getLastRowNum() + 1);
+
+                            XSSFCell cell0 = row1.createCell(0, CellType.STRING);
+                            cell0.setCellValue(String.valueOf(item.getMaterialName()));
+
+                            XSSFCell cell01 = row1.createCell(1, CellType.NUMERIC);
+                            cell01.setCellValue(item.getRequired());
+
+                            XSSFCell cell1 = row1.createCell(2, CellType.NUMERIC);
+                            cell1.setCellValue(item.getActual());
+
+                            XSSFCell cell2 = row1.createCell(3, CellType.NUMERIC);
+                            cell2.setCellValue(item.getError());
+
+                        }
+                );
+                firstSheet.autoSizeColumn(0);
+                firstSheet.autoSizeColumn(1);
+                firstSheet.autoSizeColumn(2);
+                firstSheet.autoSizeColumn(3);
+
+                xssfWorkbook.write(fileOutputStream);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -313,12 +269,9 @@ public class MaterialConsumptionController {
 
 
     private enum InHeader {
-        Number,
         MaterialName,
         Required,
         Loaded,
-        Error,
-        RequiredPercentage,
-        ActualPercentage
+        Error
     }
 }
